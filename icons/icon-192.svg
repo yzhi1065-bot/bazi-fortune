@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1816"/>
+      <stop offset="100%" style="stop-color:#0a0a14"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a574"/>
+      <stop offset="100%" style="stop-color:#c49540"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="28" fill="url(#bg)"/>
+  <text x="96" y="78" text-anchor="middle" dominant-baseline="central"
+    font-size="72" font-weight="bold" fill="url(#gold)" font-family="serif">八</text>
+  <text x="96" y="138" text-anchor="middle" dominant-baseline="central"
+    font-size="40" font-weight="bold" fill="url(#gold)" font-family="serif">字</text>
+  <circle cx="96" cy="96" r="76" fill="none" stroke="url(#gold)" stroke-width="1.5" opacity="0.3"/>
+</svg>

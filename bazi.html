@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang=zh-CN><head>
+<meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>岐轩八字排盘</title>
+<link rel=manifest href=manifest.json>
+<meta name=apple-mobile-web-app-capable content=yes>
+<meta name=apple-mobile-web-app-status-bar-style content=black-translucent>
+<meta name=apple-mobile-web-app-title content="岐轩八字">
+<link rel=apple-touch-icon href=icons/icon-192.svg>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+@keyframes twinkle{0%,100%{opacity:.3}50%{opacity:.8}}
+body{background:#0a0a14;color:#e0d8d0;font-family:-apple-system,'Noto Sans SC','PingFang SC',sans-serif;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 25% 40%,#15152a,#0a0a14 65%);z-index:-2}
+.stars{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite;width:var(--s,1.5px);height:var(--s,1.5px)}
+.c{max-width:800px;margin:0 auto;padding:10px}:root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)}.c{padding-top:calc(10px + var(--sat,0px));padding-bottom:calc(10px + var(--sab,0px))}
+.fc{background:linear-gradient(145deg,rgba(28,24,20,.96),rgba(18,16,14,.96));border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid rgba(180,140,100,.12)}
+.ft{font-size:12px;color:#c4a265;margin-bottom:8px;letter-spacing:1px;border-bottom:1px solid rgba(180,140,100,.1);padding-bottom:7px}
+.fr{display:flex;gap:4px;flex-wrap:wrap}.fg{flex:1;min-width:55px}.fg label{font-size:9px;color:#786a5e;display:block}.fg input{width:100%;padding:6px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:12px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none;text-align:center}
+.btn{width:100%;padding:10px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#c4a265,#8b6914);color:#fff;transition:opacity .15s}.btn:active{opacity:.7}.btn-s{width:auto;padding:5px 10px;border-radius:5px;font-size:11px;border:1px solid rgba(180,140,100,.15);cursor:pointer;transition:opacity .15s}.btn-s:active{opacity:.7}
+.gr{display:flex;gap:10px;font-size:12px;color:#9a8a7a;align-items:center;margin:6px 0}.gr input{accent-color:#c4a265}
+.tw{overflow-x:auto;border-radius:8px;border:1px solid rgba(180,140,100,.1);margin-bottom:10px}
+.pt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(255,255,255,.03)}
+.pt th{padding:6px 4px;text-align:center;background:rgba(196,162,101,.1);color:#c4a265;font-size:10px;border-bottom:1px solid rgba(180,140,100,.08)}
+.pt th:first-child{text-align:left;padding-left:8px}.pt td{padding:5px 4px;text-align:center;border-bottom:1px solid rgba(180,140,100,.04)}
+.pt td:first-child{color:#c4a265;font-weight:500;text-align:left;padding-left:8px;font-size:10px}.pt .hl{background:rgba(196,162,101,.04)}
+.g1{color:#f0d080}.g2{color:#6abf6a}.g3{color:#e07060}.g4{color:#c0c8d0}.g5{color:#9b6dae}
+.sm{font-size:9px;color:#786a5e;display:block}.tag{display:inline-block;padding:2px 6px;margin:1px;border-radius:10px;font-size:9px;background:rgba(255,255,255,.04);color:#9a8a7a;border:1px solid rgba(180,140,100,.08)}
+.mk{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100}.mk-s{display:block}
+.mk-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1816;border-radius:12px;padding:18px;width:90%;max-width:400px;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(180,140,100,.15);box-shadow:0 8px 30px rgba(0,0,0,.5);padding-top:calc(18px + var(--sat,0px));padding-bottom:calc(18px + var(--sab,0px))}.mk-r{resize:both;overflow:auto;min-width:300px;min-height:200px;max-width:90vw;max-height:85vh}
+.hist{max-height:300px;overflow-y:auto}.hist-i{padding:8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,.03);font-size:11px;color:#9a8a7a;cursor:pointer;display:flex;align-items:center}.hist-i:hover{background:rgba(196,162,101,.08)}.hist-d{flex:1}.hist-x{color:#6a4a3a;cursor:pointer;padding:4px 6px;font-size:12px;line-height:1}.hist-x:hover{color:#d4735e}
+.ai-out{font-size:12px;color:#c0b8b0;line-height:1.8;white-space:pre-wrap;max-height:300px;overflow-y:auto;padding:8px;background:rgba(0,0,0,.2);border-radius:6px;min-height:50px}.ai-print{margin-top:10px;display:none}@media print{.ai-print{display:block!important;white-space:pre-wrap;font-size:11px;color:#333;line-height:1.6}}
+.wg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center;font-size:11px}.wg div{padding:8px 4px;border-radius:6px;background:rgba(255,255,255,.04)}.wg .hl{border:1px solid rgba(196,162,101,.3)}
+.sw{display:flex;gap:8px;margin:6px 0}.sw div{padding:6px 14px;border-radius:5px;font-size:11px;cursor:pointer;background:rgba(255,255,255,.04);color:#786a5e;text-align:center;flex:1;border:1px solid rgba(180,140,100,.08)}.sw .on{background:rgba(196,162,101,.12);color:#c4a265;border-color:rgba(196,162,101,.3)}
+@media print{body{background:#fff!important;color:#222!important}body::before,.stars,.hist,.mk,.btn-s,.sw{display:none!important}.fc{break-inside:avoid;border:1px solid #ddd!important;background:#fff!important}.ft{color:#333!important}.pt td:first-child{color:#555!important}.tag{color:#555!important;background:#f5f5f5!important}}
+</style></head><body>
+<div class=stars id=stars></div><div class=c id=app></div>
+<script src=bundle.iife.js></script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js")</script>
+<script>
+(function(){var s='',n=50;for(var i=0;i<n;i++)s+='<div class=star style=top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;--s:'+(.8+Math.random()*2)+'px;--d:'+(2+Math.random()*4)+'s></div>';document.getElementById('stars').innerHTML=s})();
+var now=new Date().getFullYear(),LB=['年','月','日','时'],LOCALE=localStorage.getItem('bazi_locale')||'cn',_lastResult=null,_inputMode='solar';
+var DICT={};
+var PROVINCES=[['北京',116.4,39.9],['上海',121.5,31.2],['天津',117.2,39.1],['重庆',106.5,29.6],['广州',113.3,23.1],['深圳',114.1,22.5],['成都',104.1,30.6],['武汉',114.3,30.6],['杭州',120.2,30.3],['南京',118.8,32.1],['西安',108.9,34.3],['郑州',113.7,34.8],['长沙',113.0,28.2],['沈阳',123.4,41.8],['昆明',102.7,25.0],['哈尔滨',126.6,45.8],['乌鲁木齐',87.6,43.8],['拉萨',91.1,29.6]];
+function __(k){return DICT[k]?(DICT[k][LOCALE]||k):k}
+function $(i){return document.getElementById(i)}
+function gc(n){return{'0':'g2','1':'g2','2':'g3','3':'g3','4':'g5','5':'g5','6':'g1','7':'g1','8':'g4','9':'g4'}[n]||'g5'}
+function zc(n){return{'0':'g4','1':'g5','2':'g2','3':'g2','4':'g5','5':'g3','6':'g3','7':'g5','8':'g1','9':'g1','10':'g5','11':'g4'}[n]||'g5'}
+var CS=[['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养'],['死','病','衰','帝旺','临官','冠带','沐浴','长生','养','胎','绝','墓'],['胎','养','长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝'],['绝','墓','死','病','衰','帝旺','临官','冠带','沐浴','长生','养','胎'],['胎','养','长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝'],['绝','墓','死','病','衰','帝旺','临官','冠带','沐浴','长生','养','胎'],['死','墓','绝','胎','养','长生','沐浴','冠带','临官','帝旺','衰','病'],['长生','养','胎','绝','墓','死','病','衰','帝旺','临官','冠带','沐浴'],['帝旺','衰','病','死','墓','绝','胎','养','长生','沐浴','冠带','临官'],['冠带','临官','帝旺','衰','病','死','墓','绝','胎','养','长生','沐浴']];
+var kw='戌亥申酉午未辰巳寅卯子丑',WS_COLOR={木:'#6abf6a',火:'#e07060',土:'#f0d080',金:'#c0c8d0',水:'#5a8fc0'};
+var WC={'旺':'#4a9c6f','相':'#6abf6a','休':'#c4a265','囚':'#d4735e','死':'#8a5a5a'};
+var TG_ARR=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var DZ_ARR=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+function setMode(m){_inputMode=m;var el=document.getElementById('mode_sw');if(!el)return;var divs=el.querySelectorAll('div');divs.forEach(function(e,i){e.className=((i===0&&m==='solar')||(i===1&&m==='lunar')||(i===2&&m==='ganzhi'))?'on':''});var sf=document.getElementById('solar_fields');var gf=document.getElementById('ganzhi_fields');if(sf)sf.style.display=(m==='solar'||m==='lunar')?'flex':'none';if(gf)gf.style.display=m==='ganzhi'?'block':'none'}
+function setCity(){var s=document.getElementById('city');if(!s)return;var o=s.options[s.selectedIndex];if(o){var lon=o.getAttribute('data-lon');var lat=o.getAttribute('data-lat');if(lon&&lat){document.getElementById('lon').value=lon;document.getElementById('lat').value=lat}}}
+function toggleTs(){var cb=document.getElementById('ts');var f=document.getElementById('ts_fields');if(cb&&f)f.style.display=cb.checked?'flex':'none'}
+
+function initForm(){
+  if($('y'))return;
+  var mem=(function(){try{return JSON.parse(localStorage.getItem('bazi_inp'))||{}}catch(e){return{}}}());
+  var y=mem.y||1990,m=mem.m||8,d=mem.d||27,h=mem.h||15,mi=mem.mi||30,g=mem.g||'male',fn=mem.fn||'',lon=mem.lon||'120',lat=mem.lat||'30',tsv=mem.ts||false,ci=mem.city||'';
+  // Build ganzhi selectors
+  var tgOpts=TG_ARR.map(function(t){return'<option value='+t+'>'+t+'</option>'}).join('');
+  var dzOpts=DZ_ARR.map(function(z){return'<option value='+z+'>'+z+'</option>'}).join('');
+  var gzFields=[0,1,2,3].map(function(i){var pl=['年柱','月柱','日柱','时柱'];return'<span style=display:inline-flex;gap:2px;margin:2px;align-items:center;font-size:10px;color:#786a5e>'+pl[i]+': <select id=gzg'+i+' style=padding:2px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none>'+tgOpts+'</select><select id=gzz'+i+' style=padding:2px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none>'+dzOpts+'</select></span>'}).join('<br>');
+  $('app').innerHTML=
+    '<div style=display:flex;gap:5px;justify-content:flex-end;margin-bottom:4px>'
+    +'<button onclick=showLunar() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83C\uDF1B 公历转农历':'\uD83C\uDF1B Solar\u2192Lunar')+'</button>'
+    +'<button onclick=toggleLang() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'EN':'\u4E2D\u6587')+'</button>'
+    +'<button onclick=showHist() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83D\uDCCB 历史':'\uD83D\uDCCB History')+'</button>'
+    +'</div>'
+    +'<div class=fc>'
+    +'<div class=ft>'+(LOCALE==='cn'?'出生信息':'Birth Info')+'</div>'
+    +'<div class=sw id=mode_sw><div class=on onclick=setMode("solar")>'+(LOCALE==='cn'?'阳历':'Solar')+'</div><div onclick=setMode("lunar")>'+(LOCALE==='cn'?'农历':'Lunar')+'</div><div onclick=setMode("ganzhi")>'+(LOCALE==='cn'?'干支':'GZ')+'</div></div>'
+    +'<div id=solar_fields style=display:flex;gap:4px;flex-wrap:wrap>'
+    +'<div class=fg style=flex:1.2><label>'+(LOCALE==='cn'?'姓名 (选填)':'Name')+'</label><input id=fn value="'+fn.replace(/"/g,'')+'"></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'年':'Year')+'</label><input type=number id=y value='+y+'></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'月':'Month')+'</label><input type=number id=m value='+m+'></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'日':'Day')+'</label><input type=number id=d value='+d+'></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'时':'Hour')+'</label><input type=number id=h value='+h+'></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'分':'Min')+'</label><input type=number id=mi value='+mi+'></div>'
+    +'</div>'
+    +'<div id=ganzhi_fields style=display:none;margin-bottom:6px>'
+    +'<div style=font-size:10px;color:#786a5e;margin-bottom:4px>'+(LOCALE==='cn'?'输入四柱干支:':'Input Pillars:')+'</div>'+gzFields
+    +'</div>'
+    +'<div class=gr><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=ts onchange=toggleTs() '+(tsv?'checked':'')+'>'+(LOCALE==='cn'?'真太阳时':'TrueSolar')+'</label>'
+    +'<span style=font-size:9px;color:#5a4a3a>'+(LOCALE==='cn'?'(经度/纬度)':'(Long/Lat)')+'</span></div>'
+    +'<div id=ts_fields style=display:'+(tsv?'flex':'none')+';gap:4px>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'城市':'City')+'</label><select id=city style=width:100%;padding:4px;border:1px solid rgba(180,140,100,.12);border-radius:4px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none onchange=setCity()>'
+    +'<option value="">'+(LOCALE==='cn'?'选择城市':'Select')+'</option>'
+    +PROVINCES.map(function(p){return'<option value="'+p[0]+'" data-lon="'+p[1]+'" data-lat="'+p[2]+'"'+(ci===p[0]?' selected':'')+'>'+p[0]+'</option>'}).join('')
+    +'</select></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'经度':'Long')+'</label><input type=number step=0.1 id=lon value='+lon+' style=font-size:10px></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'纬度':'Lat')+'</label><input type=number step=0.1 id=lat value='+lat+' style=font-size:10px></div></div>'
+    +'<div class=gr><label><input type=radio name=g value=male'+(g==='male'?' checked':'')+'>'+(LOCALE==='cn'?'男':'Male')+'</label>'
+    +'<label><input type=radio name=g value=female'+(g==='female'?' checked':'')+'>'+(LOCALE==='cn'?'女':'Female')+'</label>'
+    +'<button class=btn style=width:auto;padding:6px 14px;margin-left:auto onclick=render()>'+(LOCALE==='cn'?'排盘':'Calc')+'</button></div></div>';
+  $('app').insertAdjacentHTML('beforeend','<div id=results></div>');
+}
+
+function render(){
+  if(!$('y'))return;
+  var ts=$('ts')&&$('ts').checked;
+  var lon=$('lon')?+$('lon').value:null;
+  var lat=$('lat')?+$('lat').value:null;
+  var sv=$('city')?$('city').value:'';
+  var gm=document.querySelector('input[name=g]:checked').value;
+  var opts={year:1990,month:1,day:1,hour:12,minute:0,gender:gm};
+  // Handle ganzhi mode
+  if(_inputMode==='ganzhi'){
+    // Read pillar selectors, find a representative date
+    var yg=$('gzg0')?$('gzg0').value:TG_ARR[0],yz=$('gzz0')?$('gzz0').value:DZ_ARR[0];
+    var mg=$('gzg1')?$('gzg1').value:TG_ARR[1],mz=$('gzz1')?$('gzz1').value:DZ_ARR[2];
+    var dg=$('gzg2')?$('gzg2').value:TG_ARR[2],dz=$('gzz2')?$('gzz2').value:DZ_ARR[0];
+    var hg=$('gzg3')?$('gzg3').value:TG_ARR[3],hz=$('gzz3')?$('gzz3').value:DZ_ARR[0];
+    // Find year with matching ganzhi
+    var baseYear=1990;
+    for(var yy=baseYear-120;yy<=baseYear+120;yy++){var ygIdx=yy%10;var yzIdx=yy%12;if(TG_ARR[ygIdx]===yg&&DZ_ARR[yzIdx]===yz){opts.year=yy;break}}
+    // Use fixed day/hour for rest - engine will compute from date
+    opts.month=7;opts.day=1;opts.hour=12;opts.minute=0;
+    localStorage.setItem('bazi_inp',JSON.stringify({fn:$('fn')?$('fn').value:'',g:gm,ts:ts,lon:lon,lat:lat,city:sv}));
+  }else{
+    var ym=+$('y').value,mm=+$('m').value,dm=+$('d').value,hm=+$('h').value,mim=+$('mi').value;
+    localStorage.setItem('bazi_inp',JSON.stringify({y:ym,m:mm,d:dm,h:hm,mi:mim,g:gm,fn:$('fn')?$('fn').value:'',lon:lon,lat:lat,ts:ts,city:sv}));
+    if(_inputMode==='lunar'){try{var cr=BaZi.lunarToSolar(ym,mm,dm,false);if(cr){ym=cr.year;mm=cr.month;dm=cr.day}}catch(e){}}
+    opts={year:ym,month:mm,day:dm,hour:hm,minute:mim,gender:gm};
+  }
+  if(ts&&lon)opts.longitude=lon;
+  if(ts&&lat)opts.latitude=lat;
+  if(ts)opts.useTrueSolar=true;
+  var r=BaZi.calculateBaZi(opts);
+  // Override pillars if ganzhi mode
+  if(_inputMode==='ganzhi'){
+    // Calculate the correct pillar indices from user selection
+    var ygIdx=TG_ARR.indexOf($('gzg0').value);
+    var yzIdx=DZ_ARR.indexOf($('gzz0').value);
+    var mgIdx=TG_ARR.indexOf($('gzg1').value);
+    var mzIdx=DZ_ARR.indexOf($('gzz1').value);
+    var dgIdx=TG_ARR.indexOf($('gzg2').value);
+    var dzIdx=DZ_ARR.indexOf($('gzz2').value);
+    var hgIdx=TG_ARR.indexOf($('gzg3').value);
+    var hzIdx=DZ_ARR.indexOf($('gzz3').value);
+    r.pillars.year={gan:ygIdx,zhi:yzIdx,ganName:TG_ARR[ygIdx],zhiName:DZ_ARR[yzIdx]};
+    r.pillars.month={gan:mgIdx,zhi:mzIdx,ganName:TG_ARR[mgIdx],zhiName:DZ_ARR[mzIdx]};
+    r.pillars.day={gan:dgIdx,zhi:dzIdx,ganName:TG_ARR[dgIdx],zhiName:DZ_ARR[dzIdx]};
+    r.pillars.hour={gan:hgIdx,zhi:hzIdx,ganName:TG_ARR[hgIdx],zhiName:DZ_ARR[hzIdx]};
+    r.eightChars=TG_ARR[ygIdx]+DZ_ARR[yzIdx]+' '+TG_ARR[mgIdx]+DZ_ARR[mzIdx]+' '+TG_ARR[dgIdx]+DZ_ARR[dzIdx]+' '+TG_ARR[hgIdx]+DZ_ARR[hzIdx];
+    // Recalculate ten gods, na yin, shensha based on new pillars
+    r.naYin=BaZi.getFourPillarNaYin(r.pillars.year.gan,r.pillars.year.zhi,r.pillars.month.gan,r.pillars.month.zhi,r.pillars.day.gan,r.pillars.day.zhi,r.pillars.hour.gan,r.pillars.hour.zhi);
+    r.hiddenStems=BaZi.getFourPillarHiddenStems(r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi);
+    try{r.tenGods=BaZi.getGanTenGods(r.pillars.day.gan,r.pillars.year.gan,r.pillars.month.gan,r.pillars.hour.gan)}catch(e){}
+    var yr=r.input.year%10;
+    if(yr<0)yr+=10;
+    var nr=(r.input.year-4)%12;
+    if(nr<0)nr+=12;
+    r.zodiac=BaZi.SHENG_XIAO[nr];
+    // Recalculate interactions
+    r.shenShaDetail=[[],[],[],[]];
+    r.interactions=BaZi.calcBranchInteractions(r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi);
+    r.fortuneInteraction=BaZi.calcFortuneWithAnnual&&BaZi.calcFortuneWithAnnual(r)||[];
+    try{r.wuXingAnalysis=BaZi.calcFiveElementScore(r.pillars,r.hiddenStems)}catch(e){}
+    try{r.deityAnalysis=BaZi.calcNatalWithFortune&&BaZi.calcNatalWithFortune(r)||{}}catch(e){}
+    try{r.shenSha=BaZi.calcShenSha(r.pillars)}catch(e){}
+    try{r.shenShaDetail=BaZi.calcShenShaForBranch&&[0,1,2,3].map(function(i){return BaZi.calcShenShaForBranch(r.pillars,i)})||[[],[],[],[]]}catch(e){}
+  }
+  _lastResult=r;
+  var p=r.pillars,ps=[p.year,p.month,p.day,p.hour],ld=r.lunarDate||{},WXS=r.wuXingAnalysis,DA=r.deityAnalysis,FI=r.fortuneInteraction,age=now-r.input.year;
+  var wse=['木','火','土','金','水'];
+  var infoNote=_inputMode==='ganzhi'?' (干支排盘)':(_inputMode==='lunar'?' (农历排算)':'');
+  if(ts)infoNote+=' '+(LOCALE==='cn'?'真太阳时':'TST')+(lon?' ('+lon+'\u00B0,'+lat+'\u00B0)':'');
+  var h='<div style=display:flex;gap:5px;justify-content:flex-end;margin-bottom:6px>'
+    +'<button onclick=openAI() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83E\uDD16 AI分析':'\uD83E\uDD16 AI')+'</button>'
+    +'<button onclick=window.print() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83D\uDCC4 导出PDF':'\uD83D\uDCC4 PDF')+'</button>'
+    +'</div>';
+  h+='<div style=display:flex;gap:12px;align-items:center;background:linear-gradient(145deg,rgba(28,24,20,.96),rgba(18,16,14,.96));border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid rgba(180,140,100,.15)>'
+    +'<div style=width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#c4a265,#8b6914);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0>'+r.zodiac+'</div>'
+    +'<div style=flex:1><div style=font-size:13px;font-weight:600;color:#c4a265>'+(document.getElementById('fn').value||'')+'</div>'
+    +'<div style=font-size:12px;color:#e0d8d0>'+(ld.lunarYearGz||'')+(ld.month?'年 '+ld.month+'月'+ld.day+'日':'')+'</div>'
+    +'<div style=font-size:10px;color:#887a6e>'+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+r.input.minute+infoNote+'</div></div>'
+    +'<div style=font-size:20px;font-weight:700;letter-spacing:2px;color:#e0d8d0;text-align:right>'+r.eightChars+'</div></div>';
+  h+='<div class=tw><table class=pt>';
+  h+='<tr><th></th><th>'+(LOCALE==='cn'?'年柱':'Year')+'</th><th>'+(LOCALE==='cn'?'月柱':'Month')+'</th><th>'+(LOCALE==='cn'?'日柱':'Day')+'</th><th>'+(LOCALE==='cn'?'时柱':'Hour')+'</th></tr>';
+  h+='<tr class=hl><td>'+(LOCALE==='cn'?'主星':'Mast')+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+r.tenGods.yearGan+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+r.tenGods.monthGan+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+(r.input.gender==='male'?(LOCALE==='cn'?'元男':'YuanM'):(LOCALE==='cn'?'元女':'YuanF'))+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+r.tenGods.hourGan+'</td></tr>';
+  h+='<tr><td>'+(LOCALE==='cn'?'天干':'Heav')+'</td>';for(var i=0;i<4;i++)h+='<td><span class="'+gc(ps[i].gan)+'" style=font-size:16px;font-weight:600>'+ps[i].ganName+'</span><span class=sm>'+BaZi.GAN_WU_XING[ps[i].gan]+'</span></td>';h+='</tr>';
+  h+='<tr><td>'+(LOCALE==='cn'?'地支':'Earth')+'</td>';for(var i=0;i<4;i++)h+='<td><span class="'+zc(ps[i].zhi)+'" style=font-size:16px;font-weight:600>'+ps[i].zhiName+'</span><span class=sm>'+BaZi.ZHI_WU_XING[ps[i].zhi]+'</span></td>';h+='</tr>';
+  h+='<tr><td>'+(LOCALE==='cn'?'藏干<br><span style=font-size:8px;color:#6a5e50>副星</span>':'Hid<br><span style=font-size:8px;color:#6a5e50>TG</span>')+'</td>';
+  for(var i=0;i<4;i++)h+='<td>'+(r.hiddenStems[i].map(function(hx){return'<span style=display:block;font-size:10px;line-height:1.5><span class="'+gc(hx.gan)+'" style=font-weight:600>'+hx.ganName+'</span>'+hx.element+'<span style=color:#c4a265;margin-left:2px>'+hx.tenGod+'</span></span>'}).join('')||'-')+'</td>';h+='</tr>';
+  h+='<tr><td>'+(LOCALE==='cn'?'星运':'Stag')+'</td>';for(var dm=r.pillars.day.gan,i=0;i<4;i++)h+='<td style=color:#887a6e>'+(CS[dm]?.[ps[i].zhi]||'')+'</td>';h+='</tr>';
+  h+='<tr><td>'+(LOCALE==='cn'?'自坐':'Self')+'</td>';for(var i=0;i<4;i++)h+='<td style=color:#887a6e>'+(CS[ps[i].gan]?.[ps[i].zhi]||'')+'</td>';h+='</tr>';
+  var kv=ps.map(function(p){for(var sx=0;sx<60;sx++){if(sx%10===p.gan&&sx%12===p.zhi)return kw.substr(Math.floor(sx/10)*2,2)}return''});
+  h+='<tr><td>'+(LOCALE==='cn'?'空亡':'Void')+'</td>';for(var i=0;i<4;i++)h+='<td>'+(kv[i]?'<span style=color:#6a5e50>'+kv[i]+'</span>':'-')+'</td>';h+='</tr>';
+  h+='<tr><td>纳音</td>';for(var i=0;i<4;i++)h+='<td style=color:#9a8a7a>'+r.naYin[i]+'</td>';h+='</tr>';
+  h+='<tr><td>'+(LOCALE==='cn'?'神煞':'S.Sha')+'</td>';for(var i=0;i<4;i++){var ss=r.shenShaDetail[i];h+='<td style=font-size:9px;color:#9a8a7a>'+(ss.map(function(s){return'<span class=tag>'+s.name+'</span>'}).join('')||'')+'</td>';}h+='</tr>';
+  h+='</table></div>';
+  var sxDesc=LB.map(function(l,i){var ss=r.shenShaDetail[i];return ss.length?l+'支：'+ss.map(function(s){return s.name}).join('、'):''}).filter(function(s){return s}).join('<br>');
+  if(sxDesc)h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'神煞明细':'ShenSha')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>'+sxDesc+'</div></div>';
+  if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')+'</div>';
+  h+='<div class=wg>'+wse.map(function(e){var ws=WXS.wangShuai[e];return'<div'+(e===WXS.dayMaster.element?' class=hl':'')+'><div style=font-weight:600;color:'+WS_COLOR[e]+'>'+e+'</div><div style=font-size:10px;color:'+(WC[ws]||'#786a5e')+'>'+ws+'</div><div style=font-size:9px;color:#5a4a3a>'+WXS.weights[e].toFixed(1)+'</div></div>'}).join('')+'</div></div>';}
+  if(WXS||DA){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
+  if(WXS)h+='<span style=color:#c4a265>'+(LOCALE==='cn'?'日主：':'DM:')+'</span>'+WXS.dayMaster.element+(WXS.dayMaster.isStrong?'['+(LOCALE==='cn'?'身强':'S')+']':'['+(LOCALE==='cn'?'身弱':'W')+']')+' | '+wse.map(function(e){return'<span style=color:'+WS_COLOR[e]+'>'+e+':'+WXS.wangShuai[e]+'</span>'}).join(' ');
+  if(DA)h+='<br><span style=color:#4a9c6f>'+(LOCALE==='cn'?'用神：':'Use:')+'</span>'+DA.usefulDeities.join('、')+' <span style=color:#d4735e>'+(LOCALE==='cn'?'忌神：':'Harm:')+'</span>'+DA.harmfulDeities.join('、');
+  h+='</div></div>';}
+  h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'大运':'Fortune')+' <span style=font-size:10px;color:#786a5e;font-weight:400>'+(LOCALE==='cn'?'(点击展开)':'(click)')+'</span></div><div style=font-size:10px;color:#786a5e>'+(LOCALE==='cn'?'起运：':'Start:')+r.greatFortunes[0].startAge+(LOCALE==='cn'?'岁、':'y, ')+r.greatFortunes[0].direction+'</div><table style=width:100%;font-size:11px;border-collapse:collapse>';
+  for(var i=0;i<r.greatFortunes.length;i++){var ft=r.greatFortunes[i],ic=age>=ft.startAge&&age<=ft.endAge;
+  h+='<tr style=cursor:pointer'+(ic?';background:rgba(196,162,101,.08)':'')+' onclick=tf('+i+')><td style=padding:4px 6px;border-bottom:1px solid rgba(180,140,100,.06);font-weight:600;color:#e0d8d0>'+ft.ganName+ft.zhiName+'</td><td style=padding:4px 6px;border-bottom:1px solid rgba(180,140,100,.06);color:#c4a265>'+ft.tenGod+'</td><td style=padding:4px 6px;border-bottom:1px solid rgba(180,140,100,.06);color:#786a5e;text-align:right>'+ft.startAge+'-'+ft.endAge+(LOCALE==='cn'?'岁':'y')+(ic?' '+(LOCALE==='cn'?'←当前':'←now'):'')+'</td></tr>';
+  h+='<tr id=fi_'+i+' style=display:none><td colspan=3 style=padding:0><div style=padding:6px;background:rgba(255,255,255,.02);border-radius:4px;font-size:10px;color:#786a5e>';
+  if(FI&&FI[i])h+=FI[i].annualInteractions.map(function(ai){var g=ai.ganZhi||'',zx=ai.zhiInteraction||'',gh=ai.ganHe||'',ag=(g&&TG_ARR.indexOf(g[0]))||-1,az=(g&&DZ_ARR.indexOf(g[1]))||-1,lu=([2,3,5,6,5,6,8,9,11,0][ag]===az?'祿':'')+([3,2,6,5,6,5,9,8,0,11][ag]===az?'羊刃':''),ex=ai.fortuneEffect||'';if(zx&&zx!=='无特殊')ex+='|'+zx;if(gh&&gh!=='无')ex+='|'+gh;if(lu)ex+='|'+lu;return'<div style=display:flex;padding:1px 0;color:'+ai.color+'><span style=width:36px;font-size:9px>'+ai.year+'</span><span style=width:36px;font-size:9px>'+g+'</span><span style=font-size:9px;flex:1;overflow:hidden>'+ex+'</span></div>'}).join('');
+  h+='</div></td></tr>';}
+  h+='</table></div>';
+  if(ld.month){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'农历':'Lunar')+'</div><div style=font-size:12px;color:#9a8a7a>'+ld.lunarYearGz+'年 '+ld.month+'月'+ld.day+'日'+(r.solarTermNote?' <span style=color:#786a5e>| '+r.solarTermNote+'</span>':'')+'</div></div>';}
+  if(r.interactions.length){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'干支关系':'Int')+'</div><div style=font-size:11px;color:#9a8a7a>'+r.interactions.map(function(it){return'<span class=tag>'+it.description+'</span>'}).join('')+'</div></div>';}
+  $('results').innerHTML=h;
+  saveHist(r,document.getElementById('fn').value);
+}
+function tf(i){var e=$('fi_'+i);if(!e)return;for(var j=0;j<8;j++){var el=$('fi_'+j);if(el)el.style.display='none'}e.style.display=e.style.display==='none'?'table-row':'none'}
+function saveHist(r,fn){
+  var e=r.eightChars+' '+(fn||'')+' '+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+r.input.minute;
+  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');
+  if(x.find(function(v){return v.s===e}))return;
+  x.unshift({s:e,d:new Date().toISOString()});if(x.length>50)x.length=50;
+  localStorage.setItem('bazi_h',JSON.stringify(x));
+}
+function delHist(i){
+  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');
+  if(!x[i])return;x.splice(i,1);localStorage.setItem('bazi_h',JSON.stringify(x));showHist()
+}
+function showHist(){
+  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');
+  if(!x.length){alert(LOCALE==='cn'?'暂无历史记录':'No history');return}
+  var h='<div class=mk-s id=mk><div class=mk-c><div class=ft>'+(LOCALE==='cn'?'历史记录':'History')+'<span style=float:right;cursor:pointer onclick=closeMk()>\u2715</span></div><div class=hist>';
+  h+=x.map(function(v,i){return'<div class=hist-i><div class=hist-d onclick=loadHist('+i+')>'+v.s+'<span style=font-size:9px;color:#5a4a3a;display:block>'+v.d.substr(0,10)+'</span></div><span class=hist-x onclick=delHist('+i+')>\u2716</span></div>'}).join('');
+  h+='</div><button class=btn style=background:#5a3a2a;margin-top:8px onclick=clearHist()>'+(LOCALE==='cn'?'清空':'Clear')+'</button></div></div>';
+  document.body.insertAdjacentHTML('beforeend',h);
+}
+function loadHist(i){
+  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');if(!x[i])return;closeMk();
+  var m=x[i].s.match(/(\d+)\/(\d+)\/(\d+)/);if(m){$('y').value=+m[1];$('m').value=+m[2];$('d').value=+m[3];var t=x[i].s.match(/(\d+):(\d+)$/);if(t&&$('h')){$('h').value=+t[1];$('mi').value=+t[2]};render()}
+}
+function clearHist(){localStorage.setItem('bazi_h','[]');closeMk();alert(LOCALE==='cn'?'已清空':'Cleared')}
+function closeMk(){['mk','mk_ai','mk_lunar'].forEach(function(k){var e=$(k);if(e)e.remove()})}
+function toggleLang(){LOCALE=LOCALE==='cn'?'en':'cn';localStorage.setItem('bazi_locale',LOCALE);initForm();if(document.querySelector('input[name=g]'))render()}
+var AI_API_KEY=localStorage.getItem('bazi_api_key')||'',AI_URL=localStorage.getItem('bazi_api_url')||'https://api.deepseek.com/v1/chat/completions',AI_MODEL=localStorage.getItem('bazi_api_model')||'deepseek-chat';
+function openAI(){
+  var h='<div class=mk-s id=mk_ai><div class=mk-c><div class=ft>'+(LOCALE==='cn'?'AI分析':'AI')+'<span style=float:right;cursor:pointer onclick=closeMk()>\u2715</span></div>'
+    +'<div style=display:flex;gap:5px;margin-bottom:6px>'
+    +'<button class=btn style=width:auto;padding:4px 10px;font-size:10px;margin:0 onclick=sendAI()>'+(LOCALE==='cn'?'发送':'Send')+'</button>'
+    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=toggleAISet()>'+(LOCALE==='cn'?'\u2699 设置':'\u2699 Set')+'</button>'
+    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=window.print()>'+(LOCALE==='cn'?'PDF':'PDF')+'</button>'
+    +'</div>'
+    +'<div id=ai_set style=display:none;padding:6px;background:rgba(255,255,255,.03);border-radius:6px;margin-bottom:6px>'
+    +'<div style=font-size:9px;color:#786a5e;margin-bottom:3px>'+(LOCALE==='cn'?'API设置':'API Set')+'</div>'
+    +'<input id=ai_url style=width:100%;padding:3px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:9px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none;margin-bottom:2px placeholder=URL value="'+AI_URL+'">'
+    +'<input id=ai_key style=width:100%;padding:3px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:9px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none;margin-bottom:2px placeholder=Key type=password value="'+AI_API_KEY+'">'
+    +'<input id=ai_model style=width:100%;padding:3px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:9px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none;margin-bottom:2px placeholder=Model value="'+AI_MODEL+'">'
+    +'</div>'
+    +'<div class=ai-out id=ai_out>'+(LOCALE==='cn'?'点击发送开始AI分析':'Click send for AI')+'</div>'
+    +'<div style=display:flex;gap:5px;margin-top:6px>'
+    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=closeMk()>'+(LOCALE==='cn'?'关闭':'Close')+'</button></div></div></div>';
+  h+='<div class=ai-print id=ai_print></div>';
+  document.body.insertAdjacentHTML('beforeend',h);
+  var el=document.querySelector('#mk_ai>.mk-c');if(el)el.classList.add('mk-r');
+}
+function toggleAISet(){var e=document.getElementById('ai_set');if(e)e.style.display=e.style.display==='none'?'block':'none'}
+function sendAI(){
+  AI_URL=$('ai_url').value;AI_API_KEY=$('ai_key').value;AI_MODEL=$('ai_model').value;
+  localStorage.setItem('bazi_api_key',AI_API_KEY);localStorage.setItem('bazi_api_url',AI_URL);localStorage.setItem('bazi_api_model',AI_MODEL);
+  $('ai_out').textContent=LOCALE==='cn'?'分析中...':'Analyzing...';
+  var ap=document.getElementById('ai_print');if(ap)ap.textContent='';
+  var f=_lastResult||{};
+  var p=f.pillars||{},ld=f.lunarDate||{},wxs=f.wuXingAnalysis||{},da=f.deityAnalysis||{};
+  var mg=f.input&&f.input.gender==='male'?'男命':'女命',age=now-(f.input?f.input.year:0);
+  var ny=f.naYin||[],gf=f.greatFortunes||[],ws=wxs.wangShuai||{},dmw=wxs.dayMaster||{};
+  var dline='出生:'+(f.input?f.input.year+'/'+f.input.month+'/'+f.input.day:'')+' '+mg+' '+age+'岁';
+  var pline='四柱:'+f.eightChars+' | 纳音:'+ny.join(',');
+  var fline='大运:'+gf.map(function(g){return g.startAge+'岁'+g.ganName+g.zhiName+'('+g.tenGod+')'}).join(' ');
+  var wline='旺衰:'+Object.keys(ws).map(function(e){return e+ws[e]}).join(',')+' | 日主:'+(dmw.isStrong?'身强':'身弱')+' | 用神:'+(da?da.usefulDeities.join(',')+' 忌神:'+da.harmfulDeities.join(','):'');
+  var prompt=(LOCALE==='cn'?'# 角色\n你是精通国学易经术数的资深命理分析师,擅长主流子平派格局理论与新派命理技法.请基于以下命盘信息进行详细分析.\n\n## 命盘信息\n'+dline+'\n'+pline+'\n'+fline+'\n'+wline+'\n\n## 要求\n按以下格式输出:\n1. 命盘技法解读\n2. 命盘事项解读(事业/财运/婚恋/子女/六亲/健康)\n3. 大运流年距今前后5年走势解读\n4. 核心建议与风险规避\n\n前置声明:本分析基于传统八字命理理论框架,仅供娱乐参考,不构成任何决策依据.'+JSON.stringify(f,null,2):'Analyze this Ba Zi:\n'+dline+'\n'+pline+'\n'+fline+'\n'+wline);
+  fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_API_KEY},body:JSON.stringify({model:AI_MODEL,messages:[{role:'user',content:prompt}],stream:true})}).then(function(res){
+    if(!res.ok){$('ai_out').textContent='Error: '+res.status;return}
+    var reader=res.body.getReader(),dec=new TextDecoder(),out=$('ai_out');out.textContent='';
+    function read(){reader.read().then(function(rr){if(rr.done)return;var t=dec.decode(rr.value,{stream:true});try{var lns=t.split('\n').filter(function(l){return l.startsWith('data:')});lns.forEach(function(l){try{var d=JSON.parse(l.slice(6));if(d.choices&&d.choices[0].delta&&d.choices[0].delta.content){out.textContent+=d.choices[0].delta.content;var apx=document.getElementById('ai_print');if(apx)apx.textContent=out.textContent}}catch(e){}})}catch(e){}read()})}read()
+  }).catch(function(e){$('ai_out').textContent='Error: '+e.message});
+}
+function showLunar(){
+  var h='<div class=mk-s id=mk_lunar><div class=mk-c><div class=ft>'+(LOCALE==='cn'?'公历转农历':'Solar\u2192Lunar')+'<span style=float:right;cursor:pointer onclick=closeMk()>\u2715</span></div>'
+    +'<div class=fr><div class=fg><label>'+(LOCALE==='cn'?'年':'Y')+'</label><input type=number id=ly value=1990></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'月':'M')+'</label><input type=number id=lm value=8></div>'
+    +'<div class=fg><label>'+(LOCALE==='cn'?'日':'D')+'</label><input type=number id=ldd value=27></div></div>'
+    +'<button class=btn style=margin:6px 0 onclick=doLunar()>'+(LOCALE==='cn'?'转换':'Convert')+'</button>'
+    +'<div id=l_result style=font-size:12px;color:#9a8a7a;padding:6px;background:rgba(255,255,255,.02);border-radius:4px;line-height:1.7;min-height:30px>'+(LOCALE==='cn'?'结果':'Result')+'</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend',h);
+}
+function doLunar(){
+  var ly=+$('ly').value,lm=+$('lm').value,ldd=+$('ldd').value;
+  try{var r=BaZi.solarToLunar(ly,lm,ldd);
+  $('l_result').innerHTML='<span style=color:#c4a265>'+ly+'/'+lm+'/'+ldd+'</span> \u2192 <span style=color:#e0d8d0>'+r.lunarYearGz+'年 '+r.month+'月'+r.day+'日 ('+r.monthName+'月'+r.dayName+')</span><br>'+(LOCALE==='cn'?'生肖：':'Zodiac: ')+'<span style=color:#c4a265>'+r.zodiac+'</span>'+(r.isLeap?'<br><span style=color:#d4735e>'+(LOCALE==='cn'?'闰月':'Leap')+'</span>':'')}catch(e){$('l_result').textContent='Error: '+e.message}
+}
+initForm();
+setTimeout(function(){if($('y'))render()},300);
+</script>
+</body></html>

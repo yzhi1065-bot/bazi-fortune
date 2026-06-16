@@ -1,0 +1,22 @@
+{
+  "name": "岐轩八字排盘",
+  "short_name": "岐轩八字",
+  "description": "专业八字排盘工具 - 四柱、大运、流年、神煞、AI分析",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a14",
+  "theme_color": "#c4a265",
+  "scope": "/",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "screenshots": [],
+  "categories": ["lifestyle", "utilities"],
+  "iarc_rating_id": "",
+  "prefer_related_applications": false
+}
