@@ -1,5 +1,5 @@
 const CACHE = 'bazi-v1';
-const URLS = ['/index.html', '/bazi.html', '/bundle.iife.js', '/manifest.json',
+const URLS = ['/bazi-fortune/index.html', '/bazi.html', '/bazi-fortune/bundle.iife.js', '/bazi-fortune/manifest.json',
   '/icons/icon-192.svg', '/icons/icon-512.svg'];
 
 self.addEventListener('install', e => {
@@ -15,3 +15,4 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(r => r || fetch(e.request).catch(() => new Response('Offline')))
   );
 });
+

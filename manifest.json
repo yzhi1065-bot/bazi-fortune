@@ -2,7 +2,7 @@
   "name": "岐轩八字排盘",
   "short_name": "岐轩八字",
   "description": "专业八字排盘工具 - 四柱、大运、流年、神煞、AI分析",
-  "start_url": "/index.html",
+  "start_url": "/bazi-fortune/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0a14",
@@ -20,3 +20,4 @@
   "iarc_rating_id": "",
   "prefer_related_applications": false
 }
+
