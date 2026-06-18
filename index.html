@@ -1,21 +1,16 @@
 <!DOCTYPE html><html lang=zh-CN><head>
-<meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>岐轩八字排盘</title>
-<link rel=manifest href=manifest.json>
-<meta name=apple-mobile-web-app-capable content=yes>
-<meta name=apple-mobile-web-app-status-bar-style content=black-translucent>
-<meta name=apple-mobile-web-app-title content="岐轩八字">
-<link rel=apple-touch-icon href=icons/icon-192.svg>
+<meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1.0"><title>岐轩八字排盘</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box}
 @keyframes twinkle{0%,100%{opacity:.3}50%{opacity:.8}}
-body{background:#0a0a14;color:#e0d8d0;font-family:-apple-system,'Noto Sans SC','PingFang SC',sans-serif;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body{background:#0a0a14;color:#e0d8d0;font-family:-apple-system,'Noto Sans SC','PingFang SC',sans-serif}
 body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 25% 40%,#15152a,#0a0a14 65%);z-index:-2}
 .stars{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite;width:var(--s,1.5px);height:var(--s,1.5px)}
-.c{max-width:800px;margin:0 auto;padding:10px}:root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)}.c{padding-top:calc(10px + var(--sat,0px));padding-bottom:calc(10px + var(--sab,0px))}
+.c{max-width:800px;margin:0 auto;padding:10px}
 .fc{background:linear-gradient(145deg,rgba(28,24,20,.96),rgba(18,16,14,.96));border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid rgba(180,140,100,.12)}
 .ft{font-size:12px;color:#c4a265;margin-bottom:8px;letter-spacing:1px;border-bottom:1px solid rgba(180,140,100,.1);padding-bottom:7px}
 .fr{display:flex;gap:4px;flex-wrap:wrap}.fg{flex:1;min-width:55px}.fg label{font-size:9px;color:#786a5e;display:block}.fg input{width:100%;padding:6px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:12px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none;text-align:center}
-.btn{width:100%;padding:10px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#c4a265,#8b6914);color:#fff;transition:opacity .15s}.btn:active{opacity:.7}.btn-s{width:auto;padding:5px 10px;border-radius:5px;font-size:11px;border:1px solid rgba(180,140,100,.15);cursor:pointer;transition:opacity .15s}.btn-s:active{opacity:.7}
+.btn{width:100%;padding:10px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#c4a265,#8b6914);color:#fff}.btn-s{width:auto;padding:5px 10px;border-radius:5px;font-size:11px;border:1px solid rgba(180,140,100,.15);cursor:pointer}
 .gr{display:flex;gap:10px;font-size:12px;color:#9a8a7a;align-items:center;margin:6px 0}.gr input{accent-color:#c4a265}
 .tw{overflow-x:auto;border-radius:8px;border:1px solid rgba(180,140,100,.1);margin-bottom:10px}
 .pt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(255,255,255,.03)}
@@ -25,17 +20,19 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 .g1{color:#f0d080}.g2{color:#6abf6a}.g3{color:#e07060}.g4{color:#c0c8d0}.g5{color:#9b6dae}
 .sm{font-size:9px;color:#786a5e;display:block}.tag{display:inline-block;padding:2px 6px;margin:1px;border-radius:10px;font-size:9px;background:rgba(255,255,255,.04);color:#9a8a7a;border:1px solid rgba(180,140,100,.08)}
 .mk{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100}.mk-s{display:block}
-.mk-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1816;border-radius:12px;padding:18px;width:90%;max-width:400px;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(180,140,100,.15);box-shadow:0 8px 30px rgba(0,0,0,.5);padding-top:calc(18px + var(--sat,0px));padding-bottom:calc(18px + var(--sab,0px))}.mk-r{resize:both;overflow:auto;min-width:300px;min-height:200px;max-width:90vw;max-height:85vh}
+.mk-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1816;border-radius:12px;padding:18px;width:90%;max-width:400px;max-height:80vh;overflow-y:auto;border:1px solid rgba(180,140,100,.15);box-shadow:0 8px 30px rgba(0,0,0,.5)}.mk-r{resize:both;overflow:auto;min-width:300px;min-height:200px;max-width:90vw;max-height:85vh}
 .hist{max-height:300px;overflow-y:auto}.hist-i{padding:8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,.03);font-size:11px;color:#9a8a7a;cursor:pointer;display:flex;align-items:center}.hist-i:hover{background:rgba(196,162,101,.08)}.hist-d{flex:1}.hist-x{color:#6a4a3a;cursor:pointer;padding:4px 6px;font-size:12px;line-height:1}.hist-x:hover{color:#d4735e}
 .ai-out{font-size:12px;color:#c0b8b0;line-height:1.8;white-space:pre-wrap;max-height:300px;overflow-y:auto;padding:8px;background:rgba(0,0,0,.2);border-radius:6px;min-height:50px}.ai-print{margin-top:10px;display:none}@media print{.ai-print{display:block!important;white-space:pre-wrap;font-size:11px;color:#333;line-height:1.6}}
 .wg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center;font-size:11px}.wg div{padding:8px 4px;border-radius:6px;background:rgba(255,255,255,.04)}.wg .hl{border:1px solid rgba(196,162,101,.3)}
 .sw{display:flex;gap:8px;margin:6px 0}.sw div{padding:6px 14px;border-radius:5px;font-size:11px;cursor:pointer;background:rgba(255,255,255,.04);color:#786a5e;text-align:center;flex:1;border:1px solid rgba(180,140,100,.08)}.sw .on{background:rgba(196,162,101,.12);color:#c4a265;border-color:rgba(196,162,101,.3)}
 @media print{body{background:#fff!important;color:#222!important}body::before,.stars,.hist,.mk,.btn-s,.sw{display:none!important}.fc{break-inside:avoid;border:1px solid #ddd!important;background:#fff!important}.ft{color:#333!important}.pt td:first-child{color:#555!important}.tag{color:#555!important;background:#f5f5f5!important}}
-</style></head><body>
+</style><style>.qm{font-size:12px;text-align:center;table-layout:fixed}.qm td{padding:10px 8px;border:1px solid rgba(180,140,100,.08);min-width:80px;width:80px;height:80px;text-align:center;vertical-align:middle;letter-spacing:2px;overflow:hidden;font-size:13px}.qm .pal{background:rgba(196,162,101,.06);font-weight:600;color:#c4a265}</style>
+</head><body>
 <div class=stars id=stars></div><div class=c id=app></div>
-<script src=bundle.iife.js></script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js")</script>
+<script src=bundle.iife.js></script>
+<script src=qimen.iife.js></script>
 <script>
-(function(){var s='',n=50;for(var i=0;i<n;i++)s+='<div class=star style=top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;--s:'+(.8+Math.random()*2)+'px;--d:'+(2+Math.random()*4)+'s></div>';document.getElementById('stars').innerHTML=s})();
+(function(){var s='',n=50;for(var i=0;i<n;i++)s+='<div class=star style=top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;--s:'+(.8+Math.random()*2)+'px;--d:'+(2+Math.random()*4)+'s><\/div>';document.getElementById('stars').innerHTML=s})();
 var now=new Date().getFullYear(),LB=['年','月','日','时'],LOCALE=localStorage.getItem('bazi_locale')||'cn',_lastResult=null,_inputMode='solar';
 var DICT={};
 var PROVINCES=[['北京',116.4,39.9],['上海',121.5,31.2],['天津',117.2,39.1],['重庆',106.5,29.6],['广州',113.3,23.1],['深圳',114.1,22.5],['成都',104.1,30.6],['武汉',114.3,30.6],['杭州',120.2,30.3],['南京',118.8,32.1],['西安',108.9,34.3],['郑州',113.7,34.8],['长沙',113.0,28.2],['沈阳',123.4,41.8],['昆明',102.7,25.0],['哈尔滨',126.6,45.8],['乌鲁木齐',87.6,43.8],['拉萨',91.1,29.6]];
@@ -48,6 +45,83 @@ var kw='戌亥申酉午未辰巳寅卯子丑',WS_COLOR={木:'#6abf6a',火:'#e070
 var WC={'旺':'#4a9c6f','相':'#6abf6a','休':'#c4a265','囚':'#d4735e','死':'#8a5a5a'};
 var TG_ARR=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 var DZ_ARR=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var _curTab='bazi';
+function switchTab(t){
+  _curTab=t;
+  var tb=document.getElementById('tab_bazi');
+  var tq=document.getElementById('tab_qimen');
+  if(tb)tb.style.background=t==='bazi'?'rgba(196,162,101,.12)':'rgba(255,255,255,.04)';
+  if(tb)tb.style.color=t==='bazi'?'#c4a265':'#9a8a7a';
+  if(tb)tb.style.borderColor=t==='bazi'?'rgba(196,162,101,.3)':'rgba(180,140,100,.08)';
+  if(tq)tq.style.background=t==='qimen'?'rgba(196,162,101,.12)':'rgba(255,255,255,.04)';
+  if(tq)tq.style.color=t==='qimen'?'#c4a265':'#9a8a7a';
+  if(tq)tq.style.borderColor=t==='qimen'?'rgba(196,162,101,.3)':'rgba(180,140,100,.08)';
+  var app=document.getElementById('app');
+  if(app)app.innerHTML='';
+  initForm();
+  if(t==='qimen')renderQimen();
+  else render();
+}
+function renderQimen(){
+  if(typeof QiMen==='undefined'){var re=document.getElementById('results');if(re)re.innerHTML='<div class=fc>奇门引擎未加载</div>';return}
+  var y=+document.getElementById('y').value,m=+document.getElementById('m').value,d=+document.getElementById('d').value,h=+document.getElementById('h').value;
+  try{
+    var r=QiMen.calcPan(y,m,d,h);if(!r)return;
+    var fp=r.fourPillars||{};
+    var ygz=fp.year||'';var mgz=fp.month||'';var dgz=fp.day||'';var hgz=fp.hour||'';
+    var TRIG={1:'☵',2:'☷',3:'☳',4:'☴',5:'',6:'☰',7:'☱',8:'☶',9:'☲'};
+    var html='<div class=fc style=text-align:center><div style=font-size:20px;font-weight:700;color:#c4a265>'+(ygz+' '+mgz+' '+dgz+' '+hgz)+'</div>';
+    html+='<div style=font-size:12px;color:#9a8a7a>'+y+'/'+m+'/'+d+' '+h+':00</div></div>';
+    html+='<div class=tw><table class=qm style=width:100%>';
+    var po=[3,8,1,2,4,6,7,0,5];
+    var monthEls=['木','木','火','火','土','土','金','金','水','水','土','土'];
+    var monthEl=monthEls[(m-1)%12]||'土';
+    var palEls=['','木','土','木','木','土','金','金','土','火'];
+    var wsColor={'旺':'#4a9c6f','相':'#6abf6a','休':'#c4a265','囚':'#d4735e','死':'#8a5a5a'};
+    function calcWs(e,m){
+      if(e===m)return '旺';var s={'木':'火','火':'土','土':'金','金':'水','水':'木'};
+      if(s[e]===m)return '相';if(s[m]===e)return '休';var k={'木':'土','土':'水','水':'火','火':'金','金':'木'};
+      if(k[e]===m)return '死';return '囚';
+    }
+    for(var pi=0;pi<9;pi++){
+      if(pi%3===0)html+='<tr>';
+      var cc=po[pi];var cell=r.cells?r.cells[cc]:{};
+      if(cell&&cell.palace)cell.trigram=TRIG[cell.palace];
+      html+='<td class=pal style=vertical-align:top;font-size:12px;cursor:pointer onclick=toggleQm('+pi+')';
+      if(cc===4)html+=';background:rgba(255,255,255,.02)';html+='>';
+      // Palace name
+      
+      // Left: 神星门 | Right: 天地
+      html+='<div style=display:flex;justify-content:space-between>';
+      html+='<div style=text-align:left;font-size:11px;line-height:1.5>'+(cell.spirit||'-')+'<br>'+(cell.star||'-')+'<br>'+(cell.door||'-')+'</div>';
+      html+='<div style=text-align:right;font-size:8px;line-height:1.3>'+(cell.heavenlyStem||'-')+'<br>'+(cell.earthlyYi||'-')+'</div>';
+      html+='</div>';
+      // Details hidden
+      html+='<div id=qm_'+pi+' style=display:none;font-size:9px;color:#887a6e;margin-top:3px;line-height:1.5;text-align:left;border-top:1px solid rgba(180,140,100,.15);padding-top:3px>';
+      html+='<span style=font-size:14px;font-weight:700;color:#c4a265>'+(cell.name||'')+'</span> <span style=font-size:12px>'+(cell.trigram||'')+'</span> ';
+      var ce=palEls[cc]||'土';
+      var ws=calcWs(ce,monthEl);
+      html+='<span style=color:'+(wsColor[ws]||'#887a6e')+'>'+ce+' '+ws+'</span>';
+      if(cell.hChangSheng)html+=' 十二长生:<b>'+(cell.hChangSheng.name||'')+'</b>';
+      html+='<br>';
+      var mks=[];if(cell.jiXing)mks.push('击刑');if(cell.ruMu)mks.push('入墓');if(cell.menPo)mks.push('门迫');if(cell.isEmpty)mks.push('空亡');
+      if(mks.length)html+='<span style=color:#d4735e>'+mks.join(' ')+'</span><br>';
+      try{var ky=QiMen.getKeYing(cell.heavenlyStem&&cell.heavenlyStem.split(',')[0],cell.earthlyYi);if(ky)html+='<span style=color:#5a4a3a>时干克应:'+ky+'</span><br>';}catch(e){}
+      html+='五行:'+cell.wuXing;
+      if(cell.star)html+=' 星五行:'+({'天蓬':'水','天芮':'土','天冲':'木','天辅':'木','天禽':'土','天心':'金','天柱':'金','天任':'土','天英':'火'}[cell.star]||'');
+      if(cell.door)html+=' 门五行:'+({'休':'水','死':'土','伤':'木','杜':'木','开':'金','惊':'金','生':'土','景':'火'}[cell.door]||'');
+      if(cell.spirit)html+=' 神:'+cell.spirit;
+      html+='</div>';
+      html+='</td>';
+      if(pi%3===2)html+='</tr>';
+    }
+    html+='</table></div>';
+    html+='<div class=fc><div class=ft>额外信息</div><div style=font-size:11px;color:#9a8a7a>局:'+r.juNumber+'局'+(r.isYangDun?'阳':'阴')+' 旬首:'+(r.xunShou||'')+' 值符:'+(r.zhiFu||'')+' 值使:'+(r.zhiShi||'')+'</div>'+'<div style=display:flex;gap:5px;margin-top:6px>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=qimenShift(-2)>上一时辰</button>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=qimenShift(2)>下一时辰</button>'+'</div></div>';
+    var res=document.getElementById('results');if(res)res.innerHTML=html;
+  }catch(e){var rx=document.getElementById('results');if(rx)rx.innerHTML='<div class=fc>错误:'+e.message+'</div>'}
+}
+function qimenShift(dh){var y=+document.getElementById('y').value,m=+document.getElementById('m').value,d=+document.getElementById('d').value,h=+document.getElementById('h').value+dh;if(h>=24){h-=24;d+=1}else if(h<0){h+=24;d-=1};document.getElementById('h').value=h;document.getElementById('d').value=d;renderQimen()}
+function toggleQm(i){for(var j=0;j<9;j++){var el=document.getElementById('qm_'+j);if(el&&j!==i)el.style.display='none'}var e=document.getElementById('qm_'+i);if(e)e.style.display=e.style.display==='none'?'block':'none'}
 function setMode(m){_inputMode=m;var el=document.getElementById('mode_sw');if(!el)return;var divs=el.querySelectorAll('div');divs.forEach(function(e,i){e.className=((i===0&&m==='solar')||(i===1&&m==='lunar')||(i===2&&m==='ganzhi'))?'on':''});var sf=document.getElementById('solar_fields');var gf=document.getElementById('ganzhi_fields');if(sf)sf.style.display=(m==='solar'||m==='lunar')?'flex':'none';if(gf)gf.style.display=m==='ganzhi'?'block':'none'}
 function setCity(){var s=document.getElementById('city');if(!s)return;var o=s.options[s.selectedIndex];if(o){var lon=o.getAttribute('data-lon');var lat=o.getAttribute('data-lat');if(lon&&lat){document.getElementById('lon').value=lon;document.getElementById('lat').value=lat}}}
 function toggleTs(){var cb=document.getElementById('ts');var f=document.getElementById('ts_fields');if(cb&&f)f.style.display=cb.checked?'flex':'none'}
@@ -66,7 +140,7 @@ function initForm(){
     +'<button onclick=toggleLang() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'EN':'\u4E2D\u6587')+'</button>'
     +'<button onclick=showHist() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83D\uDCCB 历史':'\uD83D\uDCCB History')+'</button>'
     +'</div>'
-    +'<div class=fc>'
+    +'<div class=fc style=margin-bottom:8px;padding:8px>'+'<div style=display:flex;gap:8px>'+'<div id=tab_bazi class=btn-s style=flex:1;text-align:center;background:rgba(196,162,101,.12);color:#c4a265;border:1px solid rgba(196,162,101,.3) onclick=switchTab("bazi")>八字排盘</div>'+'<div id=tab_qimen class=btn-s style=flex:1;text-align:center onclick=switchTab("qimen")>奇门遁甲</div>'+'</div>'+'</div>'+'<div class=fc>'
     +'<div class=ft>'+(LOCALE==='cn'?'出生信息':'Birth Info')+'</div>'
     +'<div class=sw id=mode_sw><div class=on onclick=setMode("solar")>'+(LOCALE==='cn'?'阳历':'Solar')+'</div><div onclick=setMode("lunar")>'+(LOCALE==='cn'?'农历':'Lunar')+'</div><div onclick=setMode("ganzhi")>'+(LOCALE==='cn'?'干支':'GZ')+'</div></div>'
     +'<div id=solar_fields style=display:flex;gap:4px;flex-wrap:wrap>'
@@ -95,7 +169,7 @@ function initForm(){
   $('app').insertAdjacentHTML('beforeend','<div id=results></div>');
 }
 
-function render(){
+function render(){if(_curTab==='qimen'){renderQimen();return}
   if(!$('y'))return;
   var ts=$('ts')&&$('ts').checked;
   var lon=$('lon')?+$('lon').value:null;
