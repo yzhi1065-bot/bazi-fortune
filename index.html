@@ -26,7 +26,7 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 .wg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center;font-size:11px}.wg div{padding:8px 4px;border-radius:6px;background:rgba(255,255,255,.04)}.wg .hl{border:1px solid rgba(196,162,101,.3)}
 .sw{display:flex;gap:8px;margin:6px 0}.sw div{padding:6px 14px;border-radius:5px;font-size:11px;cursor:pointer;background:rgba(255,255,255,.04);color:#786a5e;text-align:center;flex:1;border:1px solid rgba(180,140,100,.08)}.sw .on{background:rgba(196,162,101,.12);color:#c4a265;border-color:rgba(196,162,101,.3)}
 @media print{body{background:#fff!important;color:#222!important}body::before,.stars,.hist,.mk,.btn-s,.sw{display:none!important}.fc{break-inside:avoid;border:1px solid #ddd!important;background:#fff!important}.ft{color:#333!important}.pt td:first-child{color:#555!important}.tag{color:#555!important;background:#f5f5f5!important}}
-</style><style>.qm{font-size:12px;text-align:center;table-layout:fixed}.qm td{padding:10px 8px;border:1px solid rgba(180,140,100,.08);min-width:80px;width:80px;height:80px;text-align:center;vertical-align:middle;letter-spacing:2px;overflow:hidden;font-size:13px}.qm .pal{background:rgba(196,162,101,.06);font-weight:600;color:#c4a265}</style>
+@media print{#results{margin:0}#results .fc{break-inside:avoid;page-break-inside:avoid}.qm{table-layout:fixed;font-size:9px}.qm td{padding:4px!important}}.btn,.btn-s,button{background:rgba(255,255,255,.04)!important}#qimen_scroll{overflow:hidden!important}}</style><style>.qm{font-size:12px;text-align:center;table-layout:fixed}.qm td{padding:10px 8px;border:1px solid rgba(180,140,100,.08);min-width:80px;width:80px;height:80px;text-align:center;vertical-align:middle;letter-spacing:2px;overflow:hidden;font-size:13px}.qm .pal{background:rgba(196,162,101,.06);font-weight:600;color:#c4a265}</style>
 </head><body>
 <div class=stars id=stars></div><div class=c id=app></div>
 <script src=bundle.iife.js></script>
@@ -70,18 +70,30 @@ function renderQimen(){
     var fp=r.fourPillars||{};
     var ygz=fp.year||'';var mgz=fp.month||'';var dgz=fp.day||'';var hgz=fp.hour||'';
     var TRIG={1:'☵',2:'☷',3:'☳',4:'☴',5:'',6:'☰',7:'☱',8:'☶',9:'☲'};
-    var html='<div class=fc style=text-align:center><div style=font-size:20px;font-weight:700;color:#c4a265>'+(ygz+' '+mgz+' '+dgz+' '+hgz)+'</div>';
-    html+='<div style=font-size:12px;color:#9a8a7a>'+y+'/'+m+'/'+d+' '+h+':00</div></div>';
-    html+='<div class=tw><table class=qm style=width:100%>';
+    var html='<div class=fc style=text-align:center><div style=font-size:20px;font-weight:700;color:#c4a265>'+(ygz+' '+mgz+' '+dgz+' '+hgz)+'</div>';html+='<div style=font-size:12px;color:#9a8a7a>'+y+'/'+m+'/'+d+' '+h+':00';try{var ld=BaZi.solarToLunar(y,m,d);if(ld)html+=' <span style=color:#f0d080>('+(LOCALE==='cn'?'农历':'Lunar')+' '+ld.monthName+'月'+ld.dayName+')</span>';}catch(le){}html+=' <span style=font-size:11px;color:#887a6e;margin-left:10px>';var termStart={'小寒':[1,5],'大寒':[1,20],'立春':[2,3],'雨水':[2,18],'惊蛰':[3,5],'春分':[3,20],'清明':[4,4],'谷雨':[4,19],'立夏':[5,5],'小满':[5,21],'芒种':[6,5],'夏至':[6,21],'小暑':[7,7],'大暑':[7,22],'立秋':[8,7],'处暑':[8,23],'白露':[9,7],'秋分':[9,22],'寒露':[10,8],'霜降':[10,23],'立冬':[11,7],'小雪':[11,22],'大雪':[12,7],'冬至':[12,21]};var termEnd={'小寒':[1,19],'大寒':[2,3],'立春':[2,17],'雨水':[3,4],'惊蛰':[3,19],'春分':[4,3],'清明':[4,18],'谷雨':[5,4],'立夏':[5,20],'小满':[6,4],'芒种':[6,20],'夏至':[7,6],'小暑':[7,21],'大暑':[8,6],'立秋':[8,22],'处暑':[9,6],'白露':[9,21],'秋分':[10,7],'寒露':[10,22],'霜降':[11,6],'立冬':[11,21],'小雪':[12,6],'大雪':[12,20],'冬至':[1,4]};var curTerm=r.solarTerm||r.currentTerm||'';if(curTerm&&termStart[curTerm]){var ts=termStart[curTerm];html+=curTerm+' '+ts[0]+'月'+ts[1]+'日-';var tNames=['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];var nextIdx=(tNames.indexOf(curTerm)+1)%tNames.length;var nextName=tNames[nextIdx];if(termStart[nextName]){var ns=termStart[nextName];html+=nextName+' '+ns[0]+'月'+ns[1]+'日';}html+='</span>';}html+='</div>';if(r.dunLabel||r.xunShou){html+='<div style=display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:6px;font-size:11px;color:#c4a265>';if(r.dunLabel)html+='<span style=background:rgba(196,162,101,.1);padding:1px 6px;border-radius:8px>'+r.dunLabel+'</span>';if(r.xunShou)html+='<span style=background:rgba(196,162,101,.1);padding:1px 6px;border-radius:8px>旬首:'+r.xunShou+'</span>';if(r.zhiFu)html+='<span style=background:rgba(196,162,101,.1);padding:1px 6px;border-radius:8px>值符:'+r.zhiFu+'</span>';if(r.zhiShi)html+='<span style=background:rgba(196,162,101,.1);padding:1px 6px;border-radius:8px>值使:'+r.zhiShi+'</span>';if(r.kongWang)html+='<span style=background:rgba(196,162,101,.1);padding:1px 6px;border-radius:8px>时空:'+r.kongWang+'</span>';var rk='';if(fp.day){var ds=fp.day;if(ds&&ds.length>=2){var dw='戌亥申酉午未辰巳寅卯子丑';var riXun=Math.floor(Math.max(0,DZ_ARR.indexOf(ds.substring(1)))/2);if(riXun>=0&&riXun<6)rk=dw.substring(riXun*2,riXun*2+2);}}if(rk)html+='<span style=background:rgba(196,162,101,.1);padding:1px 6px;border-radius:8px>日空:'+rk+'</span>';html+='</div>';}html+='</div>';html+='<div class=tw><table class=qm style=width:100%>';
     var po=[3,8,1,2,4,6,7,0,5];
-    var monthEls=['木','木','火','火','土','土','金','金','水','水','土','土'];
+    var monthEls=['木','木','土','火','火','土','金','金','土','水','水','土'];
     var monthEl=monthEls[(m-1)%12]||'土';
-    var palEls=['','木','土','木','木','土','金','金','土','火'];
+    var palEls=['','水','土','木','木','土','金','金','土','火'];
     var wsColor={'旺':'#4a9c6f','相':'#6abf6a','休':'#c4a265','囚':'#d4735e','死':'#8a5a5a'};
     function calcWs(e,m){
       if(e===m)return '旺';var s={'木':'火','火':'土','土':'金','金':'水','水':'木'};
       if(s[e]===m)return '相';if(s[m]===e)return '休';var k={'木':'土','土':'水','水':'火','火':'金','金':'木'};
-      if(k[e]===m)return '死';return '囚';
+      if(k[e]===m)return '囚';return '死';
+    }
+    function calcStarWs(e,m){
+      if(e===m)return '相';
+      var s2={'木':'火','火':'土','土':'金','金':'水','水':'木'};
+      if(s2[e]===m)return '旺';if(s2[m]===e)return '死';
+      var k2={'木':'土','土':'水','水':'火','火':'金','金':'木'};
+      if(k2[e]===m)return '休';return '囚';
+    }
+    function calcDoorWs(e,m){
+      if(e===m)return '旺';
+      var s3={'木':'火','火':'土','土':'金','金':'水','水':'木'};
+      if(s3[m]===e)return '相';if(s3[e]===m)return '休';
+      var k3={'木':'土','土':'水','水':'火','火':'金','金':'木'};
+      if(k3[m]===e)return '囚';return '死';
     }
     for(var pi=0;pi<9;pi++){
       if(pi%3===0)html+='<tr>';
@@ -94,30 +106,34 @@ function renderQimen(){
       // Left: 神星门 | Right: 天地
       html+='<div style=display:flex;justify-content:space-between>';
       html+='<div style=text-align:left;font-size:11px;line-height:1.5>'+(cell.spirit||'-')+'<br>'+(cell.star||'-')+'<br>'+(cell.door||'-')+'</div>';
-      html+='<div style=text-align:right;font-size:8px;line-height:1.3>'+(cell.heavenlyStem||'-')+'<br>'+(cell.earthlyYi||'-')+'</div>';
-      html+='</div>';
-      // Details hidden
+      html+='<div style=text-align:right;font-size:11px;line-height:1.8>'+((cell.heavenlyStem||'-')+'<br>'+(cell.earthlyYi||'-'))+'</div>';
+      html+='</div>';html+='<div style=text-align:left;font-size:13px;line-height:1;margin-top:2px;color:#d4735e>'+(cell.isHorse?'🐴':'')+(cell.isEmpty?'○':'')+'</div>';
       html+='<div id=qm_'+pi+' style=display:none;font-size:9px;color:#887a6e;margin-top:3px;line-height:1.5;text-align:left;border-top:1px solid rgba(180,140,100,.15);padding-top:3px>';
       html+='<span style=font-size:14px;font-weight:700;color:#c4a265>'+(cell.name||'')+'</span> <span style=font-size:12px>'+(cell.trigram||'')+'</span> ';
       var ce=palEls[cc]||'土';
       var ws=calcWs(ce,monthEl);
-      html+='<span style=color:'+(wsColor[ws]||'#887a6e')+'>'+ce+' '+ws+'</span>';
-      if(cell.hChangSheng)html+=' 十二长生:<b>'+(cell.hChangSheng.name||'')+'</b>';
+      html+='<span style=color:'+(wsColor[ws]||'#887a6e')+'>'+ce+' '+ws+'</span><br>';
+      // 十天干十二长生
+      if(cell.heavenlyStem){var stems=cell.heavenlyStem.split(/,\s*/);for(var si=0;si<stems.length;si++){try{var cs=QiMen.calcChangSheng(stems[si],cell.palace);if(cs)html+='<span style=font-size:8px>'+stems[si]+':'+cs.name+'</span> ';}catch(e){}}}
+      if(cell.earthlyYi&&cell.earthlyYi!==cell.heavenlyStem){try{var ecs=QiMen.calcChangSheng(cell.earthlyYi,cell.palace);if(ecs)html+='<span style=font-size:8px>地'+cell.earthlyYi+':'+ecs.name+'</span>';}catch(e){}}
+      // 八门九星旺相休囚死
+      var monthEls=['木','木','土','火','火','土','金','金','土','水','水','土'];var me=monthEls[(m-1)%12]||'土';      function calcDw(e,me){if(e===me)return '旺';var s4={'木':'火','火':'土','土':'金','金':'水','水':'木'};if(s4[me]===e)return '相';if(s4[e]===me)return '休';var k4={'木':'土','土':'水','水':'火','火':'金','金':'木'};if(k4[me]===e)return '囚';return '死';}function calcSw(e,me){if(e===me)return '相';var s5={'木':'火','火':'土','土':'金','金':'水','水':'木'};if(s5[e]===me)return '旺';if(s5[me]===e)return '死';var k5={'木':'土','土':'水','水':'火','火':'金','金':'木'};if(k5[e]===me)return '休';return '囚';}      var starWx={'天蓬':'水','天芮':'土','天冲':'木','天辅':'木','天禽':'土','天心':'金','天柱':'金','天任':'土','天英':'火'};      var doorWx={'休':'水','死':'土','伤':'木','杜':'木','开':'金','惊':'金','生':'土','景':'火'};      if(cell.star){var sw=starWx[cell.star.replace('禽','')];if(sw){var sws=calcSw(sw,me);html+='<br><span style=font-size:8px;color:'+(wsColor[sws]||'#887a6e')+'>星:'+cell.star+' '+sw+'['+sws+']</span>';}}      if(cell.door&&cell.door!==''){var dw=doorWx[cell.door];if(dw){var dws=calcDw(dw,me);html+=' <span style=font-size:8px;color:'+(wsColor[dws]||'#887a6e')+'>门:'+cell.door+' '+dw+'['+dws+']</span>';}}
       html+='<br>';
-      var mks=[];if(cell.jiXing)mks.push('击刑');if(cell.ruMu)mks.push('入墓');if(cell.menPo)mks.push('门迫');if(cell.isEmpty)mks.push('空亡');
+      var mks=[];if(cell.jiXing){var jm={戊:3,己:2,庚:8,辛:9,壬:4,癸:4};var js='';if(jm[cell.earthlyYi]===cell.palace)js=cell.earthlyYi;if(cell.heavenlyStem)cell.heavenlyStem.split(/,/).forEach(function(s){s=s.trim();if(s&&jm[s]===cell.palace)js+=(js?',':'')+s});if(js)mks.push(js+'刑')}if(cell.ruMu){var rm={甲:2,乙:6,丙:6,丁:8,戊:6,己:8,庚:8,辛:4,壬:4,癸:2};var rs='';if(cell.heavenlyStem)cell.heavenlyStem.split(/,/).forEach(function(s){s=s.trim();if(s&&rm[s]===cell.palace)rs+=(rs?',':'')+s});if(rm[cell.earthlyYi]===cell.palace)rs+=(rs?',':'')+cell.earthlyYi;if(rs)mks.push(rs+'墓')}if(cell.menPo)mks.push(cell.door+'迫');if(cell.isEmpty)mks.push('空○')
       if(mks.length)html+='<span style=color:#d4735e>'+mks.join(' ')+'</span><br>';
       try{var ky=QiMen.getKeYing(cell.heavenlyStem&&cell.heavenlyStem.split(',')[0],cell.earthlyYi);if(ky)html+='<span style=color:#5a4a3a>时干克应:'+ky+'</span><br>';}catch(e){}
       html+='五行:'+cell.wuXing;
       if(cell.star)html+=' 星五行:'+({'天蓬':'水','天芮':'土','天冲':'木','天辅':'木','天禽':'土','天心':'金','天柱':'金','天任':'土','天英':'火'}[cell.star]||'');
       if(cell.door)html+=' 门五行:'+({'休':'水','死':'土','伤':'木','杜':'木','开':'金','惊':'金','生':'土','景':'火'}[cell.door]||'');
       if(cell.spirit)html+=' 神:'+cell.spirit;
+      html+=' 取数:';var palNums=[{h:1,x:6,ht:'1,6'},{h:2,x:8,ht:'5,10'},{h:3,x:4,ht:'3,8'},{h:4,x:5,ht:'3,8'},{h:5,x:0,ht:'5,10'},{h:6,x:1,ht:'4,9'},{h:7,x:2,ht:'4,9'},{h:8,x:7,ht:'5,10'},{h:9,x:3,ht:'2,7'}];var pn=palNums[cell.palace-1];if(pn)html+='后'+pn.h+' 先'+(pn.x||'—')+' 河图('+pn.ht+')';;
       html+='</div>';
       html+='</td>';
       if(pi%3===2)html+='</tr>';
     }
     html+='</table></div>';
-    html+='<div class=fc><div class=ft>额外信息</div><div style=font-size:11px;color:#9a8a7a>局:'+r.juNumber+'局'+(r.isYangDun?'阳':'阴')+' 旬首:'+(r.xunShou||'')+' 值符:'+(r.zhiFu||'')+' 值使:'+(r.zhiShi||'')+'</div>'+'<div style=display:flex;gap:5px;margin-top:6px>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=qimenShift(-2)>上一时辰</button>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=qimenShift(2)>下一时辰</button>'+'</div></div>';
-    var res=document.getElementById('results');if(res)res.innerHTML=html;
+    html+='<div class=fc><div class=ft>刑 墓 破</div><div style=font-size:11px;color:#887a6e;display:flex;flex-wrap:wrap;gap:8px>';var palNames2={1:'坎',2:'坤',3:'震',4:'巽',5:'中',6:'乾',7:'兑',8:'艮',9:'离'};var jxArr=[],rmArr=[],mpArr=[];var po3=[3,8,1,2,4,6,7,0,5];for(var p3=0;p3<9;p3++){var cc3=po3[p3];var cl3=r.cells?r.cells[cc3]:{};if(!cl3||!cl3.palace)continue;var pn3=palNames2[cl3.palace];if(cl3.jiXing){var jm3={戊:3,己:2,庚:8,辛:9,壬:4,癸:4};var js3='';if(jm3[cl3.earthlyYi]===cl3.palace)js3=cl3.earthlyYi;if(cl3.heavenlyStem)cl3.heavenlyStem.split(/,/).forEach(function(s){s=s.trim();if(s&&jm3[s]===cl3.palace)js3+=(js3?',':'')+s});if(js3)jxArr.push(pn3+'('+js3+')')}if(cl3.ruMu){var rm3={甲:2,乙:6,丙:6,丁:8,戊:6,己:8,庚:8,辛:4,壬:4,癸:2};var rs3='';if(cl3.heavenlyStem)cl3.heavenlyStem.split(/,/).forEach(function(s){s=s.trim();if(s&&rm3[s]===cl3.palace)rs3+=(rs3?',':'')+s});if(rm3[cl3.earthlyYi]===cl3.palace)rs3+=(rs3?',':'')+cl3.earthlyYi;if(rs3)rmArr.push(pn3+'('+rs3+')')}if(cl3.menPo)mpArr.push(pn3+'('+(cl3.door||'')+')');}if(jxArr.length)html+='<span><span style=color:#d4735e>击刑</span><span style=color:#887a6e>:'+jxArr.join(' ')+'</span></span>';if(rmArr.length)html+='<span><span style=color:#d4735e>入墓</span><span style=color:#887a6e>:'+rmArr.join(' ')+'</span></span>';if(mpArr.length)html+='<span><span style=color:#d4735e>门迫</span><span style=color:#887a6e>:'+mpArr.join(' ')+'</span></span>';html+='</div>';html+='<div style=display:flex;gap:5px;margin-top:6px>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=qimenShift(-2)>上一时辰</button>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=qimenShift(2)>下一时辰</button>'+'<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#c4a265 onclick=window.print()>📄 导出PDF</button>'+'</div></div>';html+='<div class=fc>';html+='<div class=ft>📝 \u8BB0\u5F55</div>';html+='<textarea id=qm_note style=width:100%;height:50px;padding:6px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:11px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none;resize:vertical;font-family:inherit;box-sizing:border-box placeholder=\u8F93\u5165\u8BB0\u5F55...></textarea>';html+='<div style=display:flex;gap:5px;margin-top:4px>';html+='<button class=btn-s style=flex:1;background:rgba(196,162,101,.1);color:#c4a265 onclick=saveNote()>💾 \u4FDD\u5B58</button>';html+='<button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#9a8a7a onclick=showNotes()>📋 \u67E5\u770B\u8BB0\u5F55</button>';html+='</div></div>';
+    var res=document.getElementById('results');if(res)res.innerHTML=html;var fn=$('fn')?$('fn').value:'';var fp=r.fourPillars||{};var ecStr=(fp.year||'')+' '+(fp.month||'')+' '+(fp.day||'')+' '+(fp.hour||'');var es=ecStr+' '+(fn||'')+' '+y+'/'+m+'/'+d+' '+h+':00';_lastResKey=es;var hk=_curTab==='qimen'?'qimen_h':'bazi_h';var hx=JSON.parse(localStorage.getItem(hk)||'[]');if(!hx.find(function(v){return v.s===es})){hx.unshift({s:es,d:new Date().toISOString()});if(hx.length>50)hx.length=50;localStorage.setItem(hk,JSON.stringify(hx));}var fn=$('fn')?$('fn').value:'';var fp=r.fourPillars||{};var ecStr=(fp.year||'')+' '+(fp.month||'')+' '+(fp.day||'')+' '+(fp.hour||'');var es=ecStr+' '+(fn||'')+' '+y+'/'+m+'/'+d+' '+h+':00';var hk=_curTab==='qimen'?'qimen_h':'bazi_h';var hx=JSON.parse(localStorage.getItem(hk)||'[]');if(!hx.find(function(v){return v.s===es})){hx.unshift({s:es,d:new Date().toISOString()});if(hx.length>50)hx.length=50;localStorage.setItem(hk,JSON.stringify(hx));}
   }catch(e){var rx=document.getElementById('results');if(rx)rx.innerHTML='<div class=fc>错误:'+e.message+'</div>'}
 }
 function qimenShift(dh){var y=+document.getElementById('y').value,m=+document.getElementById('m').value,d=+document.getElementById('d').value,h=+document.getElementById('h').value+dh;if(h>=24){h-=24;d+=1}else if(h<0){h+=24;d-=1};document.getElementById('h').value=h;document.getElementById('d').value=d;renderQimen()}
@@ -211,14 +227,11 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     var dzIdx=DZ_ARR.indexOf($('gzz2').value);
     var hgIdx=TG_ARR.indexOf($('gzg3').value);
     var hzIdx=DZ_ARR.indexOf($('gzz3').value);
-    r.pillars.year={gan:ygIdx,zhi:yzIdx,ganName:TG_ARR[ygIdx],zhiName:DZ_ARR[yzIdx]};
-    r.pillars.month={gan:mgIdx,zhi:mzIdx,ganName:TG_ARR[mgIdx],zhiName:DZ_ARR[mzIdx]};
-    r.pillars.day={gan:dgIdx,zhi:dzIdx,ganName:TG_ARR[dgIdx],zhiName:DZ_ARR[dzIdx]};
-    r.pillars.hour={gan:hgIdx,zhi:hzIdx,ganName:TG_ARR[hgIdx],zhiName:DZ_ARR[hzIdx]};
+    var _py={gan:ygIdx,zhi:yzIdx,ganName:TG_ARR[ygIdx],zhiName:DZ_ARR[yzIdx]};var _pm={gan:mgIdx,zhi:mzIdx,ganName:TG_ARR[mgIdx],zhiName:DZ_ARR[mzIdx]};var _pd={gan:dgIdx,zhi:dzIdx,ganName:TG_ARR[dgIdx],zhiName:DZ_ARR[dzIdx]};var _ph={gan:hgIdx,zhi:hzIdx,ganName:TG_ARR[hgIdx],zhiName:DZ_ARR[hzIdx]};r.pillars=[_py,_pm,_pd,_ph];r.pillars.year=_py;r.pillars.month=_pm;r.pillars.day=_pd;r.pillars.hour=_ph;
     r.eightChars=TG_ARR[ygIdx]+DZ_ARR[yzIdx]+' '+TG_ARR[mgIdx]+DZ_ARR[mzIdx]+' '+TG_ARR[dgIdx]+DZ_ARR[dzIdx]+' '+TG_ARR[hgIdx]+DZ_ARR[hzIdx];
     // Recalculate ten gods, na yin, shensha based on new pillars
-    r.naYin=BaZi.getFourPillarNaYin(r.pillars.year.gan,r.pillars.year.zhi,r.pillars.month.gan,r.pillars.month.zhi,r.pillars.day.gan,r.pillars.day.zhi,r.pillars.hour.gan,r.pillars.hour.zhi);
-    r.hiddenStems=BaZi.getFourPillarHiddenStems(r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi);
+    r.naYin=BaZi.getFourPillarNaYin(r.pillars);
+    r.hiddenStems=BaZi.getFourPillarHiddenStems([r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi]);
     try{r.tenGods=BaZi.getGanTenGods(r.pillars.day.gan,r.pillars.year.gan,r.pillars.month.gan,r.pillars.hour.gan)}catch(e){}
     var yr=r.input.year%10;
     if(yr<0)yr+=10;
@@ -227,12 +240,12 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     r.zodiac=BaZi.SHENG_XIAO[nr];
     // Recalculate interactions
     r.shenShaDetail=[[],[],[],[]];
-    r.interactions=BaZi.calcBranchInteractions(r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi);
-    r.fortuneInteraction=BaZi.calcFortuneWithAnnual&&BaZi.calcFortuneWithAnnual(r)||[];
-    try{r.wuXingAnalysis=BaZi.calcFiveElementScore(r.pillars,r.hiddenStems)}catch(e){}
+    r.interactions=BaZi.calcBranchInteractions([r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi]);
+    try{r.fortuneInteraction=BaZi.calcFortuneWithAnnual&&BaZi.calcFortuneWithAnnual(r)||[]}catch(e){r.fortuneInteraction=[]};
+    try{var _wst=BaZi.calcFiveElementScore(r.pillars,r.hiddenStems);r.wuXingAnalysis={dayMaster:{element:['木','火','土','金','水'][Math.floor(r.pillars[2].gan/2)*2%5],isStrong:false},wangShuai:{木:'旺',火:'旺',土:'旺',金:'旺',水:'旺'},weights:{木:_wst.wood||0,火:_wst.fire||0,土:_wst.earth||0,金:_wst.metal||0,水:_wst.water||0}}}catch(e){}
     try{r.deityAnalysis=BaZi.calcNatalWithFortune&&BaZi.calcNatalWithFortune(r)||{}}catch(e){}
-    try{r.shenSha=BaZi.calcShenSha(r.pillars)}catch(e){}
-    try{r.shenShaDetail=BaZi.calcShenShaForBranch&&[0,1,2,3].map(function(i){return BaZi.calcShenShaForBranch(r.pillars,i)})||[[],[],[],[]]}catch(e){}
+    try{r.shenSha=BaZi.calcShenSha(r.pillars.day.gan,r.pillars.year.gan,r.pillars.year.zhi,r.pillars.month.zhi,r.pillars,r.pillars.month.zhi)}catch(e){}
+    try{r.shenShaDetail=BaZi.calcShenShaForBranch&&[0,1,2,3].map(function(i){return BaZi.calcShenShaForBranch(r.pillars.day.gan,r.pillars.year.gan,r.pillars.year.zhi,r.pillars[i].zhi,r.pillars.month.zhi)})||[[],[],[],[]]}catch(e){}
   }
   _lastResult=r;
   var p=r.pillars,ps=[p.year,p.month,p.day,p.hour],ld=r.lunarDate||{},WXS=r.wuXingAnalysis,DA=r.deityAnalysis,FI=r.fortuneInteraction,age=now-r.input.year;
@@ -247,8 +260,7 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     +'<div style=width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#c4a265,#8b6914);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0>'+r.zodiac+'</div>'
     +'<div style=flex:1><div style=font-size:13px;font-weight:600;color:#c4a265>'+(document.getElementById('fn').value||'')+'</div>'
     +'<div style=font-size:12px;color:#e0d8d0>'+(ld.lunarYearGz||'')+(ld.month?'年 '+ld.month+'月'+ld.day+'日':'')+'</div>'
-    +'<div style=font-size:10px;color:#887a6e>'+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+r.input.minute+infoNote+'</div></div>'
-    +'<div style=font-size:20px;font-weight:700;letter-spacing:2px;color:#e0d8d0;text-align:right>'+r.eightChars+'</div></div>';
+    +'<div style=font-size:10px;color:#887a6e>'+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+r.input.minute+infoNote+'</div></div>'+'<div style=font-size:20px;letter-spacing:2px;font-weight:700;color:#e0d8d0;text-align:right;flex-shrink:0>'+r.eightChars+'</div></div>';
   h+='<div class=tw><table class=pt>';
   h+='<tr><th></th><th>'+(LOCALE==='cn'?'年柱':'Year')+'</th><th>'+(LOCALE==='cn'?'月柱':'Month')+'</th><th>'+(LOCALE==='cn'?'日柱':'Day')+'</th><th>'+(LOCALE==='cn'?'时柱':'Hour')+'</th></tr>';
   h+='<tr class=hl><td>'+(LOCALE==='cn'?'主星':'Mast')+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+r.tenGods.yearGan+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+r.tenGods.monthGan+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+(r.input.gender==='male'?(LOCALE==='cn'?'元男':'YuanM'):(LOCALE==='cn'?'元女':'YuanF'))+'</td><td style=font-size:15px;font-weight:700;color:#c4a265>'+r.tenGods.hourGan+'</td></tr>';
@@ -264,7 +276,7 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
   h+='<tr><td>'+(LOCALE==='cn'?'神煞':'S.Sha')+'</td>';for(var i=0;i<4;i++){var ss=r.shenShaDetail[i];h+='<td style=font-size:9px;color:#9a8a7a>'+(ss.map(function(s){return'<span class=tag>'+s.name+'</span>'}).join('')||'')+'</td>';}h+='</tr>';
   h+='</table></div>';
   var sxDesc=LB.map(function(l,i){var ss=r.shenShaDetail[i];return ss.length?l+'支：'+ss.map(function(s){return s.name}).join('、'):''}).filter(function(s){return s}).join('<br>');
-  if(sxDesc)h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'神煞明细':'ShenSha')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>'+sxDesc+'</div></div>';
+  if(sxDesc)
   if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')+'</div>';
   h+='<div class=wg>'+wse.map(function(e){var ws=WXS.wangShuai[e];return'<div'+(e===WXS.dayMaster.element?' class=hl':'')+'><div style=font-weight:600;color:'+WS_COLOR[e]+'>'+e+'</div><div style=font-size:10px;color:'+(WC[ws]||'#786a5e')+'>'+ws+'</div><div style=font-size:9px;color:#5a4a3a>'+WXS.weights[e].toFixed(1)+'</div></div>'}).join('')+'</div></div>';}
   if(WXS||DA){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
@@ -278,45 +290,45 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
   if(FI&&FI[i])h+=FI[i].annualInteractions.map(function(ai){var g=ai.ganZhi||'',zx=ai.zhiInteraction||'',gh=ai.ganHe||'',ag=(g&&TG_ARR.indexOf(g[0]))||-1,az=(g&&DZ_ARR.indexOf(g[1]))||-1,lu=([2,3,5,6,5,6,8,9,11,0][ag]===az?'祿':'')+([3,2,6,5,6,5,9,8,0,11][ag]===az?'羊刃':''),ex=ai.fortuneEffect||'';if(zx&&zx!=='无特殊')ex+='|'+zx;if(gh&&gh!=='无')ex+='|'+gh;if(lu)ex+='|'+lu;return'<div style=display:flex;padding:1px 0;color:'+ai.color+'><span style=width:36px;font-size:9px>'+ai.year+'</span><span style=width:36px;font-size:9px>'+g+'</span><span style=font-size:9px;flex:1;overflow:hidden>'+ex+'</span></div>'}).join('');
   h+='</div></td></tr>';}
   h+='</table></div>';
-  if(ld.month){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'农历':'Lunar')+'</div><div style=font-size:12px;color:#9a8a7a>'+ld.lunarYearGz+'年 '+ld.month+'月'+ld.day+'日'+(r.solarTermNote?' <span style=color:#786a5e>| '+r.solarTermNote+'</span>':'')+'</div></div>';}
+  if(ld.month){}
   if(r.interactions.length){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'干支关系':'Int')+'</div><div style=font-size:11px;color:#9a8a7a>'+r.interactions.map(function(it){return'<span class=tag>'+it.description+'</span>'}).join('')+'</div></div>';}
   $('results').innerHTML=h;
   saveHist(r,document.getElementById('fn').value);
 }
-function tf(i){var e=$('fi_'+i);if(!e)return;for(var j=0;j<8;j++){var el=$('fi_'+j);if(el)el.style.display='none'}e.style.display=e.style.display==='none'?'table-row':'none'}
+function tf(i){var e=$('fi_'+i);if(!e)return;var w=e.style.display!=='none';for(var j=0;j<8;j++){var el=$('fi_'+j);if(el)el.style.display='none'}if(!w)e.style.display='table-row'}
 function saveHist(r,fn){
   var e=r.eightChars+' '+(fn||'')+' '+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+r.input.minute;
-  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');
+  var x=JSON.parse(localStorage.getItem(_curTab==='qimen'?'qimen_h':'bazi_h')||'[]');var nx=JSON.parse(localStorage.getItem('bazi_notes')||'[]');
   if(x.find(function(v){return v.s===e}))return;
   x.unshift({s:e,d:new Date().toISOString()});if(x.length>50)x.length=50;
-  localStorage.setItem('bazi_h',JSON.stringify(x));
+  localStorage.setItem(_curTab==='qimen'?'qimen_h':'bazi_h',JSON.stringify(x));
 }
 function delHist(i){
-  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');
-  if(!x[i])return;x.splice(i,1);localStorage.setItem('bazi_h',JSON.stringify(x));showHist()
+  var x=JSON.parse(localStorage.getItem(_curTab==='qimen'?'qimen_h':'bazi_h')||'[]');
+  if(!x[i])return;x.splice(i,1);localStorage.setItem(_curTab==='qimen'?'qimen_h':'bazi_h',JSON.stringify(x));showHist()
 }
-function showHist(){
-  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');
+function showHist(){var nx=JSON.parse(localStorage.getItem('bazi_notes')||'[]');
+  var x=JSON.parse(localStorage.getItem(_curTab==='qimen'?'qimen_h':'bazi_h')||'[]');
   if(!x.length){alert(LOCALE==='cn'?'暂无历史记录':'No history');return}
-  var h='<div class=mk-s id=mk><div class=mk-c><div class=ft>'+(LOCALE==='cn'?'历史记录':'History')+'<span style=float:right;cursor:pointer onclick=closeMk()>\u2715</span></div><div class=hist>';
-  h+=x.map(function(v,i){return'<div class=hist-i><div class=hist-d onclick=loadHist('+i+')>'+v.s+'<span style=font-size:9px;color:#5a4a3a;display:block>'+v.d.substr(0,10)+'</span></div><span class=hist-x onclick=delHist('+i+')>\u2716</span></div>'}).join('');
+  var h='<div class=mk-s id=mk><div class=mk-c><div class=ft>'+(LOCALE==='cn'?(_curTab==='qimen'?'奇门历史':'八字历史'):'History')+'<span style=float:right;cursor:pointer onclick=closeMk()>\u2715</span></div><div class=hist>';
+  h+=x.map(function(v,i){return'<div class=hist-i><div class=hist-d onclick=loadHist('+i+')>'+v.s+'<span style=font-size:9px;color:#5a4a3a;display:block>'+v.d.substr(0,10)+'</span></div>'+(function(){var _c=nx.filter(function(_n){return _n.hk===v.s}).length;return _c?'<span style=font-size:9px;color:#5a4a3a;margin:0 4px;cursor:pointer onclick=showEntryNotes("'+v.s+'")>\uD83D\uDCDD'+_c+'</span>':''})()+'<span class=hist-x onclick=delHist('+i+')>\u2716</span></div>'}).join('');
   h+='</div><button class=btn style=background:#5a3a2a;margin-top:8px onclick=clearHist()>'+(LOCALE==='cn'?'清空':'Clear')+'</button></div></div>';
   document.body.insertAdjacentHTML('beforeend',h);
 }
 function loadHist(i){
-  var x=JSON.parse(localStorage.getItem('bazi_h')||'[]');if(!x[i])return;closeMk();
+  var x=JSON.parse(localStorage.getItem(_curTab==='qimen'?'qimen_h':'bazi_h')||'[]');if(!x[i])return;closeMk();
   var m=x[i].s.match(/(\d+)\/(\d+)\/(\d+)/);if(m){$('y').value=+m[1];$('m').value=+m[2];$('d').value=+m[3];var t=x[i].s.match(/(\d+):(\d+)$/);if(t&&$('h')){$('h').value=+t[1];$('mi').value=+t[2]};render()}
 }
-function clearHist(){localStorage.setItem('bazi_h','[]');closeMk();alert(LOCALE==='cn'?'已清空':'Cleared')}
-function closeMk(){['mk','mk_ai','mk_lunar'].forEach(function(k){var e=$(k);if(e)e.remove()})}
-function toggleLang(){LOCALE=LOCALE==='cn'?'en':'cn';localStorage.setItem('bazi_locale',LOCALE);initForm();if(document.querySelector('input[name=g]'))render()}
-var AI_API_KEY=localStorage.getItem('bazi_api_key')||'',AI_URL=localStorage.getItem('bazi_api_url')||'https://api.deepseek.com/v1/chat/completions',AI_MODEL=localStorage.getItem('bazi_api_model')||'deepseek-chat';
+function clearHist(){localStorage.setItem(_curTab==='qimen'?'qimen_h':'bazi_h','[]');closeMk();alert(LOCALE==='cn'?'已清空':'Cleared')}
+function closeMk(){['mk_ai_hist','mk_notes','mk','mk_ai','mk_kefu','mk_lunar'].forEach(function(k){var e=$(k);if(e)e.remove()})}
+function showEntryNotes(hk){var nx=JSON.parse(localStorage.getItem('bazi_notes')||'[]');var matched=nx.filter(function(m){return m.hk===hk});var h='<div class=mk-s id=mk_entry_notes><div class=mk-c style=max-height:60vh><div class=ft>\u5173\u8054\u8BB0\u5F55<span style=float:right;font-size:10px;color:#5a4a3a>\u5171'+matched.length+'\u6761</span></div>';if(!matched.length){h+='<div style=font-size:11px;color:#887a6e;padding:12px>\u65E0\u5173\u8054\u8BB0\u5F55</div>'}else{for(var ni=0;ni<matched.length;ni++){h+='<div style=display:flex;align-items:flex-start;gap:6px;padding:8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,.03);font-size:11px;color:#9a8a7a;line-height:1.5>';h+='<div style=flex:1;white-space:pre-wrap;word-break:break-word>'+matched[ni].text+'<br><span style=font-size:9px;color:#5a4a3a>'+matched[ni].d+'</span></div>';h+='<span style=color:#6a4a3a;cursor:pointer;padding:2px 4px;font-size:12px;flex-shrink:0 onclick=delNote2('+matched[ni].id+',"'+hk+'")>\u2715</span>';h+='</div>'}}h+='<div style=display:flex;gap:5px;margin-top:6px><button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#9a8a7a onclick=document.getElementById("mk_entry_notes").remove()>\u5173\u95ED</button></div></div></div>';var emk=document.getElementById('mk_entry_notes');if(emk)emk.remove();document.body.insertAdjacentHTML('beforeend',h);}function delNote2(id,hk){var nk='bazi_notes';var nx=JSON.parse(localStorage.getItem(nk)||'[]');nx=nx.filter(function(m){return m.id!==id});localStorage.setItem(nk,JSON.stringify(nx));showEntryNotes(hk);}function saveNote(){var ta=document.getElementById('qm_note');if(!ta||!ta.value.trim())return;var nk='bazi_notes';var nx=JSON.parse(localStorage.getItem(nk)||'[]');nx.unshift({id:Date.now(),text:ta.value.trim(),d:new Date().toISOString().substring(0,10),tab:_curTab||'bazi',hk:_lastResKey});if(nx.length>100)nx.length=100;localStorage.setItem(nk,JSON.stringify(nx));ta.value='';alert((LOCALE==='cn'?'已保存':'已保存'));}function showNotes(){var nk='bazi_notes';var nx=JSON.parse(localStorage.getItem(nk)||'[]');var h='<div class=mk-s id=mk_notes><div class=mk-c style=max-height:60vh><div class=ft>';h+=(LOCALE==='cn'?'记录列表':'Notes');h+='<span style=float:right;font-size:10px;color:#5a4a3a>'+(LOCALE==='cn'?'共'+nx.length+'条':'Total:'+nx.length)+'</span></div>';if(!nx.length){h+='<div style=font-size:11px;color:#887a6e;padding:12px>'+((LOCALE==='cn'?'暂无记录':'No notes'))+'</div>'}else{for(var ni=0;ni<nx.length;ni++){h+='<div style=display:flex;align-items:flex-start;gap:6px;padding:8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,.03);font-size:11px;color:#9a8a7a;line-height:1.5>';h+='<div style=flex:1;white-space:pre-wrap;word-break:break-word>'+nx[ni].text+'<br><span style=font-size:9px;color:#5a4a3a>'+nx[ni].d+(nx[ni].tab==='qimen'?' 奇门':' 八字')+'</span></div>';h+='<span style=color:#6a4a3a;cursor:pointer;padding:2px 4px;font-size:12px;flex-shrink:0 onclick=delNote('+nx[ni].id+')>✕</span>';h+='</div>'}}h+='<div style=display:flex;gap:5px;margin-top:6px><button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#9a8a7a onclick=closeMk()>'+((LOCALE==='cn'?'关闭':'Close'))+'</button>';h+='<button class=btn-s style=flex:1;background:rgba(196,162,101,.1);color:#c4a265 onclick=clearAllNotes()>🗑 '+((LOCALE==='cn'?'清空全部':'Clear All'))+'</button></div></div></div>';var mk=document.getElementById('mk_notes');if(mk)mk.remove();document.body.insertAdjacentHTML('beforeend',h);}function delNote(id){var nk='bazi_notes';var nx=JSON.parse(localStorage.getItem(nk)||'[]');nx=nx.filter(function(n){return n.id!==id});localStorage.setItem(nk,JSON.stringify(nx));showNotes();}function clearAllNotes(){var nk='bazi_notes';localStorage.setItem(nk,'[]');showNotes();}function saveAI(){var el=$('ai_out');if(!el||!el.textContent)return;var txt=el.textContent;if(txt.indexOf('AI')>=0&&txt.length<10)return;var ak='ai_analysis_h';var ax=JSON.parse(localStorage.getItem(ak)||'[]');ax.unshift({id:Date.now(),text:txt,d:new Date().toISOString().substring(0,10)});if(ax.length>50)ax.length=50;localStorage.setItem(ak,JSON.stringify(ax));alert((LOCALE==='cn'?'已保存':'Saved'));}function showAIHist(){var ak='ai_analysis_h';var ax=JSON.parse(localStorage.getItem(ak)||'[]');var h='<div class=mk-s id=mk_ai_hist><div class=mk-c style=max-height:60vh><div class=ft>AI分析记录<span style=float:right;font-size:10px;color:#5a4a3a>共'+ax.length+'条</span></div>';if(!ax.length){h+='<div style=font-size:11px;color:#887a6e;padding:12px>暂无记录</div>'}else{for(var i=0;i<ax.length;i++){h+='<div style=display:flex;align-items:flex-start;gap:6px;padding:8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,.03);font-size:11px;color:#9a8a7a;line-height:1.5>';h+='<div style=flex:1;white-space:pre-wrap;word-break:break-word;max-height:60px;overflow:hidden>'+ax[i].text+'<br><span style=font-size:9px;color:#5a4a3a>'+ax[i].d+'</span></div>';h+='<span style=color:#6a4a3a;cursor:pointer;padding:2px 4px;font-size:12px;flex-shrink:0 onclick=delAI('+ax[i].id+')>✕</span>';h+='</div>'}}h+='<div style=display:flex;gap:5px;margin-top:6px><button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#9a8a7a onclick=closeMk()>关闭</button>';h+='<button class=btn-s style=flex:1;background:rgba(196,162,101,.1);color:#c4a265 onclick=clearAI()>🗑 清空全部</button></div></div></div>';var mk=document.getElementById('mk_ai_hist');if(mk)mk.remove();document.body.insertAdjacentHTML('beforeend',h);}function delAI(id){var ak='ai_analysis_h';var ax=JSON.parse(localStorage.getItem(ak)||'[]');ax=ax.filter(function(n){return n.id!==id});localStorage.setItem(ak,JSON.stringify(ax));showAIHist();}function clearAI(){localStorage.setItem('ai_analysis_h','[]');showAIHist();}function closeAISettings(){var url=$('ai_url');var key=$('ai_key');var model=$('ai_model');if(url){var uv=url.value.trim();var kv=key.value.trim();var mv=model.value.trim();AI_URL=uv;AI_API_KEY=kv;AI_MODEL=mv;if(uv)localStorage.setItem('bazi_api_url',uv);else localStorage.removeItem('bazi_api_url');if(kv)localStorage.setItem('bazi_api_key',kv);else localStorage.removeItem('bazi_api_key');if(mv)localStorage.setItem('bazi_api_model',mv);else localStorage.removeItem('bazi_api_model');}closeMk();}function exportAI(fmt){var text='';var el=$('ai_out');if(el&&el.style.display!=='none')text=el.textContent;else{var chat=$('ai_chat');if(chat&&chat.textContent)text=chat.textContent;}if(!text||text.length<10){alert((LOCALE==='cn'?'暂无分析内容':'No content'));return}if(fmt==='pdf'){var w=window.open('','_blank');w.document.write('<html><head><meta charset=utf-8>'+'<style>body{font-family:serif;font-size:12pt;line-height:1.8;padding:40px;color:#222}'+'pre{white-space:pre-wrap;word-break:break-word}</style></head><body>');w.document.write('<pre>'+text+'</pre>');w.document.write('</body></html>');w.document.close();setTimeout(function(){w.focus();w.print();w.close()},500);}else{var h='<html><head><meta charset=utf-8>'+'<style>body{font-family:serif;font-size:12pt;line-height:2;padding:30px}'+'p{margin:0 0 8px 0}</style></head><body>';h+=text.split('\n').map(function(l){return'<p>'+l.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>'}).join('');h+='</body></html>';var blob=new Blob([h],{type:'application/msword'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='AI分析.'+fmt;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}}function showKefu(){var h='<div class=mk-s id=mk_kefu><div class=mk-c style=max-width:320px><div class=ft style=text-align:center;border:none;padding-bottom:4px>💬 在线客服</div><div style=text-align:center;padding:8px 0><div style=font-size:11px;color:#887a6e;margin-bottom:8px;line-height:1.5>遇到软件使用问题、排盘异常、API配置报错等均可添加微信咨询</div><div style=display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0><span style=font-size:11px;color:#887a6e>微信号：</span><span id=wx_display style=font-size:14px;font-weight:700;color:#c4a265;letter-spacing:1px>'+WX_ID+'</span></div><button class=btn-s style=background:rgba(196,162,101,.1);color:#c4a265;padding:6px 20px;font-size:12px onclick=copyWx()>📋 复制微信号</button><div id=wx_copied style=font-size:10px;color:#4a9c6f;margin-top:6px;display:none>已复制！请打开微信添加</div></div><div style=display:flex;gap:5px;margin-top:8px><button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#9a8a7a onclick=closeMk()>关闭</button></div></div></div>';var mk=document.getElementById('mk_kefu');if(mk)mk.remove();document.body.insertAdjacentHTML('beforeend',h);}function copyWx(){var text=WX_ID;if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){var el=$('wx_copied');if(el)el.style.display='block';}).catch(function(){alert('复制失败，请手动记录')})}else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);var el=$('wx_copied');if(el)el.style.display='block';}}function toggleLang(){LOCALE=LOCALE==='cn'?'en':'cn';localStorage.setItem('bazi_locale',LOCALE);initForm();if(document.querySelector('input[name=g]'))render()}
+var WX_ID='筹备中...',AI_API_KEY=localStorage.getItem('bazi_api_key')||'',AI_URL=localStorage.getItem('bazi_api_url')||'https://api.deepseek.com/v1/chat/completions',AI_MODEL=localStorage.getItem('bazi_api_model')||'deepseek-chat';
 function openAI(){
   var h='<div class=mk-s id=mk_ai><div class=mk-c><div class=ft>'+(LOCALE==='cn'?'AI分析':'AI')+'<span style=float:right;cursor:pointer onclick=closeMk()>\u2715</span></div>'
     +'<div style=display:flex;gap:5px;margin-bottom:6px>'
     +'<button class=btn style=width:auto;padding:4px 10px;font-size:10px;margin:0 onclick=sendAI()>'+(LOCALE==='cn'?'发送':'Send')+'</button>'
     +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=toggleAISet()>'+(LOCALE==='cn'?'\u2699 设置':'\u2699 Set')+'</button>'
-    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=window.print()>'+(LOCALE==='cn'?'PDF':'PDF')+'</button>'
+    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=exportAI("pdf")>📄 PDF</button>'+'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=exportAI("docx")>📝 DOCX</button>'
     +'</div>'
     +'<div id=ai_set style=display:none;padding:6px;background:rgba(255,255,255,.03);border-radius:6px;margin-bottom:6px>'
     +'<div style=font-size:9px;color:#786a5e;margin-bottom:3px>'+(LOCALE==='cn'?'API设置':'API Set')+'</div>'
@@ -326,7 +338,7 @@ function openAI(){
     +'</div>'
     +'<div class=ai-out id=ai_out>'+(LOCALE==='cn'?'点击发送开始AI分析':'Click send for AI')+'</div>'
     +'<div style=display:flex;gap:5px;margin-top:6px>'
-    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=closeMk()>'+(LOCALE==='cn'?'关闭':'Close')+'</button></div></div></div>';
+    +'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#c4a265;cursor:pointer onclick=saveAI()>💾 保存</button>'+'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=showAIHist()>📋 记录</button>'+'<button style=width:auto;padding:4px 10px;border:1px solid rgba(180,140,100,.12);border-radius:5px;font-size:10px;background:rgba(255,255,255,.04);color:#9a8a7a;cursor:pointer onclick=closeAISettings()>'+(LOCALE==='cn'?'关闭':'Close')+'</button></div></div></div>';
   h+='<div class=ai-print id=ai_print></div>';
   document.body.insertAdjacentHTML('beforeend',h);
   var el=document.querySelector('#mk_ai>.mk-c');if(el)el.classList.add('mk-r');

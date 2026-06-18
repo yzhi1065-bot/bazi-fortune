@@ -21,6 +21,7 @@ var QiMen = (() => {
   // src/qimen/index.js
   var qimen_exports = {};
   __export(qimen_exports, {
+    calcChangSheng: () => calcChangSheng,
     calcPan: () => calcPan,
     formatPan: () => formatPan,
     getKeYing: () => getKeYing
@@ -676,12 +677,12 @@ var QiMen = (() => {
   function isPalaceKongWang(palaceNum, kongWangZhi) {
     const PALACE_ZHI2 = {
       1: "\u5B50",
-      2: "\u4E11\u672A",
-      3: "\u5BC5",
-      4: "\u536F",
-      6: "\u620C",
+      2: "\u672A\u7533",
+      3: "\u536F",
+      4: "\u8FB0\u5DF3",
+      6: "\u620C\u4EA5",
       7: "\u9149",
-      8: "\u5BC5\u7533\u5DF3\u4EA5",
+      8: "\u4E11\u5BC5",
       9: "\u5348"
     };
     const zhiInPalace = PALACE_ZHI2[palaceNum] || "";
@@ -693,10 +694,10 @@ var QiMen = (() => {
       1: "\u5B50",
       2: "\u672A\u7533",
       3: "\u536F",
-      4: "\u5DF3",
+      4: "\u8FB0\u5DF3",
       6: "\u620C\u4EA5",
       7: "\u9149",
-      8: "\u5BC5\u4E11",
+      8: "\u4E11\u5BC5",
       9: "\u5348"
     };
     const zhiInPalace = PALACE_ZHI2[palaceNum] || "";
@@ -1134,6 +1135,9 @@ var QiMen = (() => {
       cells,
       loShu: LO_SHU
     };
+  }
+  function calcChangSheng(gan, palace) {
+    return calcStemChangSheng(gan, palace);
   }
   function getKeYing(hg, eg) {
     var k = hg + eg;
