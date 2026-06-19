@@ -436,10 +436,17 @@ function sendAI(){
   var p=f.pillars||{},ld=f.lunarDate||{},wxs=f.wuXingAnalysis||{},da=f.deityAnalysis||{};
   var mg=f.input&&f.input.gender==='male'?'男命':'女命',age=now-(f.input?f.input.year:0);
   var ny=f.naYin||[],gf=f.greatFortunes||[],ws=wxs.wangShuai||{},dmw=wxs.dayMaster||{};
-  var dline='出生:'+(f.input?f.input.year+'/'+f.input.month+'/'+f.input.day:'')+' '+mg+' '+age+'岁';
-  var pline='四柱:'+f.eightChars+' | 纳音:'+ny.join(',');
+  var hsStr='';if(f.hiddenStems)hsStr=f.hiddenStems.map(function(grp,i){return['年支','月支','日支','时支'][i]+':'+grp.map(function(h){return h.ganName+'('+h.tenGod+')'}).join(',')}).join(' | ');
+  var sxStr='';if(f.shenShaDetail)sxStr=f.shenShaDetail.map(function(ss,i){return ss.length?['年','月','日','时'][i]+':神煞:'+ss.map(function(s){return s.name}).join(','):''}).filter(Boolean).join(' | ');
+  var ggStr='';if(f.interactions)ggStr='干支关系:'+f.interactions.map(function(it){return it.description}).join(',');
+  var dline='出生:'+(f.input?f.input.year+'/'+f.input.month+'/'+f.input.day+' '+f.input.hour+':'+f.input.minute:'')+' '+mg+' '+age+'岁';
+  if(ld&&ld.month)dline+=' 农历:'+ld.month+'月'+ld.day+'日';
+  var tenStr='';if(f.tenGods)tenStr='年'+f.tenGods.yearGan+' 月'+f.tenGods.monthGan+' 日元'+(f.input.gender==='male'?'男':'女')+' 时'+f.tenGods.hourGan;
+  var pline='四柱:'+f.eightChars+(tenStr?' | '+tenStr:'')+(hsStr?' | '+hsStr:'')+' | 纳音:'+ny.join('/');
   var fline='大运:'+gf.map(function(g){return g.startAge+'岁'+g.ganName+g.zhiName+'('+g.tenGod+')'}).join(' ');
-  var wline='旺衰:'+Object.keys(ws).map(function(e){return e+ws[e]}).join(',')+' | 日主:'+(dmw.isStrong?'身强':'身弱')+' | 用神:'+(da?da.usefulDeities.join(',')+' 忌神:'+da.harmfulDeities.join(','):'');
+  var wline='旺衰:'+Object.keys(ws).map(function(e){return e+ws[e]}).join(',')+' | 日主:'+(dmw.isStrong?'身强':'身弱')+' | 用神:'+(da?da.usefulDeities.join(',')+' 忌神:'+da.harmfulDeities.join(','):'')+(da&&da.strengthLevel?' | 格局:'+da.strengthLevel:'')+(da&&da.zhuangWangName?'('+da.zhuangWangName+')':'')+(da&&da.congGeType?'('+da.congGeType+')':'');
+  if(ggStr)wline+=' | '+ggStr;
+  if(sxStr)wline+=' | '+sxStr;
   var prompt=(LOCALE==='cn'?'# 角色\n你是精通国学易经术数的资深命理分析师，核心擅长主流子平派格局理论与新派命理技法。前期已投喂《三命通会》《子平真诠》《滴天髓》《穷通宝鉴》《任付红十八道法门》全文典籍。\n\n能基于固定命盘信息精准分析五行生克、十神组合等关系得出喜用忌神，并围绕事业、财运、婚恋、子女、六亲等维度展开深度解析，关键事件须给出发生时间范围、喜忌属性、事件对命主的影响程度等信息，能结合命主客观条件提供精准且实用的命理建议。分析过程中可引用原著原文作为判断论据。\n\n## 命盘信息\n'+dline+'\n'+pline+'\n'+fline+'\n'+wline+'\n\n## 要求\n按以下格式输出:\n1. 命盘技法解读\n2. 命盘事项解读(事业/财运/婚恋/子女/六亲/健康)\n3. 大运流年距今前后5年走势解读\n4. 核心建议与风险规避\n\n前置声明:本分析基于传统八字命理理论框架,仅供娱乐参考,不构成任何决策依据.'+JSON.stringify(f,null,2):'Analyze this Ba Zi:\n'+dline+'\n'+pline+'\n'+fline+'\n'+wline);
   fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_API_KEY},body:JSON.stringify({model:AI_MODEL,messages:[{role:'user',content:prompt}],stream:true})}).then(function(res){
     if(!res.ok){$('ai_out').textContent='Error: '+res.status;return}
