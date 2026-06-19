@@ -1248,13 +1248,6 @@ var BaZi = (() => {
     "\u6C34\u571F": "\u91D1",
     "\u571F\u6C34": "\u91D1"
   };
-  function sameCamp(el, dm) {
-    return el === dm || SHENG[dm] === el;
-  }
-  function oppCamp(el, dm) {
-    const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-    return el === keWo || el === woSheng || el === woKe;
-  }
   function getLuZhi(gan) {
     return [2, 3, 5, 6, 5, 6, 8, 9, 11, 0][gan];
   }
@@ -1264,76 +1257,309 @@ var BaZi = (() => {
   function getChangShengZhi(gan) {
     return [11, 6, 2, 9, 2, 9, 5, 0, 8, 3][gan];
   }
-  function calcRootScore(gan, zhiz, zhiGans) {
-    let score = 0;
-    const lu = getLuZhi(gan);
-    const dw = getDiWangZhi(gan);
-    const cs = getChangShengZhi(gan);
-    const posWeight = [10, 40, 20, 5];
-    for (let zi = 0; zi < zhiz.length; zi++) {
-      const z = zhiz[zi];
-      let weight = posWeight[zi] || 5;
-      if (z === lu || z === dw) score += weight * 2;
-      else if (z === cs) score += weight;
-      else if (zhiGans[zi] && zhiGans[zi].includes(gan)) score += weight * 0.5;
-    }
-    return score;
+  function book(name, chapter) {
+    return `\u300A${name}\u300B${chapter || ""}`;
   }
-  function cuiClassifyStrength(dmEl, dmGan, monthZhi, allZhis, zhiGans, allGans, totals) {
-    let sameScore = 0, oppScore = 0;
-    const dm = dmEl;
+  function evaluateDeLing(dmEl, monthZhi) {
+    const ws = getWangShuai(dmEl, monthZhi);
+    let score = 0;
+    if (ws === "\u65FA") {
+      score = 40;
+      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u5F53\u4EE4\u4E3A\u65FA\uFF0C\u5F97\u4EE4+40\u5206` };
+    }
+    if (ws === "\u76F8") {
+      score = 25;
+      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u5F97\u76F8\u4EE4\uFF0C\u5F97\u4EE4+25\u5206` };
+    }
+    if (ws === "\u4F11") {
+      score = 0;
+      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u4F11\u56DA\u5931\u4EE4\uFF0C\u5F97\u4EE40\u5206` };
+    }
+    if (ws === "\u56DA") {
+      score = -10;
+      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u56DA\u4E8E\u6708\u4EE4\uFF0C\u5931\u4EE4-10\u5206` };
+    }
+    score = -20;
+    return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u6B7B\u4E8E\u6708\u4EE4\uFF0C\u5931\u4EE4-20\u5206` };
+  }
+  function evaluateDeDi(dmGan, dmEl, zhis, zhiGans) {
+    const notes = [];
+    let score = 0;
+    const lu = getLuZhi(dmGan);
+    const dw = getDiWangZhi(dmGan);
+    const cs = getChangShengZhi(dmGan);
+    const labels = ["\u5E74\u67F1", "\u6708\u67F1", "\u65E5\u652F", "\u65F6\u652F"];
+    const posWeight = [10, 20, 30, 15];
+    for (let i = 0; i < zhis.length; i++) {
+      const z = zhis[i];
+      let pts = 0;
+      let desc = "";
+      if (z === lu) {
+        pts = posWeight[i] * 2;
+        desc = `\u7984\u6839`;
+      } else if (z === dw) {
+        pts = posWeight[i] * 2;
+        desc = `\u7F8A\u5203\u6839`;
+      } else if (z === cs) {
+        pts = posWeight[i];
+        desc = `\u957F\u751F\u6839`;
+      } else {
+        const hg = HIDDEN_SCORE[z] || [];
+        for (const [g, sc] of hg) {
+          if (g === dmGan) {
+            pts = Math.round(posWeight[i] * sc / 100);
+            desc = `\u85CF\u5E72\u672C\u6C14\u6839`;
+            break;
+          }
+          if (GAN_WU_XING[g] === dmEl && g !== dmGan) {
+            pts = Math.round(posWeight[i] * sc * 0.5 / 100);
+            desc = `\u85CF\u5E72\u4F59\u6C14\u6839`;
+          }
+        }
+      }
+      if (pts > 0) {
+        score += pts;
+        notes.push(`${labels[i]}${DI_ZHI[z]}\u6709${desc}${pts > 15 ? "(\u5F3A\u6839)" : pts > 5 ? "(\u4E2D\u6839)" : "(\u5F31\u6839)"}+${pts}\u5206`);
+      }
+    }
+    if (notes.length === 0) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}\uFF1A\u56DB\u67F1\u65E0\u6839\uFF0C\u5F97\u57300\u5206`);
+    return { score, note: notes };
+  }
+  function evaluateDeShi(dmEl, gans, zhis, zhiGans) {
+    const notes = [];
+    let sameN = 0, oppN = 0;
+    let sameW = 0, oppW = 0;
+    const labels = ["\u5E74\u5E72", "\u6708\u5E72", "\u65E5\u5E72(\u7565)", "\u65F6\u5E72"];
+    const ganWeight = [15, 20, 0, 15];
+    for (let i = 0; i < gans.length; i++) {
+      if (i === 2) continue;
+      const el = GAN_WU_XING[gans[i]];
+      const wt = ganWeight[i];
+      if (el === dmEl || SHENG[dmEl] === el) {
+        sameN++;
+        sameW += wt;
+      } else if (KE[dmEl] === el || SHENG[el] === dmEl || KE[el] === dmEl) {
+        oppN++;
+        oppW += wt;
+      }
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      const z = zhis[i];
+      const hg = HIDDEN_SCORE[z] || [];
+      for (const [gan, sc] of hg) {
+        const el = GAN_WU_XING[gan];
+        const pts = Math.round(sc * 10 / 100);
+        if (el === dmEl || SHENG[dmEl] === el) {
+          sameW += pts;
+        } else if (KE[dmEl] === el || SHENG[el] === dmEl) {
+          oppW += pts;
+        }
+      }
+    }
+    const ratio = sameW + oppW > 0 ? sameW / (sameW + oppW) : 0.5;
+    if (ratio > 0.65) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\uFF1A\u5370\u6BD4\u515A\u4F17\u52BF\u5F3A(\u540C/${sameW},\u5F02/${oppW}),\u5F97\u52BF`);
+    else if (ratio > 0.35) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\uFF1A\u5370\u6BD4\u4E0E\u514B\u6CC4\u8017\u76F8\u5F53(\u540C/${sameW},\u5F02/${oppW}),\u52BF\u529B\u5747\u8861`);
+    else notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\uFF1A\u514B\u6CC4\u8017\u52BF\u5927(\u5F02/${oppW},\u540C/${sameW}),\u5931\u52BF`);
+    return { sameScore: sameW, oppScore: oppW, note: notes };
+  }
+  function evaluateDingTianSui(dmEl, monthZhi, zhis) {
+    let adjust = 0;
+    const coldMonths = [11, 0, 1];
+    const hotMonths = [5, 6, 7];
+    const coldDryZhi = [11, 0, 1, 7, 10];
+    const hotZhi = [5, 6, 2, 3];
+    let coldCount = 0, hotCount = 0;
+    for (const z of zhis) {
+      if (coldDryZhi.includes(z)) coldCount++;
+      if (hotZhi.includes(z)) hotCount++;
+    }
+    if (coldMonths.includes(monthZhi)) {
+      if (dmEl === "\u706B" || dmEl === "\u571F") {
+        adjust += 10;
+      }
+      adjust -= coldCount * 3;
+      if (coldCount >= 3) {
+        adjust -= 10;
+        return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A\u5168\u5C40\u5BD2\u91CD\uFF0C\u65E5\u4E3B\u53D7\u6291-${10 + coldCount * 3}` };
+      }
+      return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A${monthZhi >= 11 ? "\u51AC" : "\u51AC\u672B"}\u6708${coldCount >= 2 ? "\u5BD2\u91CD" : "\u504F\u5BD2"}` };
+    }
+    if (hotMonths.includes(monthZhi)) {
+      if (dmEl === "\u6C34") {
+        adjust += 8;
+      }
+      adjust -= hotCount * 2;
+      if (hotCount >= 3) {
+        adjust -= 8;
+        return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A\u5168\u5C40\u71E5\u70ED\uFF0C\u65E5\u4E3B\u53D7\u6291-8` };
+      }
+      return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A${monthZhi === 6 ? "\u4EF2" : monthZhi === 5 ? "\u5B5F" : "\u5B63"}\u590F${hotCount >= 2 ? "\u71E5\u70ED" : "\u504F\u70ED"}` };
+    }
+    return { adjust: 0, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A\u5BD2\u6696\u9002\u4E2D\uFF0C\u4E0D\u505A\u4FEE\u6B63` };
+  }
+  function calcRootScoreDetailed(dmGan, dmEl, zhis, zhiGans) {
+    const details = [];
+    let score = 0;
+    const lu = getLuZhi(dmGan);
+    const dw = getDiWangZhi(dmGan);
+    const cs = getChangShengZhi(dmGan);
+    const posWeight = [10, 40, 20, 5];
+    for (let zi = 0; zi < zhis.length; zi++) {
+      const z = zhis[zi];
+      let wt = posWeight[zi] || 5;
+      if (z === lu || z === dw) {
+        score += wt * 2;
+        details.push(`(${zi === 1 ? "\u6708\u4EE4" : zi === 2 ? "\u65E5\u652F" : zi === 0 ? "\u5E74\u652F" : "\u65F6\u652F"}\u7984/\u5E1D\u65FA\u5F3A\u6839+${wt * 2})`);
+      } else if (z === cs) {
+        score += wt;
+        details.push(`(${zi === 1 ? "\u6708\u4EE4" : zi === 2 ? "\u65E5\u652F" : ""}\u957F\u751F\u6839+${wt})`);
+      } else if (zhiGans[zi] && zhiGans[zi].includes(dmGan)) {
+        score += Math.round(wt * 0.5);
+        details.push(`(${zi === 1 ? "\u6708\u4EE4" : ""}\u85CF\u5E72\u672C\u6C14\u5F31\u6839+${Math.round(wt * 0.5)})`);
+      }
+    }
+    return { score, detail: details };
+  }
+  function detectSpecial(dmEl, allGans, zhis, zhiGans) {
+    let sameN = 0, oppN = 0;
     for (let i = 0; i < allGans.length; i++) {
       if (i === 2) continue;
       const el = GAN_WU_XING[allGans[i]];
-      const weight = [10, 15, 0, 10][i];
-      if (sameCamp(el, dm)) sameScore += weight;
-      else if (oppCamp(el, dm)) oppScore += weight;
+      if (el === dmEl || SHENG[dmEl] === el) sameN++;
+      else oppN++;
     }
-    const zhiWeight = [10, 40, 20, 5];
-    for (let zi = 0; zi < allZhis.length; zi++) {
-      const z = allZhis[zi];
+    for (let i = 0; i < zhis.length; i++) {
+      if (i === 2) continue;
+      const z = zhis[i];
       const hg = HIDDEN_SCORE[z] || [];
-      for (const [gan, score] of hg) {
-        const el = GAN_WU_XING[gan];
-        const pts = score * zhiWeight[zi] / 100;
-        if (sameCamp(el, dm)) sameScore += pts;
-        else if (oppCamp(el, dm)) oppScore += pts;
+      for (const [g] of hg) {
+        const el = GAN_WU_XING[g];
+        if (el === dmEl || SHENG[dmEl] === el) sameN++;
+        else if (KE[dmEl] === el || SHENG[el] === dmEl) oppN++;
       }
     }
-    const rootScore = calcRootScore(dmGan, allZhis, zhiGans);
-    sameScore += rootScore;
-    const ws = getWangShuai(dm, monthZhi);
-    if (ws === "\u65FA") sameScore += 15;
-    else if (ws === "\u76F8") sameScore += 5;
-    else if (ws === "\u6B7B" || ws === "\u56DA") sameScore -= 5;
-    const diff = sameScore - oppScore;
-    const total = sameScore + oppScore;
-    const ratio = total > 0 ? sameScore / total : 0.5;
-    let level;
-    if (ratio >= 0.85) level = "\u65FA\u6781(\u4ECE\u5F3A)";
-    else if (ratio >= 0.7) level = "\u592A\u65FA";
-    else if (ratio >= 0.58) level = "\u504F\u65FA";
-    else if (ratio >= 0.42) level = "\u4E2D\u548C";
-    else if (ratio >= 0.3) level = "\u504F\u5F31";
-    else if (ratio >= 0.15) level = "\u592A\u5F31";
-    else level = "\u5F31\u6781(\u4ECE\u5F31)";
-    const isStrong = level === "\u504F\u65FA" || level === "\u592A\u65FA" || level === "\u65FA\u6781(\u4ECE\u5F3A)" || level === "\u4E2D\u548C";
-    return { level, score: Math.round(sameScore - oppScore), isStrong };
+    if (sameN >= oppN * 3 && oppN <= 2) return { isSpecial: true, type: "\u4E13\u65FA", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\uFF1A\u5168\u5C40\u65E5\u4E3B\u4E00\u6C14\uFF0C${sameN}\u540C/${oppN}\u5F02\uFF0C\u6210\u4E13\u65FA\u683C` };
+    if (oppN >= sameN * 3 && sameN <= 2) return { isSpecial: true, type: "\u4ECE\u683C", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\uFF1A\u65E5\u4E3B\u65E0\u6839\u65E0\u52A9\uFF0C\u5168\u5C40\u4ECE${oppN > sameN * 4 ? "\u6740/\u8D22" : "\u52BF"}\uFF0C\u6210\u4ECE\u683C` };
+    return { isSpecial: false, type: "\u666E\u901A", note: `${book("\u5B50\u5E73\u771F\u8BE0")}\uFF1A\u5404\u52BF\u529B\u5747\u8861\uFF0C\u6309\u666E\u901A\u683C\u5C40\u8BBA` };
   }
-  function detectSpecialPattern(totals, dm) {
-    const shen = SHENG[dm], same = dm;
-    const shenScore = (totals[shen] || 0) + (totals[same] || 0);
-    const keWo = KE[dm], woKe = KE[dm], woSheng = SHENG[dm];
-    const keXieHao = (totals[keWo] || 0) + (totals[woKe] || 0) + (totals[woSheng] || 0);
-    const totalAll = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
-    if (shenScore / totalAll > 0.7 && keXieHao < 50) return true;
-    if (keXieHao / totalAll > 0.75 && shenScore < 50) return true;
-    return false;
+  function inferDeities(dayMasterElement, _isStrong, wangShuai, fiveElements, monthZhi, pillars, hiddenStems) {
+    const dm = dayMasterElement;
+    const dmGan = pillars?.[2]?.gan ?? 0;
+    const allZhis = pillars?.map((p) => p.zhi) ?? [];
+    const allGans = pillars?.map((p) => p.gan) ?? [];
+    const zhiGans = hiddenStems?.map((h) => h.map((x) => x.gan)) ?? [];
+    const mz = monthZhi ?? 0;
+    const totals = { "\u6728": 0, "\u706B": 0, "\u571F": 0, "\u91D1": 0, "\u6C34": 0 };
+    for (let i = 0; i < 5; i++) totals[EL_NAMES[i]] += fiveElements[["wood", "fire", "earth", "metal", "water"][i]] || 0;
+    for (const p of pillars || []) totals[GAN_WU_XING[p.gan]] += 20;
+    for (const grp of hiddenStems || []) for (const h of grp) totals[h.element] += 10;
+    const deLing = evaluateDeLing(dm, mz);
+    const deDi = evaluateDeDi(dmGan, dm, allZhis, zhiGans);
+    const deShi = evaluateDeShi(dm, allGans, allZhis, zhiGans);
+    const rootDet = calcRootScoreDetailed(dmGan, dm, allZhis, zhiGans);
+    const dingTian = evaluateDingTianSui(dm, mz, allZhis);
+    let totalScore = deLing.score + deDi.score + (deShi.sameScore - deShi.oppScore) * 0.3 + dingTian.adjust + rootDet.score * 0.5;
+    const ws = getWangShuai(dm, mz);
+    if (ws === "\u65FA") totalScore += 20;
+    else if (ws === "\u76F8") totalScore += 10;
+    else if (ws === "\u6B7B" || ws === "\u56DA") totalScore -= 10;
+    const special = detectSpecial(dm, allGans, allZhis, zhiGans);
+    const isSpecial = special.isSpecial;
+    let strengthLevel;
+    if (isSpecial && special.type === "\u4E13\u65FA") strengthLevel = "\u65FA\u6781(\u4ECE\u5F3A)";
+    else if (isSpecial && special.type === "\u4ECE\u683C") strengthLevel = "\u5F31\u6781(\u4ECE\u5F31)";
+    else if (totalScore >= 80) strengthLevel = "\u592A\u65FA";
+    else if (totalScore >= 40) strengthLevel = "\u504F\u65FA";
+    else if (totalScore >= 0) strengthLevel = "\u4E2D\u548C";
+    else if (totalScore >= -40) strengthLevel = "\u504F\u5F31";
+    else if (totalScore >= -80) strengthLevel = "\u592A\u5F31";
+    else strengthLevel = "\u5F31\u6781(\u4ECE\u5F31)";
+    const isStrong = strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA" || strengthLevel === "\u65FA\u6781(\u4ECE\u5F3A)";
+    const tiaoHouList = TIAO_HOU[mz] ?? ["\u706B"];
+    const tongGuanList = getTongGuan(totals, dm);
+    const useful = [];
+    const harmful = [];
+    const steps = [];
+    for (const t2 of tongGuanList) useful.push(t2);
+    for (const t2 of tiaoHouList) {
+      if (!useful.includes(t2)) {
+        useful.unshift(t2);
+        steps.push(`${book("\u6EF4\u5929\u9AD3\xB7\u5BD2\u6696\u71E5\u6E7F")}\uFF1A${mz >= 10 ? "\u51AC\u5B63" : mz >= 5 ? "\u590F\u5B63" : mz >= 2 ? "\u6625\u5B63" : "\u79CB\u5B63"}\uFF0C\u4F18\u5148\u53D6${t2}\u8C03\u5019`);
+      }
+    }
+    if (isSpecial) {
+      const shen = SHENG[dm], same = dm;
+      const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
+      const shenScore = (totals[shen] || 0) + (totals[same] || 0);
+      const keXieHao = (totals[keWo] || 0) + (totals[woKe] || 0) + (totals[woSheng] || 0);
+      if (special.type === "\u4E13\u65FA") {
+        useful.push(shen, same);
+        harmful.push(keWo, woKe, woSheng);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4E13\u65FA\u683C\uFF0C\u987A\u52BF\u53D6${shen}\u3001${same}\uFF0C\u5FCC\u9006\u5236`);
+      } else {
+        if ((totals[woKe] || 0) >= (totals[keWo] || 0) && (totals[woKe] || 0) >= (totals[woSheng] || 0)) {
+          useful.push(woKe, woSheng);
+          steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4ECE\u8D22\u683C`);
+        } else if ((totals[keWo] || 0) >= (totals[woKe] || 0) && (totals[keWo] || 0) >= (totals[woSheng] || 0)) {
+          useful.push(keWo, woKe);
+          steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4ECE\u5B98\u6740\u683C`);
+        } else {
+          useful.push(woSheng, woKe);
+          steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4ECE\u513F\u683C`);
+        }
+        harmful.push(shen, same);
+      }
+    }
+    if (!isSpecial) {
+      const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
+      const shen = SHENG[dm], same = dm;
+      if (strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA") {
+        for (const el of [keWo, woSheng, woKe]) if (el && !useful.includes(el)) useful.push(el);
+        for (const el of [shen, same]) if (el && !harmful.includes(el)) harmful.push(el);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u6B63\u5B98/\u8BBA\u98DF\u795E")}\uFF1A\u8EAB${strengthLevel === "\u504F\u65FA" ? "\u504F\u65FA" : "\u592A\u65FA"}\uFF0C\u53D6${keWo}\u5B98\u6740/${woSheng}\u98DF\u4F24/${woKe}\u8D22\u5236\u6CC4`);
+      } else if (strengthLevel === "\u504F\u5F31" || strengthLevel === "\u592A\u5F31") {
+        for (const el of [shen, same]) if (el && !useful.includes(el)) useful.push(el);
+        for (const el of [keWo, woSheng, woKe]) if (el && !harmful.includes(el)) harmful.push(el);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u5370\u7EF6/\u8BBA\u6BD4\u80A9")}\uFF1A\u8EAB${strengthLevel === "\u504F\u5F31" ? "\u504F\u5F31" : "\u592A\u5F31"}\uFF0C\u53D6${shen}\u5370/${same}\u6BD4\u6276\u52A9`);
+      } else if (strengthLevel === "\u4E2D\u548C") {
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\uFF1A\u65E5\u4E3B\u4E2D\u548C\uFF0C\u968F\u5927\u8FD0\u6D41\u8F6C\uFF0C\u5F53\u524D\u4EE5\u8C03\u5019\u4E3A\u4E3B`);
+      }
+      for (const t2 of tongGuanList) {
+        if (!useful.includes(t2)) useful.push(t2);
+      }
+    }
+    for (const e of harmful) {
+      const idx = useful.indexOf(e);
+      if (idx >= 0) useful.splice(idx, 1);
+    }
+    const neutralSet = EL_NAMES.filter((e) => !useful.includes(e) && !harmful.includes(e));
+    const bookNotes = [
+      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A${deLing.note}`,
+      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}\uFF1A${deDi.note.join("\uFF1B")}`,
+      deShi.note.join("\uFF1B"),
+      dingTian.note,
+      special.note,
+      ...steps
+    ];
+    return {
+      dayMaster: { element: dm, strength: isStrong ? "\u504F\u65FA" : "\u504F\u5F31", level: strengthLevel, isStrong },
+      strengthScore: Math.round(totalScore),
+      strengthLevel,
+      tiaoHou: [...new Set(tiaoHouList)],
+      tongGuan: [...new Set(tongGuanList)],
+      mainUseful: useful.slice(0, 2),
+      secondaryUseful: useful.slice(2),
+      usefulDeities: [...new Set(useful)],
+      harmfulDeities: [...new Set(harmful)],
+      harmfulMain: harmful.slice(0, 2),
+      harmfulSecondary: harmful.slice(2),
+      neutralDeities: neutralSet,
+      strategy: bookNotes.join("\uFF1B"),
+      advice: `\u5FCC${harmful.slice(0, 2).join("\u3001")}\u8FC7\u65FA\u6D41\u5E74`,
+      isSpecialPattern: isSpecial
+    };
   }
-  function getTiaoHou(monthZhi) {
-    return TIAO_HOU[monthZhi] ?? ["\u706B"];
-  }
-  function getTongGuan(totals) {
+  function getTongGuan(totals, dm) {
     const r = [];
     const pairs = [["\u91D1", "\u6728"], ["\u6C34", "\u706B"], ["\u706B", "\u91D1"], ["\u6728", "\u571F"], ["\u571F", "\u6C34"]];
     for (const [a, b] of pairs) {
@@ -1343,95 +1569,6 @@ var BaZi = (() => {
       }
     }
     return r;
-  }
-  function inferDeities(dayMasterElement, _isStrong, wangShuai, fiveElements, monthZhi, pillars, hiddenStems) {
-    const mz = monthZhi ?? 0;
-    const dm = dayMasterElement;
-    const dmGan = pillars?.[2]?.gan ?? 0;
-    const allZhis = pillars?.map((p) => p.zhi) ?? [];
-    const allGans = pillars?.map((p) => p.gan) ?? [];
-    const zhiGans = hiddenStems?.map((h) => h.map((x) => x.gan)) ?? [];
-    const totals = { "\u6728": 0, "\u706B": 0, "\u571F": 0, "\u91D1": 0, "\u6C34": 0 };
-    for (let i = 0; i < 5; i++)
-      totals[EL_NAMES[i]] += fiveElements[["wood", "fire", "earth", "metal", "water"][i]] || 0;
-    for (const p of pillars || []) totals[GAN_WU_XING[p.gan]] += 20;
-    for (const grp of hiddenStems || [])
-      for (const h of grp) totals[h.element] += 10;
-    const slData = cuiClassifyStrength(dm, dmGan, mz, allZhis, zhiGans, allGans, totals);
-    const isSpecial = detectSpecialPattern(totals, dm);
-    const tiaoHou = getTiaoHou(mz);
-    const tongGuan = getTongGuan(totals);
-    const useful = [];
-    const harmful = [];
-    if (isSpecial) {
-      const shen = SHENG[dm], same = dm;
-      const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-      const shenScore = (totals[shen] || 0) + (totals[same] || 0);
-      const keXieHao = (totals[keWo] || 0) + (totals[woKe] || 0) + (totals[woSheng] || 0);
-      if (shenScore > keXieHao) {
-        useful.push(shen, same);
-        harmful.push(keWo, woKe, woSheng);
-      } else {
-        if ((totals[woKe] || 0) > (totals[keWo] || 0) && (totals[woKe] || 0) > (totals[woSheng] || 0))
-          useful.push(woKe, woSheng);
-        else if ((totals[keWo] || 0) > (totals[woKe] || 0) && (totals[keWo] || 0) > (totals[woSheng] || 0))
-          useful.push(keWo, woKe);
-        else
-          useful.push(woSheng, woKe);
-        harmful.push(shen, same);
-      }
-    }
-    if (!isSpecial) {
-      for (const t2 of tiaoHou) if (!useful.includes(t2)) useful.push(t2);
-      for (const t2 of tongGuan) if (!useful.includes(t2)) useful.push(t2);
-      if (slData.level === "\u504F\u65FA") {
-        const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-        for (const el of [keWo, woSheng, woKe]) if (el && !useful.includes(el)) useful.push(el);
-        const shen = SHENG[dm], same = dm;
-        for (const el of [shen, same]) if (el && !harmful.includes(el)) harmful.push(el);
-      } else if (slData.level === "\u592A\u65FA") {
-        const woSheng = SHENG[dm];
-        if (!useful.includes(woSheng)) useful.unshift(woSheng);
-        harmful.push(SHENG[dm], dm, KE[dm]);
-      } else if (slData.level === "\u65FA\u6781(\u4ECE\u5F3A)") {
-      } else if (slData.level === "\u504F\u5F31") {
-        const shen = SHENG[dm], same = dm;
-        for (const el of [shen, same]) if (el && !useful.includes(el)) useful.push(el);
-        const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-        for (const el of [keWo, woSheng, woKe]) if (el && !harmful.includes(el)) harmful.push(el);
-      } else if (slData.level === "\u592A\u5F31") {
-        const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-        for (const el of [keWo, woSheng, woKe]) if (el && !useful.includes(el)) useful.push(el);
-        const shen = SHENG[dm], same = dm;
-        for (const el of [shen, same]) if (el && !harmful.includes(el)) harmful.push(el);
-      } else if (slData.level === "\u5F31\u6781(\u4ECE\u5F31)") {
-      }
-    }
-    for (const e of harmful) {
-      const idx = useful.indexOf(e);
-      if (idx >= 0) useful.splice(idx, 1);
-    }
-    const neutralSet = EL_NAMES.filter((e) => !useful.includes(e) && !harmful.includes(e));
-    const uSet = [...new Set(useful)];
-    const hSet = [...new Set(harmful)];
-    const strategy = isSpecial ? `[\u4ECE\u683C] \u65E5\u4E3B${slData.level}\uFF0C\u5168\u5C40\u987A\u52BF\u3002\u7528\u795E:${uSet.join("\u3001")}\uFF0C\u5FCC\u795E:${hSet.join("\u3001")}\u3002` : slData.level === "\u4E2D\u548C" ? `[\u4E2D\u548C] \u65E5\u4E3B\u4E2D\u548C\uFF0C\u968F\u5927\u8FD0\u6D41\u8F6C\u3002\u5F53\u524D\u8C03\u5019:${tiaoHou.join("\u3001")}\u3002` : slData.level === "\u504F\u65FA" || slData.level === "\u592A\u65FA" ? `[${slData.level}] \u7528\u795E:${uSet.join("\u3001")}\uFF0C\u5FCC\u795E:${hSet.join("\u3001")}\u3002\u8C03\u5019:${tiaoHou.join("\u3001")}\u3002` : `[${slData.level}] \u7528\u795E:${uSet.join("\u3001")}\uFF0C\u5FCC\u795E:${hSet.join("\u3001")}\u3002\u8C03\u5019:${tiaoHou.join("\u3001")}\u3002`;
-    return {
-      dayMaster: { element: dm, strength: slData.isStrong ? "\u504F\u65FA/\u592A\u65FA" : "\u504F\u5F31/\u592A\u5F31", level: slData.level, isStrong: slData.isStrong },
-      strengthScore: slData.score,
-      strengthLevel: slData.level,
-      tiaoHou: [...new Set(tiaoHou)],
-      tongGuan: [...new Set(tongGuan)],
-      mainUseful: uSet.slice(0, 2),
-      secondaryUseful: uSet.slice(2),
-      usefulDeities: uSet,
-      harmfulDeities: hSet,
-      harmfulMain: hSet.slice(0, 2),
-      harmfulSecondary: hSet.slice(2),
-      neutralDeities: neutralSet,
-      strategy,
-      advice: `\u6CE8\u610F${hSet.slice(0, 2).join("\u3001")}\u8FC7\u65FA\u7684\u6D41\u5E74`,
-      isSpecialPattern: isSpecial
-    };
   }
   function analyzeAnnualFortune(annual, dayGan, monthZhi, allPillars, _natalTenGodMap, deityAnalysis, currentFortune) {
     const notes = [];
