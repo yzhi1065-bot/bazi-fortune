@@ -1236,6 +1236,38 @@ var BaZi = (() => {
     10: ["\u6C34", "\u706B"],
     1: ["\u706B", "\u6C34"]
   };
+  var CHANG_SHENG_CS = {
+    0: [2, 3, 5, 6, 8, 9, 11, 0, 2, 3],
+    // 甲
+    1: [6, 7, 9, 10, 0, 1, 3, 4, 6, 7],
+    // 乙
+    2: [5, 6, 8, 9, 11, 0, 2, 3, 5, 6],
+    // 丙
+    3: [8, 9, 11, 0, 2, 3, 5, 6, 8, 9],
+    // 丁
+    4: [5, 6, 8, 9, 11, 0, 2, 3, 5, 6],
+    // 戊
+    5: [8, 9, 11, 0, 2, 3, 5, 6, 8, 9],
+    // 己
+    6: [3, 4, 6, 7, 9, 10, 0, 1, 3, 4],
+    // 庚
+    7: [0, 1, 3, 4, 6, 7, 9, 10, 0, 1],
+    // 辛
+    8: [9, 10, 0, 1, 3, 4, 6, 7, 9, 10],
+    // 壬
+    9: [5, 6, 8, 9, 11, 0, 2, 3, 5, 6]
+    // 癸
+  };
+  var LU_ZHI = [2, 3, 5, 6, 5, 6, 8, 9, 11, 0];
+  var DI_WANG_ZHI = [3, 2, 6, 5, 6, 5, 9, 8, 0, 11];
+  function getChangShengIndex(gan, zhi) {
+    const arr = CHANG_SHENG_CS[gan] || [];
+    for (let i = 0; i < arr.length; i++) if (arr[i] === zhi) return i;
+    return -1;
+  }
+  function isJue(gan, zhi) {
+    return getChangShengIndex(gan, zhi) === 9;
+  }
   var TONG_GUAN = {
     "\u91D1\u6728": "\u6C34",
     "\u6728\u91D1": "\u6C34",
@@ -1248,199 +1280,336 @@ var BaZi = (() => {
     "\u6C34\u571F": "\u91D1",
     "\u571F\u6C34": "\u91D1"
   };
-  function getLuZhi(gan) {
-    return [2, 3, 5, 6, 5, 6, 8, 9, 11, 0][gan];
+  function book(name, ch) {
+    return `\u300A${name}${ch ? "\xB7" + ch : ""}\u300B`;
   }
-  function getDiWangZhi(gan) {
-    return [3, 2, 6, 5, 6, 5, 9, 8, 0, 11][gan];
+  function evalDeLing(dmEl, mz) {
+    const ws = getWangShuai(dmEl, mz);
+    const m = { 0: "\u5B50", 1: "\u4E11", 2: "\u5BC5", 3: "\u536F", 4: "\u8FB0", 5: "\u5DF3", 6: "\u5348", 7: "\u672A", 8: "\u7533", 9: "\u9149", 10: "\u620C", 11: "\u4EA5" }[mz];
+    if (ws === "\u65FA") return { score: 40, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\u65E5\u4E3B${dmEl}\u751F\u4E8E${m}\u6708\u5F53\u4EE4\u4E3A\u65FA\uFF0C\u5F97\u4EE4+40` };
+    if (ws === "\u76F8") return { score: 25, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\u65E5\u4E3B${dmEl}\u751F\u4E8E${m}\u6708\u5F97\u76F8\u4EE4\uFF0C\u5F97\u4EE4+25` };
+    if (ws === "\u4F11") return { score: 0, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\u65E5\u4E3B${dmEl}\u751F\u4E8E${m}\u6708\u4F11\u56DA\u5931\u4EE4+0` };
+    if (ws === "\u56DA") return { score: -10, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\u65E5\u4E3B${dmEl}\u751F\u4E8E${m}\u6708\u56DA-10` };
+    return { score: -20, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\u65E5\u4E3B${dmEl}\u751F\u4E8E${m}\u6708\u6B7B-20` };
   }
-  function getChangShengZhi(gan) {
-    return [11, 6, 2, 9, 2, 9, 5, 0, 8, 3][gan];
-  }
-  function book(name, chapter) {
-    return `\u300A${name}\u300B${chapter || ""}`;
-  }
-  function evaluateDeLing(dmEl, monthZhi) {
-    const ws = getWangShuai(dmEl, monthZhi);
-    let score = 0;
-    if (ws === "\u65FA") {
-      score = 40;
-      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u5F53\u4EE4\u4E3A\u65FA\uFF0C\u5F97\u4EE4+40\u5206` };
-    }
-    if (ws === "\u76F8") {
-      score = 25;
-      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u5F97\u76F8\u4EE4\uFF0C\u5F97\u4EE4+25\u5206` };
-    }
-    if (ws === "\u4F11") {
-      score = 0;
-      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u4F11\u56DA\u5931\u4EE4\uFF0C\u5F97\u4EE40\u5206` };
-    }
-    if (ws === "\u56DA") {
-      score = -10;
-      return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u56DA\u4E8E\u6708\u4EE4\uFF0C\u5931\u4EE4-10\u5206` };
-    }
-    score = -20;
-    return { score, note: `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A\u65E5\u4E3B${dmEl}\u6B7B\u4E8E\u6708\u4EE4\uFF0C\u5931\u4EE4-20\u5206` };
-  }
-  function evaluateDeDi(dmGan, dmEl, zhis, zhiGans) {
+  function evalDeDi(dmGan, dmEl, zhis) {
     const notes = [];
     let score = 0;
-    const lu = getLuZhi(dmGan);
-    const dw = getDiWangZhi(dmGan);
-    const cs = getChangShengZhi(dmGan);
-    const labels = ["\u5E74\u67F1", "\u6708\u67F1", "\u65E5\u652F", "\u65F6\u652F"];
-    const posWeight = [10, 20, 30, 15];
+    const lu = LU_ZHI[dmGan], dw = DI_WANG_ZHI[dmGan];
+    const labels = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
+    const posW = [10, 40, 20, 5];
     for (let i = 0; i < zhis.length; i++) {
       const z = zhis[i];
-      let pts = 0;
-      let desc = "";
+      let pts = 0, desc = "";
       if (z === lu) {
-        pts = posWeight[i] * 2;
-        desc = `\u7984\u6839`;
+        pts = posW[i] * 2;
+        desc = "\u7984(\u5F3A\u6839)*2";
       } else if (z === dw) {
-        pts = posWeight[i] * 2;
-        desc = `\u7F8A\u5203\u6839`;
-      } else if (z === cs) {
-        pts = posWeight[i];
-        desc = `\u957F\u751F\u6839`;
+        pts = posW[i] * 2;
+        desc = "\u7F8A\u5203(\u5F3A\u6839)*2";
       } else {
         const hg = HIDDEN_SCORE[z] || [];
         for (const [g, sc] of hg) {
           if (g === dmGan) {
-            pts = Math.round(posWeight[i] * sc / 100);
-            desc = `\u85CF\u5E72\u672C\u6C14\u6839`;
+            pts = Math.round(posW[i] * sc / 100);
+            desc = "\u85CF\u5E72\u672C\u6C14\u6839";
             break;
-          }
-          if (GAN_WU_XING[g] === dmEl && g !== dmGan) {
-            pts = Math.round(posWeight[i] * sc * 0.5 / 100);
-            desc = `\u85CF\u5E72\u4F59\u6C14\u6839`;
           }
         }
       }
       if (pts > 0) {
         score += pts;
-        notes.push(`${labels[i]}${DI_ZHI[z]}\u6709${desc}${pts > 15 ? "(\u5F3A\u6839)" : pts > 5 ? "(\u4E2D\u6839)" : "(\u5F31\u6839)"}+${pts}\u5206`);
+        notes.push(`${labels[i]}\u652F${DI_ZHI[z]}${desc}+${pts}`);
       }
     }
-    if (notes.length === 0) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}\uFF1A\u56DB\u67F1\u65E0\u6839\uFF0C\u5F97\u57300\u5206`);
-    return { score, note: notes };
+    if (notes.length === 0) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}\u56DB\u67F1\u65E0\u901A\u6839\uFF0C\u5F97\u57300`);
+    return { score, notes };
   }
-  function evaluateDeShi(dmEl, gans, zhis, zhiGans) {
+  function evalDeShi(dmEl, gans) {
     const notes = [];
-    let sameN = 0, oppN = 0;
-    let sameW = 0, oppW = 0;
-    const labels = ["\u5E74\u5E72", "\u6708\u5E72", "\u65E5\u5E72(\u7565)", "\u65F6\u5E72"];
-    const ganWeight = [15, 20, 0, 15];
+    let same = 0, opp = 0;
+    const labels = ["\u5E74\u5E72", "\u6708\u5E72", "\u65F6\u5E72"];
+    const wts = [15, 20, 15];
     for (let i = 0; i < gans.length; i++) {
       if (i === 2) continue;
       const el = GAN_WU_XING[gans[i]];
-      const wt = ganWeight[i];
-      if (el === dmEl || SHENG[dmEl] === el) {
-        sameN++;
-        sameW += wt;
-      } else if (KE[dmEl] === el || SHENG[el] === dmEl || KE[el] === dmEl) {
-        oppN++;
-        oppW += wt;
-      }
+      const wt = wts[i < 2 ? i : i - 1];
+      if (el === dmEl || SHENG[dmEl] === el) same += wt;
+      else if (KE[dmEl] === el || SHENG[el] === dmEl || KE[el] === dmEl) opp += wt;
     }
-    for (let i = 0; i < zhis.length; i++) {
-      const z = zhis[i];
+    if (same > opp * 1.5) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\u5370\u6BD4\u515A\u4F17\u52BF\u5F3A(\u540C${same}/\u5F02${opp})`);
+    else if (opp > same * 1.5) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\u514B\u6CC4\u8017\u52BF\u5927(\u540C${same}/\u5F02${opp})`);
+    else notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\u52BF\u529B\u5747\u8861(\u540C${same}/\u5F02${opp})`);
+    return { same, opp, notes };
+  }
+  function evalTianSui(dmEl, mz, zhis) {
+    let adj = 0;
+    const cold = [11, 0, 1], hot = [5, 6, 7];
+    const coldDz = [11, 0, 1, 7, 10], hotDz = [5, 6, 2, 3];
+    let cc = 0, hc = 0;
+    for (const z of zhis) {
+      if (coldDz.includes(z)) cc++;
+      if (hotDz.includes(z)) hc++;
+    }
+    if (cold.includes(mz)) {
+      if (dmEl === "\u706B" || dmEl === "\u571F") adj += 10;
+      adj -= cc * 3;
+      if (cc >= 3) adj -= 10;
+      return { adj, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u5BD2\u51AC${cc >= 2 ? "\u5BD2\u91CD" : "\u504F\u5BD2"}\u8C03\u5019+${adj}` };
+    }
+    if (hot.includes(mz)) {
+      if (dmEl === "\u6C34") adj += 8;
+      adj -= hc * 2;
+      if (hc >= 3) adj -= 8;
+      return { adj, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u708E\u590F${hc >= 2 ? "\u71E5\u70ED" : "\u504F\u70ED"}\u8C03\u5019+${adj}` };
+    }
+    return { adj: 0, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u5BD2\u6696\u9002\u4E2D` };
+  }
+  function calcDynAdjust(dmGan, dmEl, zhis, allGans, dayZhi) {
+    const notes = [];
+    let adj = 0;
+    const pairs = [[0, 6], [1, 7], [2, 8], [3, 9], [4, 10], [5, 11]];
+    const harms = [[0, 7], [1, 6], [2, 5], [3, 4], [8, 11], [9, 10]];
+    const breaks = [[0, 9], [1, 4], [2, 11], [3, 6], [5, 8], [7, 10]];
+    const lHe = [[0, 1], [2, 11], [3, 10], [4, 9], [5, 8], [6, 7]];
+    const labels = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
+    const lu = LU_ZHI[dmGan], dw = DI_WANG_ZHI[dmGan];
+    const isStrongRoot = (z) => z === lu || z === dw;
+    const isWeakRoot = (z) => {
       const hg = HIDDEN_SCORE[z] || [];
-      for (const [gan, sc] of hg) {
-        const el = GAN_WU_XING[gan];
-        const pts = Math.round(sc * 10 / 100);
-        if (el === dmEl || SHENG[dmEl] === el) {
-          sameW += pts;
-        } else if (KE[dmEl] === el || SHENG[el] === dmEl) {
-          oppW += pts;
+      for (const [g] of hg) if (g === dmGan) return true;
+      return false;
+    };
+    const comboScore = {};
+    function isCombo(i) {
+      return comboScore[i] && comboScore[i] > 0;
+    }
+    function markCombo(i, j) {
+      comboScore[i] = (comboScore[i] || 0) + 1;
+      comboScore[j] = (comboScore[j] || 0) + 1;
+    }
+    const sanHui = [
+      [2, 3, 4, "\u5BC5\u536F\u8FB0", "\u6728"],
+      [5, 6, 7, "\u5DF3\u5348\u672A", "\u706B"],
+      [8, 9, 10, "\u7533\u9149\u620C", "\u91D1"],
+      [11, 0, 1, "\u4EA5\u5B50\u4E11", "\u6C34"]
+    ];
+    for (const [a, b, c, desc, el] of sanHui) {
+      if (zhis.includes(a) && zhis.includes(b) && zhis.includes(c)) {
+        if (el === dmEl || el === SHENG[dmEl]) {
+          adj += 30;
+          notes.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u4E09\u4F1A${desc}${el}\u5C40\u751F\u6276\u65E5\u4E3B+30`);
+        } else if (el === KE[dmEl]) {
+          adj -= 12;
+          notes.push(`\u4E09\u4F1A${desc}${el}\u5C40\u514B\u8017\u65E5\u4E3B-12`);
         }
       }
     }
-    const ratio = sameW + oppW > 0 ? sameW / (sameW + oppW) : 0.5;
-    if (ratio > 0.65) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\uFF1A\u5370\u6BD4\u515A\u4F17\u52BF\u5F3A(\u540C/${sameW},\u5F02/${oppW}),\u5F97\u52BF`);
-    else if (ratio > 0.35) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\uFF1A\u5370\u6BD4\u4E0E\u514B\u6CC4\u8017\u76F8\u5F53(\u540C/${sameW},\u5F02/${oppW}),\u52BF\u529B\u5747\u8861`);
-    else notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\uFF1A\u514B\u6CC4\u8017\u52BF\u5927(\u5F02/${oppW},\u540C/${sameW}),\u5931\u52BF`);
-    return { sameScore: sameW, oppScore: oppW, note: notes };
-  }
-  function evaluateDingTianSui(dmEl, monthZhi, zhis) {
-    let adjust = 0;
-    const coldMonths = [11, 0, 1];
-    const hotMonths = [5, 6, 7];
-    const coldDryZhi = [11, 0, 1, 7, 10];
-    const hotZhi = [5, 6, 2, 3];
-    let coldCount = 0, hotCount = 0;
-    for (const z of zhis) {
-      if (coldDryZhi.includes(z)) coldCount++;
-      if (hotZhi.includes(z)) hotCount++;
-    }
-    if (coldMonths.includes(monthZhi)) {
-      if (dmEl === "\u706B" || dmEl === "\u571F") {
-        adjust += 10;
-      }
-      adjust -= coldCount * 3;
-      if (coldCount >= 3) {
-        adjust -= 10;
-        return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A\u5168\u5C40\u5BD2\u91CD\uFF0C\u65E5\u4E3B\u53D7\u6291-${10 + coldCount * 3}` };
-      }
-      return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A${monthZhi >= 11 ? "\u51AC" : "\u51AC\u672B"}\u6708${coldCount >= 2 ? "\u5BD2\u91CD" : "\u504F\u5BD2"}` };
-    }
-    if (hotMonths.includes(monthZhi)) {
-      if (dmEl === "\u6C34") {
-        adjust += 8;
-      }
-      adjust -= hotCount * 2;
-      if (hotCount >= 3) {
-        adjust -= 8;
-        return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A\u5168\u5C40\u71E5\u70ED\uFF0C\u65E5\u4E3B\u53D7\u6291-8` };
-      }
-      return { adjust, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A${monthZhi === 6 ? "\u4EF2" : monthZhi === 5 ? "\u5B5F" : "\u5B63"}\u590F${hotCount >= 2 ? "\u71E5\u70ED" : "\u504F\u70ED"}` };
-    }
-    return { adjust: 0, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\uFF1A\u5BD2\u6696\u9002\u4E2D\uFF0C\u4E0D\u505A\u4FEE\u6B63` };
-  }
-  function calcRootScoreDetailed(dmGan, dmEl, zhis, zhiGans) {
-    const details = [];
-    let score = 0;
-    const lu = getLuZhi(dmGan);
-    const dw = getDiWangZhi(dmGan);
-    const cs = getChangShengZhi(dmGan);
-    const posWeight = [10, 40, 20, 5];
-    for (let zi = 0; zi < zhis.length; zi++) {
-      const z = zhis[zi];
-      let wt = posWeight[zi] || 5;
-      if (z === lu || z === dw) {
-        score += wt * 2;
-        details.push(`(${zi === 1 ? "\u6708\u4EE4" : zi === 2 ? "\u65E5\u652F" : zi === 0 ? "\u5E74\u652F" : "\u65F6\u652F"}\u7984/\u5E1D\u65FA\u5F3A\u6839+${wt * 2})`);
-      } else if (z === cs) {
-        score += wt;
-        details.push(`(${zi === 1 ? "\u6708\u4EE4" : zi === 2 ? "\u65E5\u652F" : ""}\u957F\u751F\u6839+${wt})`);
-      } else if (zhiGans[zi] && zhiGans[zi].includes(dmGan)) {
-        score += Math.round(wt * 0.5);
-        details.push(`(${zi === 1 ? "\u6708\u4EE4" : ""}\u85CF\u5E72\u672C\u6C14\u5F31\u6839+${Math.round(wt * 0.5)})`);
+    const sanHe = [
+      [0, 4, 8, "\u7533\u5B50\u8FB0", "\u6C34"],
+      [2, 6, 10, "\u5BC5\u5348\u620C", "\u706B"],
+      [3, 7, 11, "\u4EA5\u536F\u672A", "\u6728"],
+      [1, 5, 9, "\u5DF3\u9149\u4E11", "\u91D1"]
+    ];
+    for (const [a, b, c, desc, el] of sanHe) {
+      if (zhis.includes(a) && zhis.includes(b) && zhis.includes(c)) {
+        if (el === dmEl || el === SHENG[dmEl]) {
+          adj += 20;
+          notes.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u4E09\u5408${desc}${el}\u5C40\u751F\u6276\u65E5\u4E3B+20`);
+        } else if (el === KE[dmEl]) {
+          adj -= 10;
+          notes.push(`\u4E09\u5408${desc}${el}\u5C40\u514B\u8017\u65E5\u4E3B-10`);
+        }
       }
     }
-    return { score, detail: details };
-  }
-  function detectSpecial(dmEl, allGans, zhis, zhiGans) {
-    let sameN = 0, oppN = 0;
-    for (let i = 0; i < allGans.length; i++) {
-      if (i === 2) continue;
-      const el = GAN_WU_XING[allGans[i]];
-      if (el === dmEl || SHENG[dmEl] === el) sameN++;
-      else oppN++;
+    const gongHe = [[0, 8, "\u7533\u8FB0"], [3, 7, "\u4EA5\u672A"], [2, 10, "\u5BC5\u620C"], [1, 9, "\u5DF3\u4E11"]];
+    for (const [a, b, desc] of gongHe) {
+      if (zhis.includes(a) && zhis.includes(b)) {
+        adj += 5;
+        notes.push(`\u62F1\u5408${desc}\u6697\u4E2D\u52A9\u76CA+5`);
+      }
     }
     for (let i = 0; i < zhis.length; i++) {
-      if (i === 2) continue;
-      const z = zhis[i];
-      const hg = HIDDEN_SCORE[z] || [];
-      for (const [g] of hg) {
-        const el = GAN_WU_XING[g];
-        if (el === dmEl || SHENG[dmEl] === el) sameN++;
-        else if (KE[dmEl] === el || SHENG[el] === dmEl) oppN++;
+      for (const [a, b] of lHe) {
+        for (let j = i + 1; j < zhis.length; j++) {
+          if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            const lz = zhis[i], rz = zhis[j];
+            if (isStrongRoot(lz) || isStrongRoot(rz)) {
+              adj += 25;
+              notes.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u516D\u5408${DI_ZHI[lz]}${DI_ZHI[rz]}\u5408\u51FA\u65E5\u4E3B\u7984\u5203\u6839+25`);
+            } else {
+              adj += 5;
+              notes.push(`\u516D\u5408${DI_ZHI[lz]}${DI_ZHI[rz]}\u65E5\u4E3B\u95F4\u63A5\u5F97\u76CA+5`);
+            }
+            markCombo(i, j);
+          }
+        }
       }
     }
-    if (sameN >= oppN * 3 && oppN <= 2) return { isSpecial: true, type: "\u4E13\u65FA", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\uFF1A\u5168\u5C40\u65E5\u4E3B\u4E00\u6C14\uFF0C${sameN}\u540C/${oppN}\u5F02\uFF0C\u6210\u4E13\u65FA\u683C` };
-    if (oppN >= sameN * 3 && sameN <= 2) return { isSpecial: true, type: "\u4ECE\u683C", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\uFF1A\u65E5\u4E3B\u65E0\u6839\u65E0\u52A9\uFF0C\u5168\u5C40\u4ECE${oppN > sameN * 4 ? "\u6740/\u8D22" : "\u52BF"}\uFF0C\u6210\u4ECE\u683C` };
-    return { isSpecial: false, type: "\u666E\u901A", note: `${book("\u5B50\u5E73\u771F\u8BE0")}\uFF1A\u5404\u52BF\u529B\u5747\u8861\uFF0C\u6309\u666E\u901A\u683C\u5C40\u8BBA` };
+    const anHe = [[6, 11], [2, 1], [3, 8]];
+    for (let i = 0; i < zhis.length; i++) {
+      for (const [a, b] of anHe) {
+        for (let j = i + 1; j < zhis.length; j++) {
+          if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            adj += 3;
+            notes.push(`\u6697\u5408${DI_ZHI[zhis[i]]}${DI_ZHI[zhis[j]]}\u6697\u4E2D\u52A9\u529B+3`);
+          }
+        }
+      }
+    }
+    if (dayZhi !== void 0) {
+      const gzSelf = { 0: [6], 2: [10], 3: [11], 4: [0], 5: [11], 7: [5], 8: [6], 8: [10], 9: [5] };
+      const selfZhis = gzSelf[dmGan] || [];
+      if (selfZhis.includes(dayZhi)) {
+        adj += 8;
+        notes.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u5E72\u652F\u81EA\u5408(${TIAN_GAN[dmGan]}${DI_ZHI[dayZhi]})\u52A0\u5F3A\u65E5\u4E3B+8`);
+      }
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      if (isCombo(i)) {
+        continue;
+      }
+      for (const [a, b] of pairs) {
+        for (let j = 0; j < zhis.length; j++) {
+          if (i === j) continue;
+          if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            const sRoot = isStrongRoot(zhis[i]), wRoot = isWeakRoot(zhis[j]);
+            if (sRoot && !wRoot) {
+              adj -= 15;
+              notes.push(`${book("\u6EF4\u5929\u9AD3")}${DI_ZHI[zhis[i]]}\u65FA\u6839\u88AB\u51B2\u62D4-15`);
+            } else if (isStrongRoot(zhis[j]) && !isStrongRoot(zhis[i])) {
+              adj -= 10;
+              notes.push(`${DI_ZHI[zhis[j]]}\u5F3A\u6839\u88AB\u51B2\u8017-10`);
+            } else {
+              adj -= 3;
+              notes.push(`${DI_ZHI[zhis[i]]}${DI_ZHI[zhis[j]]}\u51B2\u8F7B\u5FAE\u6270\u52A8-3`);
+            }
+          }
+        }
+      }
+    }
+    const xingP = [
+      [1, 7, "\u4E11\u672A\u5211"],
+      [7, 10, "\u672A\u620C\u5211"],
+      [1, 10, "\u4E11\u620C\u5211"],
+      [2, 5, "\u5BC5\u5DF3\u5211"],
+      [5, 8, "\u5DF3\u7533\u5211"],
+      [2, 8, "\u5BC5\u7533\u5211"],
+      [0, 3, "\u5B50\u536F\u5211"]
+    ];
+    for (let i = 0; i < zhis.length; i++) {
+      for (const [a, b, desc] of xingP) {
+        for (let j = i + 1; j < zhis.length; j++) {
+          if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            if (isStrongRoot(zhis[i]) || isStrongRoot(zhis[j])) {
+              adj -= 5;
+              notes.push(`${book("\u5B50\u5E73\u771F\u8BE0")}${desc}\u65E5\u4E3B\u6839\u6C14\u53D7\u8017-5`);
+            } else {
+              adj -= 2;
+              notes.push(`${desc}\u8F7B\u5FAE\u8017\u6C14-2`);
+            }
+          }
+        }
+      }
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      if ([4, 6, 9, 11].includes(zhis[i])) {
+        for (let j = i + 1; j < zhis.length; j++) {
+          if (zhis[i] === zhis[j]) {
+            adj -= 3;
+            notes.push(`${DI_ZHI[zhis[i]]}\u81EA\u5211\u8017\u6C14-3`);
+          }
+        }
+      }
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      for (const [a, b] of harms) {
+        for (let j = i + 1; j < zhis.length; j++) {
+          if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            if (isStrongRoot(zhis[i]) || isStrongRoot(zhis[j])) {
+              adj -= 4;
+              notes.push(`${DI_ZHI[zhis[i]]}${DI_ZHI[zhis[j]]}\u5BB3\u6697\u8017\u6839-4`);
+            } else {
+              adj -= 2;
+              notes.push(`${DI_ZHI[zhis[i]]}${DI_ZHI[zhis[j]]}\u5BB3\u5FAE\u635F-2`);
+            }
+          }
+        }
+      }
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      for (const [a, b] of breaks) {
+        for (let j = i + 1; j < zhis.length; j++) {
+          if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            if (isWeakRoot(zhis[i]) || isWeakRoot(zhis[j])) {
+              adj -= 6;
+              notes.push(`${DI_ZHI[zhis[i]]}${DI_ZHI[zhis[j]]}\u7834\u5E9F\u5F31\u6839-6`);
+            } else {
+              adj -= 2;
+              notes.push(`${DI_ZHI[zhis[i]]}${DI_ZHI[zhis[j]]}\u7834\u5FAE\u635F-2`);
+            }
+          }
+        }
+      }
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      if (isJue(dmGan, zhis[i])) {
+        if (isStrongRoot(zhis[i])) {
+          adj -= 20;
+          notes.push(`${book("\u4EFB\u4ED8\u7EA2\u76F2\u6D3E")}${DI_ZHI[zhis[i]]}\u7EDD\u4F4D(\u5F3A\u6839)\u5927\u5E45\u51CF\u529B-20`);
+        } else if (isWeakRoot(zhis[i])) {
+          adj -= 10;
+          notes.push(`${DI_ZHI[zhis[i]]}\u7EDD\u4F4D(\u5F31\u6839)\u51CF\u529B-10`);
+        } else {
+          adj -= 3;
+          notes.push(`${DI_ZHI[zhis[i]]}\u7EDD\u4F4D-3`);
+        }
+      }
+    }
+    if (zhis.length >= 4) {
+      const dz = zhis[2], hz = zhis[3];
+      if (dz === hz) {
+        adj -= 4;
+        notes.push(`${book("\u4EFB\u4ED8\u7EA2\u76F2\u6D3E")}\u65E5\u65F6\u76F8\u540C'\u60A3'\u81EA\u635F-4`);
+      }
+      for (const [a, b] of pairs) {
+        if (dz === a && hz === b || dz === b && hz === a) {
+          adj -= 3;
+          notes.push(`\u65E5\u65F6\u51B2\u6218'\u60A3'-3`);
+          break;
+        }
+      }
+    }
+    return { adj, notes };
+  }
+  function detectSpecial(dmEl, gans, zhis, zhiGans) {
+    let same = 0, opp = 0;
+    for (let i = 0; i < gans.length; i++) {
+      if (i === 2) continue;
+      const e = GAN_WU_XING[gans[i]];
+      if (e === dmEl || SHENG[dmEl] === e) same++;
+      else opp++;
+    }
+    for (let i = 0; i < zhis.length; i++) {
+      const hg = HIDDEN_SCORE[zhis[i]] || [];
+      for (const [g] of hg) {
+        const e = GAN_WU_XING[g];
+        if (e === dmEl || SHENG[dmEl] === e) same++;
+        else if (KE[dmEl] === e || SHENG[e] === dmEl) opp++;
+      }
+    }
+    if (same >= opp * 3 && opp <= 2) return { is: true, type: "\u4E13\u65FA", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\u5168\u5C40\u65E5\u4E3B\u4E00\u6C14${same}\u540C/${opp}\u5F02,\u4E13\u65FA\u683C` };
+    if (opp >= same * 3 && same <= 2) return { is: true, type: "\u4ECE\u683C", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\u65E5\u4E3B\u65E0\u65E0\u52A9${opp}\u5F02/${same}\u540C,\u4ECE\u683C` };
+    return { is: false, type: "\u666E\u901A", note: `${book("\u5B50\u5E73\u771F\u8BE0")}\u52BF\u529B\u5747\u8861\u666E\u901A\u683C\u5C40` };
+  }
+  function getTongGuanFn(totals2) {
+    const r = [];
+    const pairs = [["\u91D1", "\u6728"], ["\u6C34", "\u706B"], ["\u706B", "\u91D1"], ["\u6728", "\u571F"], ["\u571F", "\u6C34"]];
+    for (const [a, b] of pairs) if ((totals2[a] || 0) > 100 && (totals2[b] || 0) > 100) {
+      const tg = TONG_GUAN[a + b];
+      if (tg) r.push(tg);
+    }
+    return r;
   }
   function inferDeities(dayMasterElement, _isStrong, wangShuai, fiveElements, monthZhi, pillars, hiddenStems) {
     const dm = dayMasterElement;
@@ -1449,34 +1618,33 @@ var BaZi = (() => {
     const allGans = pillars?.map((p) => p.gan) ?? [];
     const zhiGans = hiddenStems?.map((h) => h.map((x) => x.gan)) ?? [];
     const mz = monthZhi ?? 0;
-    const totals = { "\u6728": 0, "\u706B": 0, "\u571F": 0, "\u91D1": 0, "\u6C34": 0 };
-    for (let i = 0; i < 5; i++) totals[EL_NAMES[i]] += fiveElements[["wood", "fire", "earth", "metal", "water"][i]] || 0;
-    for (const p of pillars || []) totals[GAN_WU_XING[p.gan]] += 20;
-    for (const grp of hiddenStems || []) for (const h of grp) totals[h.element] += 10;
-    const deLing = evaluateDeLing(dm, mz);
-    const deDi = evaluateDeDi(dmGan, dm, allZhis, zhiGans);
-    const deShi = evaluateDeShi(dm, allGans, allZhis, zhiGans);
-    const rootDet = calcRootScoreDetailed(dmGan, dm, allZhis, zhiGans);
-    const dingTian = evaluateDingTianSui(dm, mz, allZhis);
-    let totalScore = deLing.score + deDi.score + (deShi.sameScore - deShi.oppScore) * 0.3 + dingTian.adjust + rootDet.score * 0.5;
+    const deLing = evalDeLing(dm, mz);
+    const deDi = evalDeDi(dmGan, dm, allZhis);
+    const deShi = evalDeShi(dm, allGans);
+    const staticScore = deLing.score + deDi.score + (deShi.same - deShi.opp) * 0.3;
+    const tianSui = evalTianSui(dm, mz, allZhis);
+    const dz = pillars?.[2]?.zhi ?? 0;
+    const dyn = calcDynAdjust(dmGan, dm, allZhis, allGans, dz);
     const ws = getWangShuai(dm, mz);
-    if (ws === "\u65FA") totalScore += 20;
-    else if (ws === "\u76F8") totalScore += 10;
-    else if (ws === "\u6B7B" || ws === "\u56DA") totalScore -= 10;
+    let wsAdj = 0;
+    if (ws === "\u65FA") wsAdj = 20;
+    else if (ws === "\u76F8") wsAdj = 10;
+    else if (ws === "\u6B7B" || ws === "\u56DA") wsAdj = -10;
+    let totalScore = staticScore + tianSui.adj + wsAdj + dyn.adj;
     const special = detectSpecial(dm, allGans, allZhis, zhiGans);
-    const isSpecial = special.isSpecial;
+    const isSpecial = special.is;
     let strengthLevel;
     if (isSpecial && special.type === "\u4E13\u65FA") strengthLevel = "\u65FA\u6781(\u4ECE\u5F3A)";
     else if (isSpecial && special.type === "\u4ECE\u683C") strengthLevel = "\u5F31\u6781(\u4ECE\u5F31)";
     else if (totalScore >= 80) strengthLevel = "\u592A\u65FA";
-    else if (totalScore >= 40) strengthLevel = "\u504F\u65FA";
-    else if (totalScore >= 0) strengthLevel = "\u4E2D\u548C";
-    else if (totalScore >= -40) strengthLevel = "\u504F\u5F31";
-    else if (totalScore >= -80) strengthLevel = "\u592A\u5F31";
+    else if (totalScore >= 35) strengthLevel = "\u504F\u65FA";
+    else if (totalScore >= -10) strengthLevel = "\u4E2D\u548C";
+    else if (totalScore >= -50) strengthLevel = "\u504F\u5F31";
+    else if (totalScore >= -90) strengthLevel = "\u592A\u5F31";
     else strengthLevel = "\u5F31\u6781(\u4ECE\u5F31)";
     const isStrong = strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA" || strengthLevel === "\u65FA\u6781(\u4ECE\u5F3A)";
     const tiaoHouList = TIAO_HOU[mz] ?? ["\u706B"];
-    const tongGuanList = getTongGuan(totals, dm);
+    const tongGuanList = getTongGuanFn(totals(dm, fiveElements, pillars, hiddenStems));
     const useful = [];
     const harmful = [];
     const steps = [];
@@ -1484,61 +1652,53 @@ var BaZi = (() => {
     for (const t2 of tiaoHouList) {
       if (!useful.includes(t2)) {
         useful.unshift(t2);
-        steps.push(`${book("\u6EF4\u5929\u9AD3\xB7\u5BD2\u6696\u71E5\u6E7F")}\uFF1A${mz >= 10 ? "\u51AC\u5B63" : mz >= 5 ? "\u590F\u5B63" : mz >= 2 ? "\u6625\u5B63" : "\u79CB\u5B63"}\uFF0C\u4F18\u5148\u53D6${t2}\u8C03\u5019`);
+        steps.push(`${book("\u6EF4\u5929\u9AD3\xB7\u5BD2\u6696\u71E5\u6E7F")}\u4F18\u5148\u53D6${t2}\u8C03\u5019`);
       }
     }
     if (isSpecial) {
-      const shen = SHENG[dm], same = dm;
-      const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-      const shenScore = (totals[shen] || 0) + (totals[same] || 0);
-      const keXieHao = (totals[keWo] || 0) + (totals[woKe] || 0) + (totals[woSheng] || 0);
+      const shen = SHENG[dm], same = dm, keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
       if (special.type === "\u4E13\u65FA") {
         useful.push(shen, same);
         harmful.push(keWo, woKe, woSheng);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4E13\u65FA\u683C\uFF0C\u987A\u52BF\u53D6${shen}\u3001${same}\uFF0C\u5FCC\u9006\u5236`);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\u4E13\u65FA\u683C\u987A\u52BF\u53D6${shen}${same}`);
       } else {
-        if ((totals[woKe] || 0) >= (totals[keWo] || 0) && (totals[woKe] || 0) >= (totals[woSheng] || 0)) {
+        if ((totals(dm, fiveElements, pillars, hiddenStems)[woKe] || 0) >= (totals(dm, fiveElements, pillars, hiddenStems)[keWo] || 0)) {
           useful.push(woKe, woSheng);
-          steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4ECE\u8D22\u683C`);
-        } else if ((totals[keWo] || 0) >= (totals[woKe] || 0) && (totals[keWo] || 0) >= (totals[woSheng] || 0)) {
-          useful.push(keWo, woKe);
-          steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4ECE\u5B98\u6740\u683C`);
+          steps.push("\u4ECE\u8D22\u683C");
         } else {
-          useful.push(woSheng, woKe);
-          steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u4ECE\u5316")}\uFF1A\u4ECE\u513F\u683C`);
+          useful.push(keWo, woKe);
+          steps.push("\u4ECE\u5B98\u6740\u683C");
         }
         harmful.push(shen, same);
       }
     }
     if (!isSpecial) {
-      const keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
-      const shen = SHENG[dm], same = dm;
+      const keWo = KE[dm], woSheng = SHENG[dm], shen = SHENG[dm], same = dm;
       if (strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA") {
-        for (const el of [keWo, woSheng, woKe]) if (el && !useful.includes(el)) useful.push(el);
-        for (const el of [shen, same]) if (el && !harmful.includes(el)) harmful.push(el);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u6B63\u5B98/\u8BBA\u98DF\u795E")}\uFF1A\u8EAB${strengthLevel === "\u504F\u65FA" ? "\u504F\u65FA" : "\u592A\u65FA"}\uFF0C\u53D6${keWo}\u5B98\u6740/${woSheng}\u98DF\u4F24/${woKe}\u8D22\u5236\u6CC4`);
+        for (const e of [keWo, woSheng, keWo]) if (e && !useful.includes(e)) useful.push(e);
+        for (const e of [shen, same]) if (e && !harmful.includes(e)) harmful.push(e);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u8EAB${strengthLevel}\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4`);
       } else if (strengthLevel === "\u504F\u5F31" || strengthLevel === "\u592A\u5F31") {
-        for (const el of [shen, same]) if (el && !useful.includes(el)) useful.push(el);
-        for (const el of [keWo, woSheng, woKe]) if (el && !harmful.includes(el)) harmful.push(el);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0\xB7\u8BBA\u5370\u7EF6/\u8BBA\u6BD4\u80A9")}\uFF1A\u8EAB${strengthLevel === "\u504F\u5F31" ? "\u504F\u5F31" : "\u592A\u5F31"}\uFF0C\u53D6${shen}\u5370/${same}\u6BD4\u6276\u52A9`);
-      } else if (strengthLevel === "\u4E2D\u548C") {
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\uFF1A\u65E5\u4E3B\u4E2D\u548C\uFF0C\u968F\u5927\u8FD0\u6D41\u8F6C\uFF0C\u5F53\u524D\u4EE5\u8C03\u5019\u4E3A\u4E3B`);
-      }
-      for (const t2 of tongGuanList) {
-        if (!useful.includes(t2)) useful.push(t2);
-      }
+        for (const e of [shen, same]) if (e && !useful.includes(e)) useful.push(e);
+        for (const e of [keWo, woSheng, keWo]) if (e && !harmful.includes(e)) harmful.push(e);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u8EAB${strengthLevel}\u53D6\u5370\u6BD4\u6276\u52A9`);
+      } else steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u65E5\u4E3B\u4E2D\u548C\u8C03\u5019\u4E3A\u4E3B`);
     }
     for (const e of harmful) {
-      const idx = useful.indexOf(e);
-      if (idx >= 0) useful.splice(idx, 1);
+      const i = useful.indexOf(e);
+      if (i >= 0) useful.splice(i, 1);
     }
     const neutralSet = EL_NAMES.filter((e) => !useful.includes(e) && !harmful.includes(e));
     const bookNotes = [
       `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A${deLing.note}`,
-      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}\uFF1A${deDi.note.join("\uFF1B")}`,
-      deShi.note.join("\uFF1B"),
-      dingTian.note,
+      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}${deDi.notes.join(";")}`,
+      deShi.notes.join(";"),
+      `\u3010\u9759\u6001\u57FA\u7840\u3011${staticScore >= 0 ? "+" : ""}${Math.round(staticScore)}\u5206`,
+      tianSui.note,
+      ...dyn.notes,
+      `\u3010\u52A8\u6001\u4FEE\u6B63\u5408\u8BA1\u3011${dyn.adj >= 0 ? "+" : ""}${dyn.adj}`,
       special.note,
+      `\u3010\u6700\u7EC8\u3011${Math.round(totalScore)}\u5206 ${strengthLevel}`,
       ...steps
     ];
     return {
@@ -1559,16 +1719,11 @@ var BaZi = (() => {
       isSpecialPattern: isSpecial
     };
   }
-  function getTongGuan(totals, dm) {
-    const r = [];
-    const pairs = [["\u91D1", "\u6728"], ["\u6C34", "\u706B"], ["\u706B", "\u91D1"], ["\u6728", "\u571F"], ["\u571F", "\u6C34"]];
-    for (const [a, b] of pairs) {
-      if ((totals[a] || 0) > 100 && (totals[b] || 0) > 100) {
-        const tg = TONG_GUAN[a + b];
-        if (tg) r.push(tg);
-      }
-    }
-    return r;
+  function totals(dm, _fe, pillars, hiddenStems) {
+    const t2 = { "\u6728": 0, "\u706B": 0, "\u571F": 0, "\u91D1": 0, "\u6C34": 0 };
+    for (const p of pillars || []) t2[GAN_WU_XING[p.gan]] += 20;
+    for (const grp of hiddenStems || []) for (const h of grp) t2[h.element] += 10;
+    return t2;
   }
   function analyzeAnnualFortune(annual, dayGan, monthZhi, allPillars, _natalTenGodMap, deityAnalysis, currentFortune) {
     const notes = [];
@@ -1585,8 +1740,8 @@ var BaZi = (() => {
     const branchNotes = [];
     const labels = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
     for (let i = 0; i < zhis.length; i++) {
-      const interactions = calcBranchInteractions([zhis[i], annual.zhi]);
-      for (const it of interactions) {
+      const is = calcBranchInteractions([zhis[i], annual.zhi]);
+      for (const it of is) {
         if (it.type.includes("\u516D\u51B2")) branchNotes.push(`${labels[i]}\u652F${DI_ZHI[zhis[i]]}\u4E0E\u6D41\u5E74${anZhiChar}\u51B2`);
         else if (it.type.includes("\u516D\u5408")) branchNotes.push(`${labels[i]}\u652F${DI_ZHI[zhis[i]]}\u4E0E\u6D41\u5E74${anZhiChar}\u5408`);
         else if (it.type.includes("\u5211")) branchNotes.push(`${labels[i]}\u652F${DI_ZHI[zhis[i]]}\u4E0E\u6D41\u5E74${anZhiChar}\u5211`);
@@ -1605,26 +1760,8 @@ var BaZi = (() => {
     }
     score = Math.max(-5, Math.min(5, score));
     const overall = score >= 3 ? "\u5927\u5409" : score >= 1 ? "\u5409" : score >= -1 ? "\u5E73" : score >= -3 ? "\u51F6" : "\u5927\u51F6";
-    const summaries = {
-      "\u5927\u5409": "\u6D41\u5E74\u5927\u5409\uFF0C\u8BF8\u4E8B\u987A\u9042\uFF0C\u5B9C\u79EF\u6781\u8FDB\u53D6",
-      "\u5409": "\u6D41\u5E74\u5409\u5229\uFF0C\u8FD0\u52BF\u4E0A\u626C\uFF0C\u628A\u63E1\u673A\u4F1A\u53EF\u6709\u6240\u4F5C\u4E3A",
-      "\u5E73": "\u6D41\u5E74\u5E73\u7A33\uFF0C\u6309\u90E8\u5C31\u73ED\uFF0C\u5B9C\u7A33\u4E2D\u6C42\u8FDB",
-      "\u51F6": "\u6D41\u5E74\u4E0D\u5229\uFF0C\u8C28\u8A00\u614E\u884C\uFF0C\u6CE8\u610F\u5065\u5EB7\u4E0E\u4EBA\u9645\u5173\u7CFB",
-      "\u5927\u51F6": "\u6D41\u5E74\u51F6\u9669\uFF0C\u6295\u8D44\u8C28\u614E\uFF0C\u6CE8\u610F\u5B89\u5168\u4E0E\u7EA0\u7EB7"
-    };
-    return {
-      year: annual.year,
-      ganZhi: anGanChar + anZhiChar,
-      dayMasterEffect: `${anGanChar}\u4E3A\u65E5\u4E3B\u4E4B${tgStr}`,
-      ganHe: ganHeNotes,
-      branchInteractions: branchNotes,
-      shenShaActivated: [],
-      tenGodEffect: tgStr,
-      deityEffect: score >= 1 ? "\u7528\u795E\u5E74" : score <= -1 ? "\u5FCC\u795E\u5E74" : "\u5E73",
-      overall,
-      summary: `${summaries[overall]}\uFF08\u8BC4\u5206${score >= 0 ? "+" : ""}${score}\uFF09`,
-      score
-    };
+    const summaries = { "\u5927\u5409": "\u6D41\u5E74\u5927\u5409", "\u5409": "\u6D41\u5E74\u5409\u5229", "\u5E73": "\u6D41\u5E74\u5E73\u7A33", "\u51F6": "\u6D41\u5E74\u4E0D\u5229", "\u5927\u51F6": "\u6D41\u5E74\u51F6\u9669" };
+    return { year: annual.year, ganZhi: anGanChar + anZhiChar, dayMasterEffect: `${anGanChar}\u4E3A\u65E5\u4E3B\u4E4B${tgStr}`, ganHe: ganHeNotes, branchInteractions: branchNotes, shenShaActivated: [], tenGodEffect: tgStr, deityEffect: score >= 1 ? "\u7528\u795E\u5E74" : score <= -1 ? "\u5FCC\u795E\u5E74" : "\u5E73", overall, summary: `${summaries[overall]}(${score >= 0 ? "+" : ""}${score})`, score };
   }
   function calcFortuneYears(ff, birthYear, preciseOffset) {
     const years = [];
@@ -1663,11 +1800,9 @@ var BaZi = (() => {
         else if (isHarmful) color = "#d4735e";
         const yr = [3, 2, 6, 5, 6, 5, 9, 8, 0, 11][ag] || -1;
         const yangRen = yr === az ? "\u7F8A\u5203" : "";
-        const lz = [2, 3, 5, 6, 5, 6, 8, 9, 11, 0][ag];
-        const lu = lz === az ? "\u7984" : "";
-        return { year: y, ganZhi: agC + azC, ganHe, zhiInteraction: zhiInt, shenSha: "", tenGod: tg, fortuneEffect: `${fortuneEff}\u8FD0\u9047${tg}\u5E74`, isUsefulYear: isUseful, color, yangRen, lu, ganHeDetail: ganHe, zhiDetail: zhiInt };
+        return { year: y, ganZhi: agC + azC, ganHe, zhiInteraction: zhiInt, shenSha: "", tenGod: tg, fortuneEffect: `${fortuneEff}\u8FD0\u9047${tg}\u5E74`, isUsefulYear: isUseful, color, yangRen, lu: "", ganHeDetail: ganHe, zhiDetail: zhiInt };
       });
-      return { decade: `${ff.ganName}${ff.zhiName}\u8FD0 (${ff.startAge}-${ff.endAge}\u5C81)`, ageRange: `${ff.startAge}-${ff.endAge}`, pillar: `${ff.ganName}${ff.zhiName}`, direction: ff.direction, annualInteractions: annInteractions };
+      return { decade: `${ff.ganName}${ff.zhiName}\u8FD0(${ff.startAge}-${ff.endAge}\u5C81)`, ageRange: `${ff.startAge}-${ff.endAge}`, pillar: `${ff.ganName}${ff.zhiName}`, direction: ff.direction, annualInteractions: annInteractions };
     });
   }
 
