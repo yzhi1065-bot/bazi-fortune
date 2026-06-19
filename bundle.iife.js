@@ -1530,8 +1530,7 @@ var BaZi = (() => {
         continue;
       }
       for (const [a, b] of pairs) {
-        for (let j = 0; j < zhis.length; j++) {
-          if (i === j) continue;
+        for (let j = i + 1; j < zhis.length; j++) {
           if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
             if (zhis[i] === 4 && zhis[j] === 10 || zhis[i] === 10 && zhis[j] === 4) {
               adj += 4;
@@ -1790,7 +1789,6 @@ var BaZi = (() => {
       ...stemNature.notes,
       ...steps
     ];
-    if (natureNote) bookNotes.push(natureNote);
     return {
       dayMaster: { element: dm, strength: isStrong ? "\u504F\u65FA" : "\u504F\u5F31", level: strengthLevel, isStrong },
       strengthScore: Math.round(totalScore),
