@@ -1260,6 +1260,10 @@ var BaZi = (() => {
   };
   var LU_ZHI = [2, 3, 5, 6, 5, 6, 8, 9, 11, 0];
   var DI_WANG_ZHI = [3, 2, 6, 5, 6, 5, 9, 8, 0, 11];
+  var IS_WET_SOIL = (z) => z === 4 || z === 1;
+  var IS_DRY_SOIL = (z) => z === 10 || z === 7;
+  var IS_GRAVE = (z) => IS_WET_SOIL(z) || IS_DRY_SOIL(z);
+  var GRAVE_ROOT_MULT = { 4: 0.6, 1: 0.6, 10: 0.5, 7: 0.5 };
   function getChangShengIndex(gan, zhi) {
     const arr = CHANG_SHENG_CS[gan] || [];
     for (let i = 0; i < arr.length; i++) if (arr[i] === zhi) return i;
@@ -1307,6 +1311,29 @@ var BaZi = (() => {
       } else if (z === dw) {
         pts = posW[i] * 2;
         desc = "\u7F8A\u5203(\u5F3A\u6839)*2";
+      } else if (IS_GRAVE(z)) {
+        const hg = HIDDEN_SCORE[z] || [];
+        let hasBenQi = false;
+        for (const [g, sc] of hg) {
+          if (g === dmGan) {
+            pts = Math.round(posW[i] * sc * GRAVE_ROOT_MULT[z] / 100);
+            desc = "\u5893\u5E93" + DI_ZHI[z] + (IS_WET_SOIL(z) ? "(\u6E7F\u571F)" : "(\u71E5\u571F)") + (z === 4 ? "\u6C34\u5E93" : z === 1 ? "\u91D1\u5E93" : z === 10 ? "\u706B\u5E93" : "\u6728\u5E93");
+            hasBenQi = true;
+            break;
+          }
+        }
+        if (!hasBenQi) {
+          if ((dmEl === "\u706B" || dmEl === "\u571F") && IS_DRY_SOIL(z)) {
+            pts = Math.round(posW[i] * 0.4);
+            desc = "\u71E5\u571F\u52A9" + dmEl;
+          } else if (dmEl === "\u6C34" && IS_WET_SOIL(z)) {
+            pts = Math.round(posW[i] * 0.3);
+            desc = "\u6E7F\u571F\u52A9\u6C34";
+          } else if (dmEl === "\u91D1" && IS_WET_SOIL(z)) {
+            pts = Math.round(posW[i] * 0.3);
+            desc = "\u6E7F\u571F\u751F\u91D1";
+          }
+        }
       } else {
         const hg = HIDDEN_SCORE[z] || [];
         for (const [g, sc] of hg) {
@@ -1351,18 +1378,41 @@ var BaZi = (() => {
       if (coldDz.includes(z)) cc++;
       if (hotDz.includes(z)) hc++;
     }
+    let wetCount = 0, dryCount = 0;
+    for (const z of zhis) {
+      if (IS_WET_SOIL(z)) wetCount++;
+      if (IS_DRY_SOIL(z)) dryCount++;
+    }
+    let graveNote = "";
+    if (wetCount >= 2) {
+      adj -= 5;
+      graveNote = `\u6E7F\u571F${wetCount}\u91CD(\u8FB0\u4E11)\u52A0\u5267\u5BD2\u6E7F-5`;
+    }
+    if (dryCount >= 2) {
+      adj += 5;
+      graveNote = `\u71E5\u571F${dryCount}\u91CD(\u620C\u672A)\u52A0\u5267\u71E5\u70ED+5`;
+    }
     if (cold.includes(mz)) {
       if (dmEl === "\u706B" || dmEl === "\u571F") adj += 10;
       adj -= cc * 3;
       if (cc >= 3) adj -= 10;
-      return { adj, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u5BD2\u51AC${cc >= 2 ? "\u5BD2\u91CD" : "\u504F\u5BD2"}\u8C03\u5019+${adj}` };
+      if (wetCount >= 2) adj -= 5;
+      let note = `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u5BD2\u51AC${cc >= 2 ? "\u5BD2\u91CD" : "\u504F\u5BD2"}`;
+      if (graveNote) note += "\uFF1B" + graveNote;
+      note += `\u8C03\u5019\u5408\u8BA1${adj}`;
+      return { adj, note };
     }
     if (hot.includes(mz)) {
       if (dmEl === "\u6C34") adj += 8;
       adj -= hc * 2;
       if (hc >= 3) adj -= 8;
-      return { adj, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u708E\u590F${hc >= 2 ? "\u71E5\u70ED" : "\u504F\u70ED"}\u8C03\u5019+${adj}` };
+      if (dryCount >= 2) adj += 5;
+      let note = `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u708E\u590F${hc >= 2 ? "\u71E5\u70ED" : "\u504F\u70ED"}`;
+      if (graveNote) note += "\uFF1B" + graveNote;
+      note += `\u8C03\u5019\u5408\u8BA1${adj}`;
+      return { adj, note };
     }
+    if (graveNote) return { adj, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}${graveNote}` };
     return { adj: 0, note: `${book("\u6EF4\u5929\u9AD3", "\u5BD2\u6696\u71E5\u6E7F")}\u5BD2\u6696\u9002\u4E2D` };
   }
   function calcDynAdjust(dmGan, dmEl, zhis, allGans, dayZhi) {
@@ -1473,6 +1523,32 @@ var BaZi = (() => {
         for (let j = 0; j < zhis.length; j++) {
           if (i === j) continue;
           if (zhis[i] === a && zhis[j] === b || zhis[i] === b && zhis[j] === a) {
+            if (zhis[i] === 4 && zhis[j] === 10 || zhis[i] === 10 && zhis[j] === 4) {
+              adj += 4;
+              notes.push(`${book("\u6EF4\u5929\u9AD3")}\u8FB0\u620C\u51B2\u5F00\u706B\u6C34\u5E93\uFF0C\u85CF\u5E72\u900F\u51FA+4`);
+              if (dmEl === "\u91D1" || dmEl === "\u6C34") {
+                adj -= 3;
+                notes.push(`\u71E5\u571F\u620C\u8106\u91D1\u514B\u6C34-3`);
+              }
+              if (dmEl === "\u706B") {
+                adj += 3;
+                notes.push(`\u71E5\u571F\u620C\u52A9\u706B+3`);
+              }
+              continue;
+            }
+            if (zhis[i] === 1 && zhis[j] === 7 || zhis[i] === 7 && zhis[j] === 1) {
+              adj += 4;
+              notes.push(`${book("\u6EF4\u5929\u9AD3")}\u4E11\u672A\u51B2\u5F00\u6728\u91D1\u5E93\uFF0C\u85CF\u5E72\u900F\u51FA+4`);
+              if (dmEl === "\u91D1") {
+                adj += 2;
+                notes.push(`\u4E11\u91D1\u5E93\u900F\u51FA\u52A9\u91D1+2`);
+              }
+              if (dmEl === "\u6728") {
+                adj += 2;
+                notes.push(`\u672A\u6728\u5E93\u900F\u51FA\u52A9\u6728+2`);
+              }
+              continue;
+            }
             const sRoot = isStrongRoot(zhis[i]), wRoot = isWeakRoot(zhis[j]);
             if (sRoot && !wRoot) {
               adj -= 15;
