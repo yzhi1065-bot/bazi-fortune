@@ -30,13 +30,18 @@ var BaZi = (() => {
     calcAllInteractions: () => calcAllInteractions,
     calcAnnualShenSha: () => calcAnnualShenSha,
     calcBranchInteractions: () => calcBranchInteractions,
+    calcDaYunFuYinFanYin: () => calcDaYunFuYinFanYin,
     calcFiveElementScore: () => calcFiveElementScore,
     calcFortuneWithAnnual: () => calcFortuneWithAnnual,
+    calcFourPillarShenSha: () => calcFourPillarShenSha,
+    calcFuYinFanYin: () => calcFuYinFanYin,
     calcGanTenGods: () => calcGanTenGods,
+    calcLiuNianFuYinFanYin: () => calcLiuNianFuYinFanYin,
     calcNatalWithAnnual: () => calcNatalWithAnnual,
     calcNatalWithFortune: () => calcNatalWithFortune,
     calcShenSha: () => calcShenSha,
     calcShenShaForBranch: () => calcShenShaForBranch,
+    calcSinglePillarShenSha: () => calcSinglePillarShenSha,
     calcTenGod: () => calcTenGod,
     calcZhiTenGods: () => calcZhiTenGods,
     calculateBaZi: () => calculateBaZi,
@@ -277,61 +282,169 @@ var BaZi = (() => {
   }
 
   // src/fortune/great-fortune.ts
+  var JIE_PRECISE = {
+    // 2024
+    "2024/2/4": [16, 27],
+    "2024/3/5": [10, 23],
+    "2024/4/4": [15, 2],
+    "2024/5/5": [8, 10],
+    "2024/6/5": [0, 26],
+    "2024/7/6": [22, 0],
+    "2024/8/7": [8, 9],
+    "2024/9/7": [11, 11],
+    "2024/10/8": [3, 0],
+    "2024/11/7": [6, 20],
+    "2024/12/6": [23, 17],
+    "2025/1/5": [10, 33],
+    // 2025
+    "2025/2/3": [22, 10],
+    "2025/3/5": [16, 7],
+    "2025/4/4": [20, 48],
+    "2025/5/5": [13, 56],
+    "2025/6/5": [5, 9],
+    "2025/7/7": [4, 5],
+    "2025/8/7": [9, 52],
+    "2025/9/7": [12, 12],
+    "2025/10/8": [2, 42],
+    "2025/11/7": [5, 20],
+    "2025/12/7": [6, 30],
+    "2026/1/5": [3, 20],
+    // 2026
+    "2026/2/4": [4, 15],
+    "2026/3/5": [22, 40],
+    "2026/4/5": [3, 40],
+    "2026/5/5": [19, 25],
+    "2026/6/5": [10, 55],
+    "2026/6/21": [1, 0],
+    "2026/7/7": [10, 5],
+    "2026/8/7": [15, 30],
+    "2026/9/7": [17, 55],
+    "2026/10/8": [8, 25],
+    "2026/11/7": [11, 5],
+    "2026/12/7": [12, 20],
+    // 1986 (from shen88.cn)
+    "1986/9/8": [6, 0],
+    "1986/10/8": [22, 0],
+    "1986/11/7": [8, 0],
+    "1986/12/7": [12, 0]
+    // Common approx for other years (use mid-points)
+  };
+  function getJieTime(year, month, day) {
+    const key = year + "/" + month + "/" + day;
+    const p = JIE_PRECISE[key];
+    if (p) return { hour: p[0], minute: p[1] };
+    return { hour: 4, minute: 30 };
+  }
   function calcFortuneDirection(gy, gender) {
     const yang = gy % 2 === 0;
     return yang && gender === "male" || !yang && gender === "female" ? "\u987A\u6392" : "\u9006\u6392";
   }
-  function calcStartAge(year, month, day, dir) {
-    const terms = getSolarTermDays(year, "jie");
-    const birth = new Date(year, month - 1, day);
-    let diff = 0;
-    if (dir.indexOf("\u987A") === 0) {
-      for (let i = 0; i < terms.length; i++) {
-        const tm = Math.floor(terms[i] / 100);
-        const td = terms[i] % 100;
-        const ty = tm >= 2 ? year : year + 1;
-        const termDate = new Date(ty, tm - 1, td);
-        if (termDate > birth) {
-          diff = Math.round((termDate.getTime() - birth.getTime()) / 864e5);
-          break;
-        }
-      }
-      if (diff === 0) {
-        const first = terms[0];
-        const termDate = new Date(year + 1, Math.floor(first / 100) - 1, first % 100);
-        diff = Math.round((termDate.getTime() - birth.getTime()) / 864e5);
-      }
-    } else {
-      let prevDate = null;
-      let prevDiff = Infinity;
-      for (let i = 0; i < terms.length; i++) {
-        const tm = Math.floor(terms[i] / 100);
-        const td = terms[i] % 100;
-        const ty = tm >= 2 ? year : year + 1;
-        const termDate = new Date(ty, tm - 1, td);
-        const d = birth.getTime() - termDate.getTime();
-        if (d > 0 && d < prevDiff) {
-          prevDiff = d;
-          prevDate = termDate;
-        }
-      }
-      if (!prevDate) {
-        const pterms = getSolarTermDays(year - 1, "jie");
-        for (let i = 0; i < pterms.length; i++) {
-          const tm = Math.floor(pterms[i] / 100);
-          const td = pterms[i] % 100;
-          if (tm < 2) continue;
-          const termDate = new Date(year - 1, tm - 1, td);
-          const d = birth.getTime() - termDate.getTime();
-          if (d > 0 && d < prevDiff) {
-            prevDiff = d;
-            prevDate = termDate;
+  function termToFullDate(year, mmdd) {
+    const m = Math.floor(mmdd / 100);
+    const d = mmdd % 100;
+    return { year, month: m, day: d };
+  }
+  function findNextJie(birthYear, birthMonth, birthDay, birthHour, birthMin) {
+    const birthMins = birthHour * 60 + birthMin;
+    for (let y = birthYear; y <= birthYear + 1; y++) {
+      const terms = getSolarTermDays(y, "jie");
+      for (const mmdd of terms) {
+        const { month: m, day: d } = termToFullDate(y, mmdd);
+        if (y === birthYear) {
+          if (m < birthMonth || m === birthMonth && d < birthDay || m === birthMonth && d === birthDay && getJieTime(y, m, d).hour * 60 + getJieTime(y, m, d).minute <= birthMins) {
+            continue;
           }
         }
+        const jt = getJieTime(y, m, d);
+        return { year: y, month: m, day: d, hour: jt.hour, minute: jt.minute };
       }
-      if (prevDate) diff = Math.round(prevDiff / 864e5);
     }
-    return Math.max(0, Math.min(120, Math.floor(diff / 3)));
+    return { year: birthYear + 1, month: 2, day: 4, hour: 4, minute: 30 };
+  }
+  function findPrevJie(birthYear, birthMonth, birthDay, birthHour, birthMin) {
+    const birthMins = birthHour * 60 + birthMin;
+    let best = null;
+    for (let y = birthYear - 1; y <= birthYear; y++) {
+      const terms = getSolarTermDays(y, "jie");
+      for (const mmdd of terms) {
+        const { month: m, day: d } = termToFullDate(y, mmdd);
+        if (y === birthYear) {
+          if (m > birthMonth || m === birthMonth && d > birthDay || m === birthMonth && d === birthDay && getJieTime(y, m, d).hour * 60 + getJieTime(y, m, d).minute >= birthMins) {
+            continue;
+          }
+        }
+        const jt = getJieTime(y, m, d);
+        if (!best || y > best.year || y === best.year && (m > best.month || m === best.month && (d > best.day || d === best.day && jt.hour * 60 + jt.minute > best.hour * 60 + best.minute))) {
+          best = { year: y, month: m, day: d, hour: jt.hour, minute: jt.minute };
+        }
+      }
+    }
+    return best || { year: birthYear, month: 1, day: 6, hour: 5, minute: 0 };
+  }
+  function diffMinutes(a, b) {
+    const da = new Date(a.year, a.month - 1, a.day, a.hour, a.minute).getTime();
+    const db = new Date(b.year, b.month - 1, b.day, b.hour, b.minute).getTime();
+    return Math.round(Math.abs(da - db) / 6e4);
+  }
+  function getJieName(year, month, day) {
+    const terms = getSolarTermDays(year, "jie");
+    const bd = month * 100 + day;
+    let bestIdx = 0, bestDiff = 999;
+    for (let i = 0; i < terms.length; i++) {
+      const d = Math.abs(terms[i] - bd);
+      if (d < bestDiff) {
+        bestDiff = d;
+        bestIdx = i;
+      }
+    }
+    const mmdd = terms[bestIdx];
+    const tm = Math.floor(mmdd / 100);
+    const td = mmdd % 100;
+    if (tm !== month || td !== day) {
+      for (let i = 0; i < terms.length; i++) {
+        if (terms[i] === bd) return getSolarTermName(i);
+      }
+    }
+    return getSolarTermName(bestIdx);
+  }
+  function calcStartAgePrecise(birthYear, birthMonth, birthDay, birthHour, birthMinute, direction) {
+    const target = direction === "\u987A\u6392" ? findNextJie(birthYear, birthMonth, birthDay, birthHour, birthMinute) : findPrevJie(birthYear, birthMonth, birthDay, birthHour, birthMinute);
+    const totalMin = diffMinutes(
+      { year: birthYear, month: birthMonth, day: birthDay, hour: birthHour, minute: birthMinute },
+      target
+    );
+    const YEAR = 4320, MONTH = 360, DAY = 12, SHICHEN = 120;
+    const years = Math.floor(totalMin / YEAR);
+    let rem = totalMin - years * YEAR;
+    const months = Math.floor(rem / MONTH);
+    rem -= months * MONTH;
+    const days = Math.floor(rem / DAY);
+    rem -= days * DAY;
+    const hours = Math.floor(rem / SHICHEN);
+    rem -= hours * SHICHEN;
+    const jiaoYun = new Date(birthYear, birthMonth - 1, birthDay, birthHour, birthMinute + totalMin);
+    const jieName = getJieName(target.year, target.month, target.day);
+    const fmtJie = target.year + "\u5E74" + target.month + "\u6708" + target.day + "\u65E5 " + String(target.hour).padStart(2, "0") + ":" + String(target.minute).padStart(2, "0");
+    const fmtJiao = jiaoYun.getFullYear() + "\u5E74" + (jiaoYun.getMonth() + 1) + "\u6708" + jiaoYun.getDate() + "\u65E5 " + String(jiaoYun.getHours()).padStart(2, "0") + ":" + String(jiaoYun.getMinutes()).padStart(2, "0");
+    return {
+      years,
+      months,
+      days,
+      hours,
+      totalMin,
+      jieName,
+      jieTime: fmtJie,
+      jiaoYunTime: fmtJiao,
+      targetYear: target.year,
+      targetMonth: target.month,
+      targetDay: target.day,
+      targetHour: target.hour,
+      targetMinute: target.minute
+    };
+  }
+  function calcStartAge(year, month, day, dir) {
+    const r = calcStartAgePrecise(year, month, day, 0, 0, dir);
+    return r.years;
   }
   function calcGreatFortunes(sa, mp, dir, dg) {
     const f = [];
@@ -799,126 +912,240 @@ var BaZi = (() => {
   }
 
   // src/shensha.ts
-  var TIAN_YI = {
-    0: [1, 7],
-    4: [1, 7],
-    // 甲戊→丑未
-    1: [0, 8],
-    5: [0, 8],
-    // 乙己→子申
-    2: [11, 9],
-    3: [11, 9],
-    // 丙丁→亥酉
-    6: [2, 6],
-    7: [2, 6],
-    // 庚辛→寅午 (was 6:[1,7] - fixed!)
-    8: [3, 5],
-    9: [3, 5]
-    // 壬癸→卯巳
-  };
-  var TAI_JI = {
-    0: [0, 6],
-    1: [0, 6],
-    2: [9, 3],
-    3: [9, 3],
-    4: [4, 10, 1, 7],
-    5: [4, 10, 1, 7],
-    6: [2, 11],
-    7: [2, 11],
-    8: [5, 8],
-    9: [5, 8]
-  };
-  var YUE_DE = { 2: 2, 6: 2, 10: 2, 3: 0, 7: 0, 11: 0, 0: 8, 4: 8, 8: 8, 1: 6, 5: 6, 9: 6 };
+  var TIAN_GAN_ARR = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+  var DI_ZHI_ARR = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+  var LU2 = { 0: 2, 1: 3, 2: 5, 3: 6, 4: 5, 5: 6, 6: 8, 7: 9, 8: 11, 9: 0 };
+  var TIAN_YI = { 0: [1, 7], 4: [1, 7], 1: [0, 8], 5: [0, 8], 2: [11, 9], 3: [11, 9], 6: [2, 6], 7: [2, 6], 8: [3, 5], 9: [3, 5] };
+  var TAI_JI = { 0: [0, 6], 1: [0, 6], 2: [9, 3], 3: [9, 3], 4: [4, 10, 1, 7], 5: [4, 10, 1, 7], 6: [2, 11], 7: [2, 11], 8: [5, 8], 9: [5, 8] };
+  var TIAN_DE_GAN = { 2: 3, 3: -1, 4: 9, 5: 7, 6: -1, 7: 0, 8: 9, 9: -1, 10: 2, 11: 1, 0: -1, 1: 6 };
+  var TIAN_DE_ZHI = { 3: 7, 6: 11, 9: 2, 0: 5 };
+  var YUE_DE = { 0: 9, 4: 9, 8: 9, 3: 0, 7: 0, 11: 0, 2: 2, 6: 2, 10: 2, 1: 6, 5: 6, 9: 6 };
   var FU_XING = { 0: 2, 2: 2, 4: 2, 6: 2, 8: 2, 1: 8, 3: 8, 5: 8, 7: 8, 9: 8 };
   var WEN_CHANG = { 0: 5, 1: 6, 2: 8, 4: 8, 3: 9, 5: 9, 6: 11, 7: 0, 8: 2, 9: 3 };
-  var TAO_HUA = { 2: 3, 6: 3, 10: 3, 0: 9, 4: 9, 8: 9, 3: 0, 7: 0, 11: 0, 1: 6, 5: 6, 9: 6 };
-  var YI_MA = { 2: 8, 6: 8, 10: 8, 0: 2, 4: 2, 8: 2, 3: 5, 7: 5, 11: 5, 1: 11, 5: 11, 9: 11 };
-  var HONG_YAN = { 0: 6, 1: 8, 2: 2, 3: 7, 4: 4, 5: 4, 6: 10, 7: 9, 8: 0, 9: 3 };
+  var SAN_QI = { 0: [4, 6], 4: [4, 6], 6: [4, 6], 1: [2, 3], 2: [2, 3], 3: [2, 3] };
   var XUE_TANG = { 0: 11, 1: 6, 2: 2, 3: 9, 4: 2, 5: 9, 6: 5, 7: 0, 8: 8, 9: 3 };
-  var HUA_GAI = { 2: 10, 6: 10, 10: 10, 0: 4, 4: 4, 8: 4, 3: 7, 7: 7, 11: 7, 1: 1, 5: 1, 9: 1 };
-  var GU_CHEN = { 0: 2, 1: 2, 11: 2, 2: 5, 3: 5, 4: 5, 5: 8, 6: 8, 7: 8, 8: 11, 9: 11, 10: 11 };
-  var GUA_XIU = { 0: 10, 1: 10, 11: 10, 2: 1, 3: 1, 4: 1, 5: 4, 6: 4, 7: 4, 8: 7, 9: 7, 10: 7 };
-  var TONG_ZI = { 0: [2, 3], 1: [6], 2: [6], 3: [2, 3], 4: [4, 5], 5: [4, 5], 6: [8, 9], 7: [8, 9], 8: [11, 0], 9: [11, 0] };
-  var ZAI_SHA = { 2: 0, 6: 0, 10: 0, 3: 9, 7: 9, 11: 9, 0: 6, 4: 6, 8: 6, 1: 3, 5: 3, 9: 3 };
-  var SANG_MEN = { 0: 2, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10, 9: 11, 10: 0, 11: 1 };
-  var YANG_REN = { 0: 3, 1: 2, 2: 6, 3: 5, 4: 6, 5: 5, 6: 9, 7: 8, 8: 0, 9: 11 };
-  var JIE_SHA = { 2: 11, 6: 11, 10: 11, 0: 5, 4: 5, 8: 5, 3: 8, 7: 8, 11: 8, 1: 2, 5: 2, 9: 2 };
-  var WANG_SHEN = { 2: 5, 6: 5, 10: 5, 0: 11, 4: 11, 8: 11, 3: 2, 7: 2, 11: 2, 1: 8, 5: 8, 9: 8 };
+  var CI_GUAN = { 0: 11, 1: 6, 2: 2, 3: 9, 4: 2, 5: 9, 6: 5, 7: 0, 8: 8, 9: 3 };
   var JIN_YU = { 0: 4, 1: 5, 2: 7, 3: 8, 4: 7, 5: 8, 6: 10, 7: 11, 8: 1, 9: 2 };
-  var TIAN_XI = { 0: 9, 1: 8, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2, 8: 1, 9: 0, 10: 11, 11: 10 };
-  var JIANG_XING = { 2: 6, 6: 6, 10: 6, 0: 0, 4: 0, 8: 0, 3: 3, 7: 3, 11: 3, 1: 9, 5: 9, 9: 9 };
-  function calcShenSha(dg, yg, yz, mz, pillars, monthZhi) {
-    const r = [];
-    const zhis = pillars.map((p) => p.zhi);
-    const gans = pillars.map((p) => p.gan);
-    const push = (name, type) => {
-      if (!r.some((s) => s.name === name)) r.push({ name, type });
+  var HONG_LUAN = { 0: 3, 1: 2, 2: 1, 3: 0, 4: 11, 5: 10, 6: 9, 7: 8, 8: 7, 9: 6, 10: 5, 11: 4 };
+  var TIAN_XI2 = { 0: 9, 1: 8, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2, 8: 1, 9: 0, 10: 11, 11: 10 };
+  var KUI_GANG = /* @__PURE__ */ new Set(["\u620A\u8FB0", "\u5E9A\u8FB0", "\u5E9A\u620C", "\u58EC\u620C"]);
+  var YANG_REN2 = { 0: 3, 1: 2, 2: 6, 3: 5, 4: 6, 5: 5, 6: 9, 7: 8, 8: 0, 9: 11 };
+  var KONG_WANG = [[10, 11], [8, 9], [6, 7], [4, 5], [2, 3], [0, 1]];
+  var ZAI_SHA = { 2: 0, 6: 0, 10: 0, 3: 9, 7: 9, 11: 9, 0: 6, 4: 6, 8: 6, 1: 3, 5: 3, 9: 3 };
+  var JIE_SHA = { 2: 11, 6: 11, 10: 11, 0: 5, 4: 5, 8: 5, 3: 8, 7: 8, 11: 8, 1: 2, 5: 2, 9: 2 };
+  var YIN_YANG_CHA_CUO = /* @__PURE__ */ new Set(["\u4E19\u5B50", "\u4E01\u4E11", "\u620A\u5BC5", "\u8F9B\u536F", "\u58EC\u8FB0", "\u7678\u5DF3", "\u4E19\u5348", "\u4E01\u672A", "\u620A\u7533", "\u8F9B\u9149", "\u58EC\u620C", "\u7678\u4EA5"]);
+  var SHI_E_DA_BAI = /* @__PURE__ */ new Set(["\u7532\u8FB0", "\u4E59\u5DF3", "\u4E19\u7533", "\u4E01\u4EA5", "\u620A\u620C", "\u5DF1\u4E11", "\u5E9A\u8FB0", "\u8F9B\u5DF3", "\u58EC\u7533", "\u7678\u4EA5"]);
+  var SANG_MEN = {};
+  for (let i = 0; i < 12; i++) SANG_MEN[i] = (i + 2) % 12;
+  var DIAO_KE = {};
+  for (let i = 0; i < 12; i++) DIAO_KE[i] = (i + 4) % 12;
+  var BING_FU = {};
+  for (let i = 0; i < 12; i++) BING_FU[i] = (i + 1) % 12;
+  var GOU_JIAO = {};
+  for (let i = 0; i < 12; i++) GOU_JIAO[i] = [(i + 3) % 12, (i - 2 + 12) % 12];
+  var YUAN_CHEN = { 0: 9, 1: 4, 2: 5, 3: 6, 4: 7, 5: 8, 6: 10, 7: 0, 8: 1, 9: 2, 10: 3, 11: 11 };
+  var SI_DA_KONG_WANG = [[6, 7], [4, 5], [2, 3], [0, 1], [10, 11], [8, 9]];
+  var JIE_LU_KONG = { 0: [8, 9], 1: [6, 7], 2: [4, 5], 3: [2, 3], 4: [0, 1], 5: [10, 11], 6: [8, 9], 7: [6, 7], 8: [4, 5], 9: [2, 3] };
+  var GU_LUAN = /* @__PURE__ */ new Set(["\u4E59\u5DF3", "\u4E01\u5DF3", "\u8F9B\u4EA5", "\u620A\u7533", "\u7532\u5BC5", "\u4E19\u5348", "\u620A\u5348", "\u58EC\u5B50"]);
+  var ZI_YI_MAP = { 0: [2], 2: [5], 3: [8], 6: [11], 9: [7], 10: [10], 11: [1] };
+  function calcFourPillarShenSha(pillars, gender, mode = "combined") {
+    const TG2 = TIAN_GAN_ARR, DZ2 = DI_ZHI_ARR;
+    const result = [[], [], [], []];
+    const sets = [/* @__PURE__ */ new Set(), /* @__PURE__ */ new Set(), /* @__PURE__ */ new Set(), /* @__PURE__ */ new Set()];
+    const gans = pillars.map((p) => p.gan), zhis = pillars.map((p) => p.zhi);
+    const dg = gans[2], dz = zhis[2], yg = gans[0], yz = zhis[0], mz = zhis[1];
+    const push = (col, nm, ty, src) => {
+      if (!sets[col].has(nm)) {
+        sets[col].add(nm);
+        result[col].push({ name: nm, type: ty, source: src });
+      }
     };
-    const ty = TIAN_YI[dg] ?? [];
-    if (ty.some((z) => zhis.includes(z))) push("\u5929\u4E59\u8D35\u4EBA", "\u5409");
-    const tj = TAI_JI[dg] ?? [];
-    if (tj.some((z) => zhis.includes(z))) push("\u592A\u6781\u8D35\u4EBA", "\u5409");
-    const mzM = monthZhi ?? pillars[1].zhi;
-    const ydGan = YUE_DE[mzM];
-    if (ydGan !== void 0 && gans.some((g) => g === ydGan)) push("\u6708\u5FB7\u8D35\u4EBA", "\u5409");
-    if (dg % 2 === 0 && zhis.some((z) => [0, 6, 3, 9].includes(z))) push("\u5FB7\u79C0\u8D35\u4EBA", "\u5409");
-    if (FU_XING[yg] !== void 0 && zhis.includes(FU_XING[yg])) push("\u798F\u661F\u8D35\u4EBA", "\u5409");
-    if (zhis.includes(WEN_CHANG[dg] ?? -1)) push("\u6587\u660C\u8D35\u4EBA", "\u5409");
-    if (zhis.includes(TAO_HUA[yz] ?? -1)) push("\u6843\u82B1", "\u4E2D\u6027");
-    if (zhis.includes(YI_MA[yz] ?? -1)) push("\u9A7F\u9A6C", "\u4E2D\u6027");
-    if (zhis.includes(HONG_YAN[dg] ?? -1)) push("\u7EA2\u8273\u715E", "\u4E2D\u6027");
-    if (zhis.includes(XUE_TANG[yg] ?? -1)) push("\u5B66\u5802", "\u5409");
-    if (zhis.includes(HUA_GAI[yz] ?? -1)) push("\u534E\u76D6", "\u4E2D\u6027");
-    if (zhis.includes(GU_CHEN[yz] ?? -1)) push("\u5B64\u8FB0", "\u51F6");
-    if (zhis.includes(GUA_XIU[yz] ?? -1)) push("\u5BE1\u5BBF", "\u51F6");
-    const tz = TONG_ZI[dg] ?? [];
-    if (tz.some((z) => zhis.includes(z))) push("\u7AE5\u5B50\u715E", "\u51F6");
-    if (zhis.includes(ZAI_SHA[yz] ?? -1)) push("\u707E\u715E", "\u51F6");
-    if (zhis.includes(SANG_MEN[yz] ?? -1)) push("\u4E27\u95E8", "\u51F6");
-    if (zhis.includes(YANG_REN[dg] ?? -1)) push("\u7F8A\u5203", "\u51F6");
-    if (zhis.includes(JIE_SHA[yz] ?? -1)) push("\u52AB\u715E", "\u51F6");
-    if (zhis.includes(WANG_SHEN[yz] ?? -1)) push("\u4EA1\u795E", "\u51F6");
-    if (zhis.includes(JIN_YU[dg] ?? -1)) push("\u91D1\u8206", "\u5409");
-    if (zhis.includes(TIAN_XI[yz] ?? -1)) push("\u5929\u559C", "\u5409");
-    if (zhis.includes(JIANG_XING[yz] ?? -1)) push("\u5C06\u661F", "\u5409");
+    const lz = LU2[dg];
+    if (lz != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === lz) push(i, "\u7984\u795E", "\u5409", "\u5171\u7528");
+    }
+    for (const sg of [dg, yg]) {
+      const ty = TIAN_YI[sg] || [];
+      for (let i = 0; i < 4; i++) if (ty.includes(zhis[i])) push(i, "\u5929\u4E59\u8D35\u4EBA" + (sg === dg ? "(\u65E5\u5E72)" : "(\u5E74\u5E72)"), "\u5409", "\u5171\u7528");
+    }
+    const tdG = TIAN_DE_GAN[mz];
+    if (tdG !== void 0) {
+      if (tdG < 0) {
+        const tz = TIAN_DE_ZHI[mz];
+        if (tz != null) {
+          for (let i = 0; i < 4; i++) if (zhis[i] === tz) push(i, "\u5929\u5FB7\u8D35\u4EBA", "\u5409", "\u5171\u7528");
+        }
+      } else for (let i = 0; i < 4; i++) if (gans[i] === tdG) push(i, "\u5929\u5FB7\u8D35\u4EBA", "\u5409", "\u5171\u7528");
+    }
+    if (YUE_DE[mz] != null) {
+      for (let i = 0; i < 4; i++) if (gans[i] === YUE_DE[mz]) push(i, "\u6708\u5FB7\u8D35\u4EBA", "\u5409", "\u5171\u7528");
+    }
+    const tj = TAI_JI[dg] || [];
+    for (let i = 0; i < 4; i++) if (tj.includes(zhis[i])) push(i, "\u592A\u6781\u8D35\u4EBA", "\u5409", "\u5171\u7528");
+    if (WEN_CHANG[dg] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === WEN_CHANG[dg]) push(i, "\u6587\u660C\u8D35\u4EBA", "\u5409", "\u4F20\u7EDF");
+    }
+    if (FU_XING[yg] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === FU_XING[yg]) push(i, "\u798F\u661F\u8D35\u4EBA", "\u5409", "\u5171\u7528");
+    }
+    const sq = SAN_QI[dg] || [];
+    for (let i = 0; i < 4; i++) if (sq.includes(zhis[i])) push(i, "\u4E09\u5947\u8D35\u4EBA", "\u5409", "\u4F20\u7EDF");
+    if (XUE_TANG[yg] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === XUE_TANG[yg]) push(i, "\u5B66\u5802", "\u5409", "\u4F20\u7EDF");
+    }
+    if (CI_GUAN[yg] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === CI_GUAN[yg]) push(i, "\u8BCD\u9986", "\u5409", "\u4F20\u7EDF");
+    }
+    if (JIN_YU[dg] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === JIN_YU[dg]) push(i, "\u91D1\u8206\u8D35\u4EBA", "\u5409", "\u4F20\u7EDF");
+    }
+    for (const sz of [yz, dz]) {
+      const ma = { 0: 2, 4: 2, 8: 2, 3: 5, 7: 5, 11: 5, 2: 8, 6: 8, 10: 8, 1: 11, 5: 11, 9: 11 }[sz];
+      if (ma != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === ma) push(i, "\u9A7F\u9A6C", "\u4E2D\u6027", "\u5171\u7528");
+      }
+    }
+    for (const sz of [yz, dz]) {
+      const th = { 0: 9, 4: 9, 8: 9, 3: 0, 7: 0, 11: 0, 2: 3, 6: 3, 10: 3, 1: 6, 5: 6, 9: 6 }[sz];
+      if (th != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === th) {
+          push(i, sz === 10 && zhis[i] === 3 ? "\u5899\u5916\u6843\u82B1" : "\u54B8\u6C60\u6843\u82B1", "\u4E2D\u6027", "\u5171\u7528");
+        }
+      }
+    }
+    for (const sz of [yz, dz]) {
+      const hg = { 0: 4, 4: 4, 8: 4, 3: 7, 7: 7, 11: 7, 2: 10, 6: 10, 10: 10, 1: 1, 5: 1, 9: 1 }[sz];
+      if (hg != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === hg) push(i, "\u534E\u76D6", "\u4E2D\u6027", "\u5171\u7528");
+      }
+    }
+    for (const sz of [yz, dz]) {
+      const jx = { 0: 0, 4: 0, 8: 0, 3: 3, 7: 3, 11: 3, 2: 6, 6: 6, 10: 6, 1: 9, 5: 9, 9: 9 }[sz];
+      if (jx != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === jx) push(i, "\u5C06\u661F", "\u4E2D\u6027", "\u4F20\u7EDF");
+      }
+    }
+    const xi = Math.floor((dz - (dg - dg % 2) + 24) % 12 / 2);
+    const kw = KONG_WANG[xi] || [];
+    for (let i = 0; i < 4; i++) if (kw.includes(zhis[i])) push(i, "\u7A7A\u4EA1", "\u51F6", "\u5171\u7528");
+    if (KUI_GANG.has(TG2[dg] + DZ2[dz])) push(2, "\u9B41\u7F61", "\u4E2D\u6027", "\u4F20\u7EDF");
+    if (HONG_LUAN[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === HONG_LUAN[yz]) push(i, "\u7EA2\u9E3E", "\u4E2D\u6027", "\u4F20\u7EDF");
+    }
+    if (TIAN_XI2[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === TIAN_XI2[yz]) push(i, "\u5929\u559C", "\u4E2D\u6027", "\u4F20\u7EDF");
+    }
+    const yr = YANG_REN2[dg];
+    if (yr != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === yr) push(i, "\u7F8A\u5203", "\u51F6", "\u5171\u7528");
+    }
+    for (const sz of [yz, dz]) {
+      const ws = { 0: 11, 4: 11, 8: 11, 3: 2, 7: 2, 11: 2, 2: 5, 6: 5, 10: 5, 1: 8, 5: 8, 9: 8 }[sz];
+      if (ws != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === ws) push(i, "\u4EA1\u795E", "\u51F6", "\u5171\u7528");
+      }
+    }
+    if (ZAI_SHA[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === ZAI_SHA[yz]) push(i, "\u707E\u715E", "\u51F6", "\u4F20\u7EDF");
+    }
+    if (JIE_SHA[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === JIE_SHA[yz]) push(i, "\u52AB\u715E", "\u51F6", "\u4F20\u7EDF");
+    }
+    for (const sz of [yz, dz]) {
+      const gc = { 0: 5, 4: 5, 8: 5, 3: 8, 7: 8, 11: 8, 2: 11, 6: 11, 10: 11, 1: 2, 5: 2, 9: 2 }[sz];
+      const gx = { 0: 2, 4: 2, 8: 2, 3: 5, 7: 5, 11: 5, 2: 8, 6: 8, 10: 8, 1: 11, 5: 11, 9: 11 }[sz];
+      if (gc != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === gc) push(i, "\u5B64\u8FB0", "\u51F6", "\u5171\u7528");
+      }
+      if (gx != null) {
+        for (let i = 0; i < 4; i++) if (zhis[i] === gx) push(i, "\u5BE1\u5BBF", "\u51F6", "\u5171\u7528");
+      }
+    }
+    if (YIN_YANG_CHA_CUO.has(TG2[dg] + DZ2[dz])) push(2, "\u9634\u9633\u5DEE\u9519", "\u51F6", "\u76F2\u6D3E");
+    if (SHI_E_DA_BAI.has(TG2[dg] + DZ2[dz])) push(2, "\u5341\u6076\u5927\u8D25", "\u51F6", "\u76F2\u6D3E");
+    const isYangYear = yg % 2 === 0, isMale = gender === "male";
+    const forward = isYangYear && isMale || !isYangYear && !isMale;
+    const gou = forward ? (yz + 3) % 12 : (yz - 3 + 12) % 12, jiao = forward ? (yz - 2 + 12) % 12 : (yz + 2) % 12;
+    for (let i = 0; i < 4; i++) {
+      if (zhis[i] === gou) push(i, "\u52FE\u715E", "\u51F6", "\u76F2\u6D3E");
+      if (zhis[i] === jiao) push(i, "\u7EDE\u715E", "\u51F6", "\u76F2\u6D3E");
+    }
+    if (YUAN_CHEN[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === YUAN_CHEN[yz]) push(i, "\u5143\u8FB0(\u5927\u8017)", "\u51F6", "\u4F20\u7EDF");
+    }
+    if (yz === 10 || yz === 11) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === 10 || zhis[i] === 11) push(i, "\u5929\u7F57", "\u51F6", "\u4F20\u7EDF");
+    }
+    if (yz === 4 || yz === 5) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === 4 || zhis[i] === 5) push(i, "\u5730\u7F51", "\u51F6", "\u4F20\u7EDF");
+    }
+    if (SANG_MEN[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === SANG_MEN[yz]) push(i, "\u4E27\u95E8", "\u51F6", "\u76F2\u6D3E");
+    }
+    if (DIAO_KE[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === DIAO_KE[yz]) push(i, "\u540A\u5BA2", "\u51F6", "\u76F2\u6D3E");
+    }
+    if (BING_FU[yz] != null) {
+      for (let i = 0; i < 4; i++) if (zhis[i] === BING_FU[yz]) push(i, "\u75C5\u7B26", "\u51F6", "\u76F2\u6D3E");
+    }
+    if (mode === "ren" || mode === "combined") {
+      const sdkw = SI_DA_KONG_WANG[xi] || [];
+      for (let i = 0; i < 4; i++) if (sdkw.includes(zhis[i])) push(i, "\u56DB\u5927\u7A7A\u4EA1", "\u51F6", "\u76F2\u6D3E");
+      for (let i = 0; i < 4; i++) if ((JIE_LU_KONG[gans[i]] || []).includes(zhis[i])) push(i, "\u622A\u8DEF\u7A7A\u4EA1", "\u51F6", "\u76F2\u6D3E");
+      if (GU_LUAN.has(TG2[dg] + DZ2[dz])) push(2, "\u5B64\u9E3E\u715E", "\u51F6", "\u76F2\u6D3E");
+      for (let i = 0; i < 4; i++) if ((ZI_YI_MAP[yz] || []).includes(zhis[i])) push(i, "\u81EA\u7F22\u715E", "\u51F6", "\u76F2\u6D3E");
+    }
+    return result;
+  }
+  function calcFuYinFanYin(pillars) {
+    const r = [];
+    const g = pillars.map((p) => p.gan), z = pillars.map((p) => p.zhi), n = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
+    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+      if (g[i] === g[j] && z[i] === z[j]) r.push({ type: "\u4F0F\u541F", pillarA: i, pillarB: j, desc: n[i] + "\u67F1\u4E0E" + n[j] + "\u67F1\u4F0F\u541F" });
+      if ((g[i] + g[j]) % 10 === 0 && (z[i] + z[j]) % 12 === 0) r.push({ type: "\u53CD\u541F", pillarA: i, pillarB: j, desc: n[i] + "\u67F1\u4E0E" + n[j] + "\u67F1\u53CD\u541F" });
+    }
     return r;
   }
-  function calcShenShaForBranch(dg, yg, yz, zhi, mz) {
+  function calcDaYunFuYinFanYin(yuanJu, dyGan, dyZhi) {
     const r = [];
-    const push = (n, t2) => {
-      r.push({ name: n, type: t2 });
-    };
-    if ((TIAN_YI[dg] ?? []).includes(zhi)) push("\u5929\u4E59\u8D35\u4EBA", "\u5409");
-    if ((TAI_JI[dg] ?? []).includes(zhi)) push("\u592A\u6781\u8D35\u4EBA", "\u5409");
-    if (WEN_CHANG[dg] === zhi) push("\u6587\u660C\u8D35\u4EBA", "\u5409");
-    if (TAO_HUA[yz] === zhi) push("\u6843\u82B1", "\u4E2D\u6027");
-    if (YI_MA[yz] === zhi) push("\u9A7F\u9A6C", "\u4E2D\u6027");
-    if (HUA_GAI[yz] === zhi) push("\u534E\u76D6", "\u4E2D\u6027");
-    if (JIANG_XING[yz] === zhi) push("\u5C06\u661F", "\u5409");
-    if (JIE_SHA[yz] === zhi) push("\u52AB\u715E", "\u51F6");
-    if (WANG_SHEN[yz] === zhi) push("\u4EA1\u795E", "\u51F6");
-    if (JIN_YU[dg] === zhi) push("\u91D1\u8206", "\u5409");
-    if (TIAN_XI[yz] === zhi) push("\u5929\u559C", "\u5409");
-    if (HONG_YAN[dg] === zhi) push("\u7EA2\u8273\u715E", "\u4E2D\u6027");
-    if (XUE_TANG[yg] === zhi) push("\u5B66\u5802", "\u5409");
-    if (FU_XING[yg] === zhi) push("\u798F\u661F\u8D35\u4EBA", "\u5409");
-    if (GU_CHEN[yz] === zhi) push("\u5B64\u8FB0", "\u51F6");
-    if (GUA_XIU[yz] === zhi) push("\u5BE1\u5BBF", "\u51F6");
-    if (ZAI_SHA[yz] === zhi) push("\u707E\u715E", "\u51F6");
-    if (SANG_MEN[yz] === zhi) push("\u4E27\u95E8", "\u51F6");
-    if (YANG_REN[dg] === zhi) push("\u7F8A\u5203", "\u51F6");
-    if ((TAI_JI[dg] ?? []).includes(zhi) && !["\u5929\u4E59\u8D35\u4EBA", "\u6587\u660C\u8D35\u4EBA"].includes("")) push("\u592A\u6781\u8D35\u4EBA", "\u5409");
-    const myz = mz ?? 0;
-    const ydGan = YUE_DE[myz];
-    if (ydGan !== void 0 && zhi === ydGan) {
+    const n = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
+    for (let i = 0; i < 4; i++) {
+      if (yuanJu[i].gan === dyGan && yuanJu[i].zhi === dyZhi) r.push({ type: "\u4F0F\u541F", pillarA: i, pillarB: -1, desc: n[i] + "\u67F1\u4E0E\u5927\u8FD0\u4F0F\u541F" });
+      if ((yuanJu[i].gan + dyGan) % 10 === 0 && (yuanJu[i].zhi + dyZhi) % 12 === 0) r.push({ type: "\u53CD\u541F", pillarA: i, pillarB: -1, desc: n[i] + "\u67F1\u4E0E\u5927\u8FD0\u53CD\u541F" });
     }
-    if (dg % 2 === 0 && [0, 6, 3, 9].includes(zhi)) push("\u5FB7\u79C0\u8D35\u4EBA", "\u5409");
-    const tz = TONG_ZI[dg] ?? [];
-    if (tz.includes(zhi)) push("\u7AE5\u5B50\u715E", "\u51F6");
+    return r;
+  }
+  function calcLiuNianFuYinFanYin(yuanJu, yGan, yZhi) {
+    return calcDaYunFuYinFanYin(yuanJu, yGan, yZhi);
+  }
+  function calcSinglePillarShenSha(dg, yg, yz, mz, tGan, tZhi, gender, mode = "combined") {
+    const fp = [{ gan: yg, zhi: yz }, { gan: 0, zhi: mz }, { gan: dg, zhi: 0 }, { gan: tGan, zhi: tZhi }];
+    return calcFourPillarShenSha(fp, gender, mode)[3] || [];
+  }
+  function calcShenSha(dg, yg, yz, mz, pillars, monthZhi, gender) {
+    const all = [];
+    const set = /* @__PURE__ */ new Set();
+    const pp = calcFourPillarShenSha(pillars, gender || "male", "combined");
+    for (const col of pp) for (const s of col) if (!set.has(s.name)) {
+      set.add(s.name);
+      all.push(s);
+    }
+    return all;
+  }
+  function calcShenShaForBranch(dg, yg, yz, zhi, mz) {
+    const fp = [{ gan: yg || 0, zhi: yz || 0 }, { gan: 0, zhi: mz ?? 0 }, { gan: dg || 0, zhi: 0 }, { gan: 0, zhi: zhi || 0 }];
+    const r = [];
+    const set = /* @__PURE__ */ new Set();
+    for (const s of calcFourPillarShenSha(fp, "male", "combined")[3] || []) {
+      if (!set.has(s.name)) {
+        set.add(s.name);
+        r.push(s);
+      }
+    }
     return r;
   }
   function calcAnnualShenSha(dg, yg, yz, anZhi) {
-    return calcShenShaForBranch(dg, yg, yz, anZhi);
+    return calcShenShaForBranch(dg, yg, yz, anZhi, 0);
   }
 
   // src/wangshuai.ts
@@ -1262,14 +1489,17 @@ var BaZi = (() => {
       score
     };
   }
-  function calcFortuneYears(ff, birthYear) {
+  function calcFortuneYears(ff, birthYear, preciseOffset) {
     const years = [];
-    for (let y = ff.startAge + birthYear; y <= ff.endAge + birthYear; y++) years.push(y);
+    const shift = preciseOffset !== void 0 && preciseOffset > 3 ? 1 : 0;
+    const startY = ff.startAge + birthYear + shift;
+    const endY = ff.endAge + birthYear + shift;
+    for (let y = startY; y <= endY; y++) years.push(y);
     return years;
   }
-  function analyzeFortuneInteractions(greatFortunes, currentYear, dayGan, allPillars, birthYear, deityAnalysis) {
+  function analyzeFortuneInteractions(greatFortunes, currentYear, dayGan, allPillars, birthYear, deityAnalysis, preciseMonths) {
     return greatFortunes.map((ff) => {
-      const years = calcFortuneYears(ff, birthYear);
+      const years = calcFortuneYears(ff, birthYear, preciseMonths);
       const annInteractions = years.map((y) => {
         const ag = ((y - 4) % 10 + 10) % 10, az = ((y - 4) % 12 + 12) % 12;
         const agC = TIAN_GAN[ag], azC = DI_ZHI[az];
@@ -1471,6 +1701,12 @@ var BaZi = (() => {
     const zhiGods = calcZhiTenGods(dp.gan, pillars);
     const dir = calcFortuneDirection(yp.gan, input.gender);
     const sa = calcStartAge(input.year, input.month, input.day, dir);
+    let preciseMonths = 0;
+    try {
+      const p = calcStartAgePrecise(input.year, input.month, input.day, input.hour || 0, input.minute || 0, dir);
+      preciseMonths = p.months;
+    } catch (e) {
+    }
     const gf = calcGreatFortunes(sa, mp, dir, dp.gan);
     const cy = (/* @__PURE__ */ new Date()).getFullYear();
     const af = calcAnnualFortune(cy, dp.gan);
@@ -1489,7 +1725,7 @@ var BaZi = (() => {
     const deityAnalysis = inferDeities(dm.element, wuXingAnalysis.dayMaster.isStrong, wuXingAnalysis.wangShuai, fe, mp.zhi, pillars, hsWithGod);
     const curFf = gf.find((ff) => cy - input.year >= ff.startAge && cy - input.year <= ff.endAge);
     const annualDetail = analyzeAnnualFortune(af, dp.gan, mp.zhi, pillars, {}, deityAnalysis, curFf);
-    const fortuneInteraction = analyzeFortuneInteractions(gf, cy, dp.gan, pillars, input.year, deityAnalysis);
+    const fortuneInteraction = analyzeFortuneInteractions(gf, cy, dp.gan, pillars, input.year, deityAnalysis, preciseMonths);
     const solarTermNote = getSolarTermName(termIdx);
     return {
       input,
