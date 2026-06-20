@@ -338,7 +338,38 @@ if(_fyf2&&_fyf2.length){
 if(r.interactions.length){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'干支关系':'Int')+'</div><div style=font-size:11px;color:#9a8a7a>'+r.interactions.map(function(it){return'<span class=tag>'+it.description+'</span>'}).join('')+'</div></div>';}
 if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')+'</div>';
   h+='<div class=wg>'+wse.map(function(e){var ws=WXS.wangShuai[e];return'<div'+(e===WXS.dayMaster.element?' class=hl':'')+'><div style=font-weight:600;color:'+WS_COLOR[e]+'>'+e+'</div><div style=font-size:10px;color:'+(WC[ws]||'#786a5e')+'>'+ws+'</div><div style=font-size:9px;color:#5a4a3a>'+WXS.weights[e].toFixed(1)+'</div></div>'}).join('')+'</div></div>';}
-  if(WXS||DA){h+='<div class=fc><div class=ft style=cursor:pointer onclick=toggleAnalysis()>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
+  if(WXS||DA){  // 格局名称——子平真诠藏干透干算法
+  var geMap={'正官':'正官格','七杀':'七杀格','正财':'正财格','偏财':'偏财格',
+    '食神':'食神格','伤官':'伤官格','正印':'正印格','偏印':'偏印格',
+    '比肩':'建禄格','劫财':'羊刃格'};
+  var geName='普通格局';
+  var geTrace='';
+  try{
+    if(r.hiddenStems&&r.hiddenStems[1]&&r.pillars&&r.pillars.year){
+      var _hs=r.hiddenStems[1];
+      var _stems=[TG_ARR[r.pillars.year.gan],TG_ARR[r.pillars.month.gan],TG_ARR[r.pillars.day.gan],TG_ARR[r.pillars.hour.gan]];
+      var _gIdx=r.pillars.day.gan;
+      var _found=null;
+      var _tt='';
+      for(var _i=0;_i<_hs.length;_i++){
+        var _n=_hs[_i].ganName;
+        if(_stems.indexOf(_n)>=0){_found=_hs[_i];_tt=_n;break}
+      }
+      if(!_found&&_hs[0]){_found=_hs[0];_tt=_hs[0].ganName+'不透'}
+      if(_found){
+        var _a=Math.floor(_gIdx/2), _b=Math.floor(_found.gan/2);
+        var _r=((_b-_a)%5+5)%5;
+        var _sy=(_gIdx%2)!==(_found.gan%2);
+        var tgMap=[['劫财','比肩'],['伤官','食神'],['正财','偏财'],['正官','七杀'],['正印','偏印']];
+        var _pg=tgMap[_r][_sy?0:1];
+        geName=geMap[_pg]||'普通格局';
+        geTrace=_tt+'→'+_pg;
+      }
+    }
+  }catch(_e){console.log('ge_err',_e)}
+  if(geName){
+    h+='<div class=fc><div class=ft>格局定形</div><div style=font-size:12px;color:#c4a265;font-weight:600>'+geName+'</div><div style=font-size:10px;color:#887a6e;margin-top:2px>- '+geTrace+'</div></div>';
+  }  // 分析h+='<div class=fc><div class=ft style=cursor:pointer onclick=toggleAnalysis()>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
   if(WXS)h+='<span style=color:#c4a265>'+(LOCALE==='cn'?'日主：':'DM:')+'</span>'+WXS.dayMaster.element+(WXS.dayMaster.isStrong?'['+(LOCALE==='cn'?'身强':'S')+']':'['+(LOCALE==='cn'?'身弱':'W')+']')+' | '+wse.map(function(e){return'<span style=color:'+WS_COLOR[e]+'>'+e+':'+WXS.wangShuai[e]+'</span>'}).join(' ');
   if(DA)h+='<div style=font-size:11px;color:#9a8a7a;line-height:1.7><span style=color:#4a9c6f>'+(LOCALE==='cn'?'用神：':'Use:')+'</span>'+DA.usefulDeities.join('、')+' <span style=color:#d4735e>'+(LOCALE==='cn'?'忌神：':'Harm:')+'</span>'+DA.harmfulDeities.join('、')+'</div>';
   h+='<div style=display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;font-size:9px;color:#887a6e>';
@@ -346,7 +377,17 @@ if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')
   h+='<span style=color:#6abf6a>喜神：'+(DA.secondaryUseful&&DA.secondaryUseful.length?DA.secondaryUseful.join('/'):DA.usefulDeities.slice(2).join('/')||'无')+'</span>';
   h+='<span style=color:#d4735e>忌神：'+(DA.harmfulMain?DA.harmfulMain.join('/'):DA.harmfulDeities.slice(0,2).join('/'))+'</span>';
   h+='<span style=color:#5a4a3a>闲神：'+(DA.neutralDeities&&DA.neutralDeities.length?DA.neutralDeities.join('/'):'无')+'</span>';
-  h+='</div>'
+ 
+  // 取用溯源
+  if(DA&&geName&&geName!=='普通格局'){
+    var _pn2=geName||'普通格局';
+    var _st=WXS.dayMaster.isStrong?'身强':'身弱';
+    var _us=DA.usefulDeities?DA.usefulDeities.join('/'):'';
+    var _ill=WXS.dayMaster.isStrong?'日主偏旺，当以克泄耗为药':'日主偏弱不能承载格局';
+    var _tr='【取用逻辑溯源说明】\n1、《子平真诠》格局主线推导：本局'+_pn2+'，'+_ill+'，核心药为'+_us+'，为本命取用根本依据\n2、《三命通会》旺衰平衡参考推导：日主'+_st+'，扶抑论推出'+_us+'，两套结论合意';
+    h+='<div style=font-size:10px;color:#5a4a3a;line-height:1.6;margin-top:4px;padding-top:4px;border-top:1px solid rgba(180,140,100,.06);white-space:pre>'+_tr+'</div>';
+  }
+ h+='</div>'
   if(DA.strategy){
     h+='<div id=ax_body style=display:none>';var _s=DA.strategy;
     var _p1end=_s.indexOf('【动态');if(_p1end<0)_p1end=_s.indexOf('【最终');if(_p1end<0)_p1end=_s.length;

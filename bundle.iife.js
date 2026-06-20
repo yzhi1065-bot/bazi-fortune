@@ -1756,11 +1756,11 @@ var BaZi = (() => {
       if (strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA") {
         for (const e of [keWo, woSheng, keWo]) if (e && !useful.includes(e)) useful.push(e);
         for (const e of [shen, same]) if (e && !harmful.includes(e)) harmful.push(e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u8EAB${strengthLevel}\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4\u4E3A\u836F`);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40\u8EAB${strengthLevel}\uFF0C\u75C5\u5728\u65E5\u4E3B\u8FC7\u65FA\uFF0C\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4\u4E3A\u836F`);
       } else if (strengthLevel === "\u504F\u5F31" || strengthLevel === "\u592A\u5F31") {
         for (const e of [shen, same]) if (e && !useful.includes(e)) useful.push(e);
         for (const e of [keWo, woSheng, keWo]) if (e && !harmful.includes(e)) harmful.push(e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u8EAB${strengthLevel}\u53D6\u5370\u6BD4\u6276\u52A9\u4E3A\u836F`);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40\u8EAB${strengthLevel}\uFF0C\u75C5\u5728\u65E5\u4E3B\u8FC7\u5F31\uFF0C\u53D6\u5370\u6BD4\u6276\u52A9\u4E3A\u836F`);
       } else steps.push(`\u65E5\u4E3B\u4E2D\u548C\u8C03\u5019\u4E3A\u4E3B`);
     }
     for (const e of harmful) {
