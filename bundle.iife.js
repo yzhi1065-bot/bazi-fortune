@@ -2066,61 +2066,62 @@ var BaZi = (() => {
     var patName = patternResult ? patternResult.name : "";
     var patGroup = patternResult ? patternResult.group : "";
     if (patName) {
-      steps.push("\u3010\u683C\u5C40\u75C5\u836F\u5B9A\u7528\u795E\u3011\u672C\u5C40" + patName);
+      steps.push("\u672C\u5C40" + patName);
       useful = [];
       harmful = [];
     }
-    for (const t2 of tongGuanList) if (!useful.includes(t2)) useful.push(t2);
+    for (const t2 of tongGuanList) if (t2 && !useful.includes(t2)) useful.push(t2);
     for (const t2 of tiaoHouList) {
-      if (!useful.includes(t2)) {
+      if (t2 && !useful.includes(t2)) {
         useful.push(t2);
-        steps.push(`\u683C\u5C40\u5185\u8C03\u5019\u53D6${t2}`);
+        steps.push("\u683C\u5C40\u5185\u8C03\u5019\u53D6" + t2);
       }
     }
     if (isSpecial) {
-      const shen = SHENG2[dm], same = dm, keWo = KE2[dm], woSheng = SHENG2[dm], woKe = KE2[dm];
+      const shen = SHENG2[dm], same = dm, keWo = KE2[dm];
+      const woKe = KE2[dm], woSheng = SHENG2[dm];
       if (special.type === "\u4E13\u65FA") {
-        for (const _e of [shen, same]) if (!useful.includes(_e)) useful.push(_e);
-        for (const _e of [keWo, woKe, woSheng]) if (!harmful.includes(_e)) harmful.push(_e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\u4E13\u65FA\u683C\u987A\u52BF\u53D6${shen}${same}`);
+        for (const _e of [shen, same]) if (_e && !useful.includes(_e)) useful.push(_e);
+        for (const _e of [keWo, woKe, woSheng]) if (_e && !harmful.includes(_e)) harmful.push(_e);
+        steps.push("\u4E13\u65FA\u683C\u987A\u52BF\u53D6" + shen + same);
       } else {
-        for (const _e of [woKe, woSheng]) if (!useful.includes(_e)) useful.push(_e);
-        for (const _e of [shen, same]) if (!harmful.includes(_e)) harmful.push(_e);
+        for (const _e of [woKe, woSheng]) if (_e && !useful.includes(_e)) useful.push(_e);
+        for (const _e of [shen, same]) if (_e && !harmful.includes(_e)) harmful.push(_e);
         steps.push("\u4ECE\u683C\u987A\u52BF\u53D6\u7528");
       }
-      steps.push("\uFF08\u7279\u6B8A\u683C\u5C40>\u6B63\u7EDF\u516B\u683C\uFF09");
+      steps.push("\u3010\u7279\u6B8A\u683C\u5C40>\u6B63\u7EDF\u516B\u683C\u3011");
     } else if (patGroup === "\u6B63\u7EDF\u516B\u683C" && patName) {
       var _shen = SHENG2[dm], _ke = KE2[dm], _woSheng = SHENG2[dm];
       if (["\u6B63\u5B98\u683C", "\u6B63\u8D22\u683C", "\u504F\u8D22\u683C", "\u6B63\u5370\u683C", "\u98DF\u795E\u683C"].includes(patName)) {
         if (patName === "\u6B63\u5B98\u683C") {
-          for (const _e of [_ke, _woSheng]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [_shen, KE2[_shen]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [_ke, _woSheng]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [_shen, KE2[_shen]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u6B63\u5B98\u683C\u987A\u7528\uFF1A\u559C\u8D22\u751F\u5B98\u3001\u5370\u62A4\u5B98\uFF1B\u5FCC\u4F24\u5B98\u514B\u5B98\u3001\u5B98\u6740\u6DF7\u6742");
         } else if (patName === "\u6B63\u8D22\u683C" || patName === "\u504F\u8D22\u683C") {
-          for (const _e of [_woSheng, SHENG2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [dm, KE2[_shen]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [_woSheng, SHENG2[_ke]]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [dm, KE2[_shen]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u8D22\u683C\u987A\u7528\uFF1A\u559C\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u62A4\u8D22\uFF1B\u5FCC\u6BD4\u52AB\u593A\u8D22");
         } else if (patName === "\u6B63\u5370\u683C") {
-          for (const _e of [KE2[dm], dm]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [SHENG2[_ke]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [KE2[dm], dm]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [SHENG2[_ke]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u5370\u683C\u987A\u7528\uFF1A\u559C\u5B98\u6740\u751F\u5370\u3001\u6BD4\u52AB\u62A4\u5370\uFF1B\u5FCC\u8D22\u661F\u7834\u5370");
         } else if (patName === "\u98DF\u795E\u683C") {
-          for (const _e of [_ke, SHENG2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [KE2[SHENG2[dm]]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [_ke, SHENG2[_ke]]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[SHENG2[dm]]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u98DF\u795E\u683C\u987A\u7528\uFF1A\u559C\u98DF\u795E\u751F\u8D22\uFF1B\u5FCC\u67AD\u795E\u593A\u98DF");
         }
       } else {
         if (patName === "\u4E03\u6740\u683C") {
-          for (const _e of [_woSheng, KE2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [_ke, KE2[_woSheng]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [_woSheng, KE2[_ke]]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [_ke, KE2[_woSheng]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u4E03\u6740\u683C\u9006\u7528\uFF1A\u559C\u98DF\u795E\u5236\u6740\u3001\u5370\u5316\u6740\uFF1B\u5FCC\u8D22\u6ECB\u6740\u3001\u65E0\u5236\u653B\u8EAB");
         } else if (patName === "\u4F24\u5B98\u683C") {
-          for (const _e of [_ke, _shen]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [KE2[_woSheng]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [_ke, _shen]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[_woSheng]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u4F24\u5B98\u683C\u9006\u7528\uFF1A\u559C\u4F24\u5B98\u751F\u8D22\u3001\u5370\u5236\u4F24\uFF1B\u5FCC\u4F24\u5B98\u89C1\u5B98");
         } else if (patName === "\u504F\u5370\u683C") {
-          for (const _e of [SHENG2[_ke], _woSheng]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [KE2[_shen]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [SHENG2[_ke], _woSheng]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[_shen]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u504F\u5370\u683C\u9006\u7528\uFF1A\u559C\u504F\u8D22\u5236\u8861\u3001\u98DF\u795E\u6CC4\u5370\uFF1B\u5FCC\u504F\u5370\u593A\u98DF");
         }
       }
@@ -2128,17 +2129,17 @@ var BaZi = (() => {
     } else if (patGroup === "\u7984\u5203\u5916\u683C") {
       if (patName === "\u5EFA\u7984\u683C") {
         if (isStrong) {
-          for (const _e of [KE2[dm], _woSheng, SHENG2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [dm, SHENG2[dm]]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [KE2[dm], _woSheng, SHENG2[_ke]]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [dm, SHENG2[dm]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u5EFA\u7984\u683C\u8EAB\u65FA\uFF1A\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4\u4E3A\u836F");
         } else {
-          for (const _e of [SHENG2[dm], dm]) if (!useful.includes(_e)) useful.push(_e);
-          for (const _e of [KE2[dm], _woSheng]) if (!harmful.includes(_e)) harmful.push(_e);
+          for (const _e of [SHENG2[dm], dm]) if (_e && !useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[dm], _woSheng]) if (_e && !harmful.includes(_e)) harmful.push(_e);
           steps.push("\u5EFA\u7984\u683C\u8EAB\u5F31\uFF1A\u53D6\u5370\u6BD4\u6276\u52A9\u4E3A\u836F");
         }
       } else {
-        for (const _e of [KE2[dm], _woSheng]) if (!useful.includes(_e)) useful.push(_e);
-        for (const _e of [dm, SHENG2[dm]]) if (!harmful.includes(_e)) harmful.push(_e);
+        for (const _e of [KE2[dm], _woSheng]) if (_e && !useful.includes(_e)) useful.push(_e);
+        for (const _e of [dm, SHENG2[dm]]) if (_e && !harmful.includes(_e)) harmful.push(_e);
         steps.push("\u7F8A\u5203\u683C\uFF1A\u9996\u9009\u5B98\u6740\u9A7E\u5203\uFF0C\u6B21\u98DF\u4F24\u6CC4\u79C0");
       }
     } else {
@@ -2159,12 +2160,19 @@ var BaZi = (() => {
     }
     const neutralSet = EL_NAMES2.filter((e) => !useful.includes(e) && !harmful.includes(e));
     if (harmful.length === 0 && neutralSet.length > 0) harmful.push(neutralSet[0]);
-    const _s1 = "\u3010\u4E00\u3001\u9759\u6001\u529B\u91CF\u7EDF\u8BA1\uFF08\u4E09\u547D\u901A\u4F1A\uFF09\u3011\n" + deLing.note + "\n" + deDi.notes.join(";") + "\n" + deShi.notes.join(";") + "\n\u539F\u59CB\u529B\u91CF\u53C2\u8003\uFF1A" + strengthLevel + "\n\u5F97\u4EE4" + deLing.score + "\u5206/\u5F97\u5730" + deDi.score + "\u5206/\u5F97\u52BF" + (deShi.same - deShi.opp) * 0.3 + "\u5206";
-    const _s2 = "\u3010\u4E8C\u3001\u6838\u5FC3\u51B3\u7B56\uFF1A\u683C\u5C40\u75C5\u836F\u5B9A\u7528\u795E\uFF08\u5B50\u5E73\u771F\u8BE0\uFF09\u3011\n\u672C\u5C40\u5B9A\u683C\uFF1A" + patName + "\u3010" + patGroup + "\u3011\n" + steps.join("\n") + "\n\u683C\u5C40\u54C1\u7EA7\uFF1A" + special.note;
-    const _s3 = "\u3010\u4E09\u3001\u6EF4\u5929\u9AD3\u52A8\u6001\u4FEE\u6B63\u3011\n" + tianSui.note + "\n" + dyn.notes.join("\n") + "\n\u52A8\u6001\u4FEE\u6B63\u5408\u8BA1\uFF1A" + (dyn.adj >= 0 ? "+" : "") + dyn.adj;
-    let _s4 = "\u3010\u56DB\u3001\u7A77\u901A\u5B9D\u9274\u65E5\u5E72\u6821\u6B63+\u56DB\u795E\u5B9A\u7A3F\u3011\n" + (stemNature.notes.length ? stemNature.notes.join("\n") : "(\u65E0\u51B2\u7A81)");
-    _s4 += "\n\u7B2C\u4E00\u6838\u5FC3\u7528\u795E\uFF1A" + useful.slice(0, 2).join("/") + "\n\u8F85\u52A9\u559C\u795E\uFF1A" + (useful.slice(2).length ? useful.slice(2).join("/") : "\u65E0") + "\n\u5934\u53F7\u5FCC\u795E\uFF1A" + (harmful.length ? harmful.slice(0, 2).join("/") : "\u65E0") + "\n\u4E2D\u6027\u95F2\u795E\uFF1A" + (neutralSet.length ? neutralSet.join("/") : "\u65E0");
-    const bookNotes = [_s1, _s2, _s3, _s4];
+    const bookNotes = [
+      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A${deLing.note}`,
+      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}${deDi.notes.join(";")}`,
+      deShi.notes.join(";"),
+      `\u3010\u9759\u6001\u57FA\u7840\u3011${staticScore >= 0 ? "+" : ""}${Math.round(staticScore)}\u5206`,
+      tianSui.note,
+      ...dyn.notes,
+      `\u3010\u52A8\u6001\u4FEE\u6B63\u5408\u8BA1\u3011${dyn.adj >= 0 ? "+" : ""}${dyn.adj}`,
+      special.note,
+      `\u3010\u6700\u7EC8\u3011${Math.round(totalScore)}\u5206 ${strengthLevel}`,
+      ...stemNature.notes,
+      ...steps
+    ];
     return {
       dayMaster: { element: dm, strength: isStrong ? "\u504F\u65FA" : "\u504F\u5F31", level: strengthLevel, isStrong },
       strengthScore: Math.round(totalScore),
