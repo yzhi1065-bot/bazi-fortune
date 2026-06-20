@@ -1735,8 +1735,8 @@ var BaZi = (() => {
     for (const t2 of tongGuanList) useful.push(t2);
     for (const t2 of tiaoHouList) {
       if (!useful.includes(t2)) {
-        useful.unshift(t2);
-        steps.push(`${book("\u6EF4\u5929\u9AD3\xB7\u5BD2\u6696\u71E5\u6E7F")}\u4F18\u5148\u53D6${t2}\u8C03\u5019`);
+        useful.push(t2);
+        steps.push(`${book("\u6EF4\u5929\u9AD3\xB7\u5BD2\u6696\u71E5\u6E7F")}\u683C\u5C40\u6846\u67B6\u5185\u53D6${t2}\u8C03\u5019\u8F85\u52A9`);
       }
     }
     if (isSpecial) {
@@ -1756,11 +1756,11 @@ var BaZi = (() => {
       if (strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA") {
         for (const e of [keWo, woSheng, keWo]) if (e && !useful.includes(e)) useful.push(e);
         for (const e of [shen, same]) if (e && !harmful.includes(e)) harmful.push(e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u8EAB${strengthLevel}\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4`);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40\u8EAB${strengthLevel}\uFF0C\u75C5\u5728\u65E5\u4E3B\u8FC7\u65FA\uFF0C\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4\u4E3A\u836F`);
       } else if (strengthLevel === "\u504F\u5F31" || strengthLevel === "\u592A\u5F31") {
         for (const e of [shen, same]) if (e && !useful.includes(e)) useful.push(e);
         for (const e of [keWo, woSheng, keWo]) if (e && !harmful.includes(e)) harmful.push(e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u8EAB${strengthLevel}\u53D6\u5370\u6BD4\u6276\u52A9`);
+        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40\u8EAB${strengthLevel}\uFF0C\u75C5\u5728\u65E5\u4E3B\u8FC7\u5F31\uFF0C\u53D6\u5370\u6BD4\u6276\u52A9\u4E3A\u836F`);
       } else steps.push(`\u65E5\u4E3B\u4E2D\u548C\u8C03\u5019\u4E3A\u4E3B`);
     }
     for (const e of harmful) {
@@ -1780,6 +1780,7 @@ var BaZi = (() => {
       `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A${deLing.note}`,
       `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}${deDi.notes.join(";")}`,
       deShi.notes.join(";"),
+      `${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40`,
       `\u3010\u9759\u6001\u57FA\u7840\u3011${staticScore >= 0 ? "+" : ""}${Math.round(staticScore)}\u5206`,
       tianSui.note,
       ...dyn.notes,
