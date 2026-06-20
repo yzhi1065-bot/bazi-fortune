@@ -191,11 +191,12 @@ var BaZi = (() => {
     const gan = (WU_SHU[dayGan] ?? WU_SHU[0])[zhi];
     return { gan, zhi, ganName: TIAN_GAN[gan], zhiName: DI_ZHI[zhi] };
   }
-  function calcHourPillarRenFuHong(dayGan, hour, isLateZi) {
+  function calcHourPillarRenFuHong(dayGan, hour, isLateZi, nextDayGan) {
     const zhi = 0;
     let gan;
     if (isLateZi) {
-      gan = ((WU_SHU[dayGan] ?? WU_SHU[0])[0] + 1) % 10;
+      var _g = nextDayGan !== void 0 ? nextDayGan : (dayGan + 1) % 10;
+      gan = (WU_SHU[_g] ?? WU_SHU[0])[0];
     } else {
       gan = (WU_SHU[dayGan] ?? WU_SHU[0])[0];
     }
@@ -2472,10 +2473,12 @@ var BaZi = (() => {
     var _useRFH = input.useRenFuHongZi === true;
     if (isZiHour(hour)) {
       if (_useRFH) {
-        _ziMode = "\u4EFB\u4ED8\u7EA2\u65E9\u665A\u5B50\u6392\u76D8";
+        _ziMode = "\u65E9\u665A\u5B50\u6392\u76D8";
         if (isLateZiHour(hour)) {
           _ziType = "\u665A\u5B50\u65F6";
-          _hp = calcHourPillarRenFuHong(_dp.gan, hour, true);
+          var _ndNext = new Date(input.year, input.month - 1, input.day + 1);
+          var _nextDp = calcDayPillar(_ndNext.getFullYear(), _ndNext.getMonth() + 1, _ndNext.getDate());
+          _hp = calcHourPillarRenFuHong(_dp.gan, hour, true, _nextDp.gan);
         } else {
           _ziType = "\u65E9\u5B50\u65F6";
           var _nd = new Date(input.year, input.month - 1, input.day + 1);
