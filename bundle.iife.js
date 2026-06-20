@@ -22,6 +22,7 @@ var BaZi = (() => {
   var src_exports = {};
   __export(src_exports, {
     DI_ZHI: () => DI_ZHI,
+    FIVE_ELEMENT_MED: () => FIVE_ELEMENT_MED,
     GAN_WU_XING: () => GAN_WU_XING,
     MONTH_ZHI_FROM_TERM: () => MONTH_ZHI_FROM_TERM,
     SHENG_XIAO: () => SHENG_XIAO,
@@ -1545,32 +1546,36 @@ var BaZi = (() => {
   }
 
   // src/constitution.ts
-  var SEASON_MAP = {
-    0: "\u51AC",
-    // 子
-    1: "\u51AC",
-    // 丑
-    2: "\u6625",
-    // 寅
-    3: "\u6625",
-    // 卯
-    4: "\u6625",
-    // 辰
-    5: "\u590F",
-    // 巳
-    6: "\u590F",
-    // 午
-    7: "\u590F",
-    // 未
-    8: "\u79CB",
-    // 申
-    9: "\u79CB",
-    // 酉
-    10: "\u79CB",
-    // 戌
-    11: "\u51AC"
-    // 亥
-  };
+  function getSeason(mz, day) {
+    const halfMap = {
+      4: { first: "\u6625", second: "\u5B63", splitDay: 20 },
+      // 辰月(清明) 20日前后为界
+      7: { first: "\u590F", second: "\u5B63", splitDay: 23 },
+      // 未月(小暑) 23日前后为界
+      10: { first: "\u79CB", second: "\u5B63", splitDay: 23 },
+      // 戌月(寒露) 23日前后为界
+      1: { first: "\u51AC", second: "\u5B63", splitDay: 20 }
+      // 丑月(小寒) 20日前后为界
+    };
+    if (day !== void 0 && halfMap[mz]) {
+      return day <= halfMap[mz].splitDay ? halfMap[mz].first : halfMap[mz].second;
+    }
+    const simple = {
+      0: "\u51AC",
+      1: "\u51AC",
+      2: "\u6625",
+      3: "\u6625",
+      4: "\u6625",
+      5: "\u590F",
+      6: "\u590F",
+      7: "\u590F",
+      8: "\u79CB",
+      9: "\u79CB",
+      10: "\u79CB",
+      11: "\u51AC"
+    };
+    return simple[mz] || "\u5B63";
+  }
   var ELEMENT_MAP = {
     0: "\u6728",
     // 甲
@@ -1593,8 +1598,31 @@ var BaZi = (() => {
     9: "\u5BD2"
     // 癸
   };
-  function getKey(mz, dg) {
-    return SEASON_MAP[mz] + ELEMENT_MAP[dg];
+  var ELEMENT_GODS = {
+    "\u6728": { match: ["\u6C34", "\u6728"], avoid: ["\u91D1", "\u71E5"], illness: "\u809D\u80C6\u75BE\u60A3\u3001\u76EE\u75BE\u3001\u7B4B\u8109\u62D8\u631B\u3001\u98CE\u8BC1\u3001\u9AD8\u8840\u538B" },
+    "\u706B": { match: ["\u6728", "\u706B"], avoid: ["\u6C34", "\u5BD2"], illness: "\u5FC3\u8111\u8840\u7BA1\u75BE\u75C5\u3001\u53E3\u820C\u751F\u75AE\u3001\u5931\u7720\u3001\u8840\u70ED\u8BC1" },
+    "\u6E7F": { match: ["\u706B", "\u571F"], avoid: ["\u6728", "\u98CE"], illness: "\u813E\u80C3\u8FD0\u5316\u5931\u5E38\u3001\u6E7F\u8BC1\u3001\u6C34\u80BF\u3001\u5E26\u4E0B\u3001\u75F0\u996E" },
+    "\u71E5": { match: ["\u571F", "\u91D1"], avoid: ["\u706B", "\u70ED"], illness: "\u80BA\u7CFB\u75C5\u8BC1\u3001\u76AE\u80A4\u5E72\u88C2\u3001\u4FBF\u79D8\u3001\u54B3\u5598\u3001\u9F3B\u8844" },
+    "\u5BD2": { match: ["\u91D1", "\u6C34"], avoid: ["\u571F", "\u6E7F"], illness: "\u80BE\u865A\u5BD2\u8BC1\u3001\u8170\u819D\u51B7\u75DB\u3001\u6C34\u80BF\u3001\u754F\u5BD2\u3001\u9633\u75FF" }
+  };
+  function getDefaultMatchGod(el) {
+    return ELEMENT_GODS[el]?.match || [];
+  }
+  function getDefaultAvoidGod(el) {
+    return ELEMENT_GODS[el]?.avoid || [];
+  }
+  function getDefaultIllness(el) {
+    return ELEMENT_GODS[el]?.illness || "";
+  }
+  var FIVE_ELEMENT_MED = {
+    "\u6728": { zang: "\u809D", fu: "\u80C6", wei: "\u9178", color: "\u9752/\u7EFF", season: "\u6625" },
+    "\u706B": { zang: "\u5FC3", fu: "\u5C0F\u80A0", wei: "\u82E6", color: "\u8D64/\u7EA2", season: "\u590F" },
+    "\u571F": { zang: "\u813E", fu: "\u80C3", wei: "\u7518", color: "\u9EC4", season: "\u957F\u590F(\u5B63)" },
+    "\u91D1": { zang: "\u80BA", fu: "\u5927\u80A0", wei: "\u8F9B", color: "\u767D", season: "\u79CB" },
+    "\u6C34": { zang: "\u80BE", fu: "\u8180\u80F1", wei: "\u54B8", color: "\u9ED1/\u84DD", season: "\u51AC" }
+  };
+  function getKey(mz, dg, day) {
+    return getSeason(mz, day) + ELEMENT_MAP[dg];
   }
   var constitutionMap = {
     "\u51AC\u5BD2": {
@@ -1798,14 +1826,18 @@ var BaZi = (() => {
       healthAction: "1\u953B\u70BC\u65B9\u5F0F\u5B9C\u5BFC\u5F15\uFF0C\u9002\u91CF\u62C9\u7B4B\u3001\u6162\u8DD1\u7B49\uFF1B\u4E0D\u5B9C\u9759\u5750\u3001\u547C\u5438\u5410\u7EB3\u3002\n2\u8C03\u7406\u8EAB\u4F53\u53EF\u9002\u5EA6\u827E\u7078\u3001\u706B\u7597\u3001\u6C57\u84B8\u7B49\uFF1B\u53EF\u6E29\u70ED\u6027\u6C64\u5242\uFF0C\u4E0D\u5B9C\u9488\u3002\n"
     }
   };
-  function determineConstitution(monthZhi, dayGan) {
-    const key = getKey(monthZhi, dayGan);
+  function determineConstitution(monthZhi, dayGan, day) {
+    const key = getKey(monthZhi, dayGan, day);
     const item = constitutionMap[key];
     if (!item) return null;
+    const el = ELEMENT_MAP[dayGan];
     return {
       ...item,
-      season: SEASON_MAP[monthZhi],
-      masterFive: ELEMENT_MAP[dayGan]
+      season: getSeason(monthZhi, day),
+      masterFive: el,
+      matchGod: getDefaultMatchGod(el),
+      avoidGod: getDefaultAvoidGod(el),
+      illnessTip: getDefaultIllness(el)
     };
   }
   function getConstitutionName(monthZhi, dayGan) {
@@ -2489,15 +2521,16 @@ var BaZi = (() => {
     _s5 += "\n\u539F\u5C40\u6001\u52BF\uFF1A" + strengthLevel + "\uFF08" + Math.round(totalScore) + "\u5206\uFF09";
     _s5 += "\n\uFF08\u6CE8\uFF1A\u672C\u6BB5\u5F85\u8865\u5145\u8BE6\u7EC6\u505A\u529F\u5206\u6790\u4E0E\u5C81\u8FD0\u5E94\u671F\uFF09";
     const bookNotes = [_s1, _s2, _s3, _s4];
-    var _cx = determineConstitution(mz, dmGan);
+    var _cx = determineConstitution(mz, dmGan, allZhis && allZhis.length > 2 ? allZhis[2] : void 0);
     if (_cx) {
       var _s6 = "\n\n\u7B2C\u516D\u6BB5\uFF1A\u5148\u5929\u7980\u8D4B\u4F53\u8D28\u4E13\u9879\u5206\u6790\uFF08\u300A\u5185\u7ECF\u300B\u5E72\u652F\u7980\u8D4B\u5BF9\u5E94\uFF09\n";
       _s6 += "1\u3001\u5148\u5929\u7980\u8D4B\u5206\u578B\uFF1A\u3010" + _cx.name + "\u3011\n";
       _s6 += "2\u3001\u4F53\u8D28\u6838\u5FC3\u75C5\u673A\uFF1A" + _cx.pathogenesis + "\n";
-      _s6 += "3\u3001\u60C5\u5FD7\u8C03\u517B\u5EFA\u8BAE\uFF1A" + _cx.emotion + "\n";
-      _s6 += "4\u3001\u996E\u98DF\u5B9C\u5FCC\u65B9\u6848\uFF1A" + _cx.diet + "\n";
-      _s6 += "5\u3001\u5C45\u4F4F\u73AF\u5883\u8C03\u6574\u6307\u5357\uFF1A" + _cx.environment + "\n";
-      _s6 += "6\u3001\u8FD0\u52A8\u3001\u7406\u7597\u5B9C\u5FCC\u8BF4\u660E\uFF1A" + _cx.healthAction + "\n";
+      _s6 += "3\u3001\u6613\u611F\u810F\u8151\u75C5\u75C7\uFF1A" + _cx.illnessTip + "\n";
+      _s6 += "4\u3001\u60C5\u5FD7\u8C03\u517B\u5EFA\u8BAE\uFF1A" + _cx.emotion + "\n";
+      _s6 += "5\u3001\u996E\u98DF\u5B9C\u5FCC\u65B9\u6848\uFF1A" + _cx.diet + "\n";
+      _s6 += "6\u3001\u5C45\u4F4F\u73AF\u5883\u8C03\u6574\u6307\u5357\uFF1A" + _cx.environment + "\n";
+      _s6 += "7\u3001\u8FD0\u52A8\u3001\u7406\u7597\u5B9C\u5FCC\u8BF4\u660E\uFF1A" + _cx.healthAction + "\n";
       bookNotes.push(_s6);
     }
     return {
