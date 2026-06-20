@@ -144,6 +144,37 @@ function setCity(){var s=document.getElementById('city');if(!s)return;var o=s.op
 function toggleTs(){var cb=document.getElementById('ts');var f=document.getElementById('ts_fields');if(cb&&f)f.style.display=cb.checked?'flex':'none'}
 
 
+
+var _manualPattern=null;
+var _patternList=null;
+function showPatternSelect(){
+  try{
+    _patternList=BaZi.getAllPatterns();
+    var h='<div class=mk id=mk_pattern onclick="if(event.target===this)closeMk()"><div class=mk-c><div class=ft>手动选格<span style=float:right;cursor:pointer;font-size:16px onclick=closeMk()>✕</span></div>';
+    for(var gi=0;gi<_patternList.length;gi++){
+      h+='<div style=font-size:10px;color:#c4a265;margin:6px 0 3px>'+_patternList[gi].group+'</div>';
+      for(var ni=0;ni<_patternList[gi].names.length;ni++){
+        var n=_patternList[gi].names[ni];
+        var sel=(_manualPattern===n)?' style=background:rgba(196,162,101,.15);border-color:rgba(196,162,101,.4)':'';
+        h+='<div class=tag style=cursor:pointer;margin:2px;display:inline-block'+sel+' onclick=selPatIdx('+gi+','+ni+')>'+n+'</div>';
+      }
+    }
+    h+='<div style=margin-top:8px;display:flex;gap:5px><button class=btn-s style=flex:1;background:rgba(74,156,111,.15);color:#6abf6a onclick=applyPattern()>确定应用</button><button class=btn-s style=flex:1;background:rgba(255,255,255,.04);color:#887a6e onclick=clearPattern()>清除手动</button></div>';
+    h+='</div></div>';document.body.insertAdjacentHTML('beforeend',h);
+  }catch(e){}
+}
+function selPatIdx(gi,ni){
+  if(!_patternList||!_patternList[gi])return;
+  window._patternSelection=_patternList[gi].names[ni];
+  var els=document.querySelectorAll('#mk_pattern .tag');
+  for(var i=0;i<els.length;i++){
+    var isSel=els[i].textContent===window._patternSelection;
+    els[i].style.background=isSel?'rgba(196,162,101,.15)':'';
+    els[i].style.borderColor=isSel?'rgba(196,162,101,.4)':'';
+  }
+}
+function applyPattern(){if(window._patternSelection){_manualPattern=window._patternSelection;closeMk();render()}else{closeMk()}}
+function clearPattern(){_manualPattern=null;closeMk();render()}
 function toggleAnalysis(){var e=document.getElementById('ax_body');if(e)e.style.display=(e.style.display==='none'||e.style.display==='')?'block':'none';}
 
 function openAIDetail(id){
@@ -338,38 +369,18 @@ if(_fyf2&&_fyf2.length){
 if(r.interactions.length){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'干支关系':'Int')+'</div><div style=font-size:11px;color:#9a8a7a>'+r.interactions.map(function(it){return'<span class=tag>'+it.description+'</span>'}).join('')+'</div></div>';}
 if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')+'</div>';
   h+='<div class=wg>'+wse.map(function(e){var ws=WXS.wangShuai[e];return'<div'+(e===WXS.dayMaster.element?' class=hl':'')+'><div style=font-weight:600;color:'+WS_COLOR[e]+'>'+e+'</div><div style=font-size:10px;color:'+(WC[ws]||'#786a5e')+'>'+ws+'</div><div style=font-size:9px;color:#5a4a3a>'+WXS.weights[e].toFixed(1)+'</div></div>'}).join('')+'</div></div>';}
-  if(WXS||DA){  // 格局名称——子平真诠藏干透干算法
-  var geMap={'正官':'正官格','七杀':'七杀格','正财':'正财格','偏财':'偏财格',
-    '食神':'食神格','伤官':'伤官格','正印':'正印格','偏印':'偏印格',
-    '比肩':'建禄格','劫财':'羊刃格'};
-  var geName='普通格局';
-  var geTrace='';
-  try{
-    if(r.hiddenStems&&r.hiddenStems[1]&&r.pillars&&r.pillars.year){
-      var _hs=r.hiddenStems[1];
-      var _stems=[TG_ARR[r.pillars.year.gan],TG_ARR[r.pillars.month.gan],TG_ARR[r.pillars.day.gan],TG_ARR[r.pillars.hour.gan]];
-      var _gIdx=r.pillars.day.gan;
-      var _found=null;
-      var _tt='';
-      for(var _i=0;_i<_hs.length;_i++){
-        var _n=_hs[_i].ganName;
-        if(_stems.indexOf(_n)>=0){_found=_hs[_i];_tt=_n;break}
-      }
-      if(!_found&&_hs[0]){_found=_hs[0];_tt=_hs[0].ganName+'不透'}
-      if(_found){
-        var _a=Math.floor(_gIdx/2), _b=Math.floor(_found.gan/2);
-        var _r=((_b-_a)%5+5)%5;
-        var _sy=(_gIdx%2)!==(_found.gan%2);
-        var tgMap=[['劫财','比肩'],['伤官','食神'],['正财','偏财'],['正官','七杀'],['正印','偏印']];
-        var _pg=tgMap[_r][_sy?0:1];
-        geName=geMap[_pg]||'普通格局';
-        geTrace=_tt+'→'+_pg;
-      }
-    }
-  }catch(_e){console.log('ge_err',_e)}
+  if(WXS||DA){    // 格局判定——全局优先级引擎
+  var _geEng=typeof BaZi!=='undefined'&&BaZi.determinePattern?BaZi.determinePattern(r):null;
+  var geName=_manualPattern||(_geEng?_geEng.name:'普通格局');
+  var geTrace=_manualPattern?('手动选格'):(_geEng?_geEng.trace.replace(/\n/g,'<br>'):'');
+  var geGroup=_manualPattern?'[手动]':(_geEng?'['+_geEng.group+']':'');
   if(geName){
-    h+='<div class=fc><div class=ft>格局定形</div><div style=font-size:12px;color:#c4a265;font-weight:600>'+geName+'</div><div style=font-size:10px;color:#887a6e;margin-top:2px>- '+geTrace+'</div></div>';
-  }  // 分析h+='<div class=fc><div class=ft style=cursor:pointer onclick=toggleAnalysis()>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
+    h+='<div class=fc><div class=ft>格局定形<span style=float:right;font-size:9px;color:#5a4a3a;cursor:pointer onclick=showPatternSelect()>✏手动</span></div>';
+    h+='<div style=font-size:12px;color:#c4a265;font-weight:600>'+geName+'</div>';
+    h+='<div style=font-size:9px;color:#5a4a3a;margin-top:1px>'+geGroup+'</div>';
+    h+='<div style=font-size:10px;color:#6a5e50;line-height:1.5;margin-top:3px;padding-top:3px;border-top:1px solid rgba(180,140,100,.08)>'+geTrace+'</div></div>';
+  }
+  // 分析h+='<div class=fc><div class=ft style=cursor:pointer onclick=toggleAnalysis()>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
   if(WXS)h+='<span style=color:#c4a265>'+(LOCALE==='cn'?'日主：':'DM:')+'</span>'+WXS.dayMaster.element+(WXS.dayMaster.isStrong?'['+(LOCALE==='cn'?'身强':'S')+']':'['+(LOCALE==='cn'?'身弱':'W')+']')+' | '+wse.map(function(e){return'<span style=color:'+WS_COLOR[e]+'>'+e+':'+WXS.wangShuai[e]+'</span>'}).join(' ');
   if(DA)h+='<div style=font-size:11px;color:#9a8a7a;line-height:1.7><span style=color:#4a9c6f>'+(LOCALE==='cn'?'用神：':'Use:')+'</span>'+DA.usefulDeities.join('、')+' <span style=color:#d4735e>'+(LOCALE==='cn'?'忌神：':'Harm:')+'</span>'+DA.harmfulDeities.join('、')+'</div>';
   h+='<div style=display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;font-size:9px;color:#887a6e>';
@@ -379,8 +390,8 @@ if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')
   h+='<span style=color:#5a4a3a>闲神：'+(DA.neutralDeities&&DA.neutralDeities.length?DA.neutralDeities.join('/'):'无')+'</span>';
  
   // 取用溯源
-  if(DA&&geName&&geName!=='普通格局'){
-    var _pn2=geName||'普通格局';
+  if(DA&&_geEng&&_geEng.name){
+    var _pn2=_manualPattern||(_geEng?_geEng.name:'普通格局');
     var _st=WXS.dayMaster.isStrong?'身强':'身弱';
     var _us=DA.usefulDeities?DA.usefulDeities.join('/'):'';
     var _ill=WXS.dayMaster.isStrong?'日主偏旺，当以克泄耗为药':'日主偏弱不能承载格局';
