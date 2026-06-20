@@ -191,6 +191,22 @@ var BaZi = (() => {
     const gan = (WU_SHU[dayGan] ?? WU_SHU[0])[zhi];
     return { gan, zhi, ganName: TIAN_GAN[gan], zhiName: DI_ZHI[zhi] };
   }
+  function calcHourPillarRenFuHong(dayGan, hour, isLateZi) {
+    const zhi = 0;
+    let gan;
+    if (isLateZi) {
+      gan = ((WU_SHU[dayGan] ?? WU_SHU[0])[0] + 1) % 10;
+    } else {
+      gan = (WU_SHU[dayGan] ?? WU_SHU[0])[0];
+    }
+    return { gan, zhi, ganName: TIAN_GAN[gan], zhiName: DI_ZHI[zhi] };
+  }
+  function isZiHour(hour) {
+    return hour >= 23 || hour < 1;
+  }
+  function isLateZiHour(hour) {
+    return hour >= 23 && hour < 24;
+  }
 
   // src/true-solar.ts
   function equationOfTime(n) {
@@ -2449,8 +2465,24 @@ var BaZi = (() => {
     const hour = ts.hour;
     const yp = calcYearPillar(input.year, input.month, input.day);
     const mp = calcMonthPillar(yp.gan, input.year, input.month, input.day);
-    const dp = calcDayPillar(input.year, input.month, input.day);
-    const hp = calcHourPillar(dp.gan, hour);
+    var _ziType = null;
+    var _dp = calcDayPillar(input.year, input.month, input.day);
+    var _hp = null;
+    if (isZiHour(hour)) {
+      if (isLateZiHour(hour)) {
+        _ziType = "\u665A\u5B50\u65F6";
+        _hp = calcHourPillarRenFuHong(_dp.gan, hour, true);
+      } else {
+        _ziType = "\u65E9\u5B50\u65F6";
+        var _nd = new Date(input.year, input.month - 1, input.day + 1);
+        _dp = calcDayPillar(_nd.getFullYear(), _nd.getMonth() + 1, _nd.getDate());
+        _hp = calcHourPillarRenFuHong(_dp.gan, hour, false);
+      }
+    } else {
+      _hp = calcHourPillar(_dp.gan, hour);
+    }
+    const dp = _dp;
+    const hp = _hp;
     const pillars = [yp, mp, dp, hp];
     const pObj = { year: yp, month: mp, day: dp, hour: hp };
     const dm = getDayMasterInfo(dp.gan);
