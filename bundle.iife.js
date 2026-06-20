@@ -2174,34 +2174,33 @@ var BaZi = (() => {
     }
     const neutralSet = EL_NAMES2.filter((e) => !useful.includes(e) && !harmful.includes(e));
     if (harmful.length === 0 && neutralSet.length > 0) harmful.push(neutralSet[0]);
-    let _s1 = "# \u7B2C\u4E00\u6BB5\uFF1A\u300A\u4E09\u547D\u901A\u4F1A\u300B\u9759\u6001\u529B\u91CF\u7EDF\u8BA1\uFF08\u4EC5\u53C2\u8003\uFF0C\u4E0D\u5B9A\u559C\u5FCC\uFF09";
+    let _s1 = "\u7B2C\u4E00\u6BB5\uFF1A\u300A\u4E09\u547D\u901A\u4F1A\u300B\u9759\u6001\u529B\u91CF\u7EDF\u8BA1\uFF08\u4EC5\u53C2\u8003\uFF0C\u4E0D\u5B9A\u559C\u5FCC\uFF09";
     _s1 += "\n\u5F97\u4EE4\uFF1A" + deLing.note;
     _s1 += "\n\u5F97\u5730\uFF1A" + deDi.notes.join("\n");
     _s1 += "\n\u5F97\u52BF\uFF1A" + deShi.notes.join("\n");
     _s1 += "\n\u9759\u6001\u603B\u5206\uFF1A" + Math.round(deLing.score + deDi.score + (deShi.same - deShi.opp) * 0.3) + "\u5206\uFF08\u5F97\u4EE4" + deLing.score + "/\u5F97\u5730" + deDi.score + "/\u5F97\u52BF" + (deShi.same - deShi.opp) * 0.3 + "\uFF09";
     _s1 += "\n\u5C0F\u7ED3\uFF1A\u65E5\u4E3B" + (dm || "") + "\u52BF" + strengthLevel;
-    let _s2 = "# \u7B2C\u4E8C\u6BB5\uFF1A\u3010\u6838\u5FC3\u51B3\u7B56\u3011\u300A\u5B50\u5E73\u771F\u8BE0\u300B\u683C\u5C40\u75C5\u836F\u5B9A\u7528\u795E\uFF08\u5168\u5C40\u6700\u9AD8\u4F18\u5148\u7EA7\uFF09";
+    let _s2 = "\u7B2C\u4E8C\u6BB5\uFF1A\u3010\u6838\u5FC3\u51B3\u7B56\u3011\u300A\u5B50\u5E73\u771F\u8BE0\u300B\u683C\u5C40\u75C5\u836F\u5B9A\u7528\u795E\uFF08\u5168\u5C40\u6700\u9AD8\u4F18\u5148\u7EA7\uFF09";
     _s2 += "\n\u672C\u5C40\u5B9A\u683C\uFF1A" + patName + "\u3010" + patGroup + "\u3011";
     _s2 += "\n" + steps.join("\n");
     _s2 += "\n\uFF08\u8C03\u5019\u8BF4\u660E\uFF1A\u683C\u5C40\u5185\u62E9\u4F18\uFF0C\u975E\u63A8\u7FFB\u683C\u5C40\u7528\u795E\uFF09";
-    let _s3 = "# \u7B2C\u4E09\u6BB5\uFF1A\u300A\u6EF4\u5929\u9AD3\u300B\u52A8\u6001\u4F5C\u7528+\u683C\u5C40\u5185\u8C03\u5019\u4FEE\u6B63";
+    let _s3 = "\u7B2C\u4E09\u6BB5\uFF1A\u300A\u6EF4\u5929\u9AD3\u300B\u52A8\u6001\u4F5C\u7528+\u683C\u5C40\u5185\u8C03\u5019\u4FEE\u6B63";
     _s3 += "\n" + tianSui.note;
     _s3 += "\n" + (dyn.notes.length ? dyn.notes.join("\n") : "\u65E0\u663E\u8457\u4E92\u52A8");
     _s3 += "\n\u52A8\u6001\u4FEE\u6B63\u5408\u8BA1\uFF1A" + (dyn.adj >= 0 ? "+" : "") + dyn.adj + "\u5206";
     _s3 += "\n\u4FEE\u6B63\u540E\u603B\u5206\uFF1A" + Math.round(totalScore) + "\u5206";
-    let _s4 = "# \u7B2C\u56DB\u6BB5\uFF1A\u300A\u7A77\u901A\u5B9D\u9274\u300B\u65E5\u5E72\u672C\u6027\u6821\u6B63\uFF0C\u6700\u7EC8\u6572\u5B9A\u56DB\u795E";
+    let _s4 = "\u7B2C\u56DB\u6BB5\uFF1A\u300A\u7A77\u901A\u5B9D\u9274\u300B\u65E5\u5E72\u672C\u6027\u6821\u6B63\uFF0C\u6700\u7EC8\u6572\u5B9A\u56DB\u795E";
     _s4 += "\n\u65E5\u5E72\u6821\u9A8C\uFF1A" + (stemNature.notes.length ? stemNature.notes.join("\n") : "\u683C\u5C40\u7528\u795E\u4E0E\u65E5\u5E72\u5148\u5929\u559C\u5FCC\u4E00\u81F4");
     _s4 += "\n\n\u3010\u56DB\u795E\u603B\u89C8\u3011";
     _s4 += "\n\u7B2C\u4E00\u6838\u5FC3\u7528\u795E\uFF1A" + useful.slice(0, 2).join("/");
     _s4 += "\n\u8F85\u52A9\u559C\u795E\uFF1A" + (useful.slice(2).length ? useful.slice(2).join("/") : "\u65E0");
     _s4 += "\n\u5934\u53F7\u5FCC\u795E\uFF1A" + (harmful.length ? harmful.slice(0, 2).join("/") : "\u65E0");
     _s4 += "\n\u4E2D\u6027\u95F2\u795E\uFF1A" + (neutralSet.length ? neutralSet.join("/") : "\u65E0");
-    let _s5 = "# \u7B2C\u4E94\u6BB5\uFF1A\u4EFB\u4ED8\u7EA2\u76F2\u6D3E\u4F53\u7528\u505A\u529F+\u5C81\u8FD0\u603B\u7ED3\uFF08\u9884\u7559\uFF09";
-    _s5 += "\n\u4F53\uFF08\u81EA\u8EAB\u6839\u57FA\uFF09\uFF1A" + dm + "\u65E5\u4E3B+\u5370\u6BD4";
+    let _s5 = "\u7B2C\u4E94\u6BB5\uFF1A\u4EFB\u4ED8\u7EA2\u76F2\u6D3E\u4F53\u7528\u505A\u529F+\u5C81\u8FD0\u603B\u7ED3\uFF08\u9884\u7559\uFF09";
     _s5 += "\n\u7528\uFF08\u4E8B\u4E1A\u540D\u5229\uFF09\uFF1A\u6708\u4EE4" + patName.replace("\u683C", "") + "\u683C\u5C40\u7528\u795E\u4E3A" + (useful.slice(0, 2).length ? useful.slice(0, 2).join("/") : "\u65E0");
     _s5 += "\n\u539F\u5C40\u6001\u52BF\uFF1A" + strengthLevel + "\uFF08" + Math.round(totalScore) + "\u5206\uFF09";
     _s5 += "\n\uFF08\u6CE8\uFF1A\u672C\u6BB5\u5F85\u8865\u5145\u8BE6\u7EC6\u505A\u529F\u5206\u6790\u4E0E\u5C81\u8FD0\u5E94\u671F\uFF09";
-    const bookNotes = [_s1, _s2, _s3, _s4, _s5];
+    const bookNotes = [_s1, _s2, _s3, _s4];
     return {
       dayMaster: { element: dm, strength: isStrong ? "\u504F\u65FA" : "\u504F\u5F31", level: strengthLevel, isStrong },
       strengthScore: Math.round(totalScore),
