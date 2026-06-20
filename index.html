@@ -248,7 +248,7 @@ function initForm(){
     +'<div id=ganzhi_fields style=display:none;margin-bottom:6px>'
     +'<div style=font-size:10px;color:#786a5e;margin-bottom:4px>'+(LOCALE==='cn'?'输入四柱干支:':'Input Pillars:')+'</div>'+gzFields
     +'</div>'
-    +'<div class=gr><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=rfh '+(rfhv?'checked':'')+'>任付红早晚子</label><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=ts onchange=toggleTs() '+(tsv?'checked':'')+'>'+(LOCALE==='cn'?'真太阳时':'TrueSolar')+'</label>'
+    +'<div class=gr><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=rfh '+(rfhv?'checked':'')+'>早晚子</label><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=ts onchange=toggleTs() '+(tsv?'checked':'')+'>'+(LOCALE==='cn'?'真太阳时':'TrueSolar')+'</label>'
     +'<span style=font-size:9px;color:#5a4a3a>'+(LOCALE==='cn'?'(经度/纬度)':'(Long/Lat)')+'</span></div>'
     +'<div id=ts_fields style=display:'+(tsv?'flex':'none')+';gap:4px>'
     +'<div class=fg><label>'+(LOCALE==='cn'?'城市':'City')+'</label><select id=city style=width:100%;padding:4px;border:1px solid rgba(180,140,100,.12);border-radius:4px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none onchange=setCity()>'
