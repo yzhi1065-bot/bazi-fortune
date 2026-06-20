@@ -2481,15 +2481,21 @@ var BaZi = (() => {
           _hp = calcHourPillarRenFuHong(_dp.gan, hour, true, _nextDp.gan);
         } else {
           _ziType = "\u65E9\u5B50\u65F6";
-          var _nd = new Date(input.year, input.month - 1, input.day + 1);
-          _dp = calcDayPillar(_nd.getFullYear(), _nd.getMonth() + 1, _nd.getDate());
-          _hp = calcHourPillarRenFuHong(_dp.gan, hour, false);
+          var _pd = new Date(input.year, input.month - 1, input.day - 1);
+          var _pdp = calcDayPillar(_pd.getFullYear(), _pd.getMonth() + 1, _pd.getDate());
+          _dp = _pdp;
+          _hp = calcHourPillar(_dp.gan, hour);
         }
       } else {
         _ziMode = "\u4F20\u7EDF\u6392\u76D8";
-        var _nd2 = new Date(input.year, input.month - 1, input.day + 1);
-        _dp = calcDayPillar(_nd2.getFullYear(), _nd2.getMonth() + 1, _nd2.getDate());
-        _hp = calcHourPillar(_dp.gan, hour);
+        if (isLateZiHour(hour)) {
+          _hp = calcHourPillar(_dp.gan, hour);
+        } else {
+          var _pd2 = new Date(input.year, input.month - 1, input.day - 1);
+          var _pdp2 = calcDayPillar(_pd2.getFullYear(), _pd2.getMonth() + 1, _pd2.getDate());
+          _dp = _pdp2;
+          _hp = calcHourPillar(_dp.gan, hour);
+        }
       }
     } else {
       _hp = calcHourPillar(_dp.gan, hour);
