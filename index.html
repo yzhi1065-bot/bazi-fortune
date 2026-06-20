@@ -377,8 +377,7 @@ if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')
   if(geName){
     h+='<div class=fc><div class=ft>格局定形<span style=float:right;font-size:9px;color:#5a4a3a;cursor:pointer onclick=showPatternSelect()>✏手动</span></div>';
     h+='<div style=font-size:12px;color:#c4a265;font-weight:600>'+geName+'</div>';
-    h+='<div style=font-size:9px;color:#5a4a3a;margin-top:1px>'+geGroup+'</div>';
-    h+='<div style=font-size:10px;color:#6a5e50;line-height:1.5;margin-top:3px;padding-top:3px;border-top:1px solid rgba(180,140,100,.08)>'+geTrace+'</div></div>';
+    h+='<div style=font-size:9px;color:#5a4a3a;margin-top:1px>'+geGroup+'</div></div>';
   }
   // 分析h+='<div class=fc><div class=ft style=cursor:pointer onclick=toggleAnalysis()>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
   if(WXS)h+='<span style=color:#c4a265>'+(LOCALE==='cn'?'日主：':'DM:')+'</span>'+WXS.dayMaster.element+(WXS.dayMaster.isStrong?'['+(LOCALE==='cn'?'身强':'S')+']':'['+(LOCALE==='cn'?'身弱':'W')+']')+' | '+wse.map(function(e){return'<span style=color:'+WS_COLOR[e]+'>'+e+':'+WXS.wangShuai[e]+'</span>'}).join(' ');
