@@ -2466,17 +2466,27 @@ var BaZi = (() => {
     const yp = calcYearPillar(input.year, input.month, input.day);
     const mp = calcMonthPillar(yp.gan, input.year, input.month, input.day);
     var _ziType = null;
+    var _ziMode = null;
     var _dp = calcDayPillar(input.year, input.month, input.day);
     var _hp = null;
+    var _useRFH = input.useRenFuHongZi === true;
     if (isZiHour(hour)) {
-      if (isLateZiHour(hour)) {
-        _ziType = "\u665A\u5B50\u65F6";
-        _hp = calcHourPillarRenFuHong(_dp.gan, hour, true);
+      if (_useRFH) {
+        _ziMode = "\u4EFB\u4ED8\u7EA2\u65E9\u665A\u5B50\u6392\u76D8";
+        if (isLateZiHour(hour)) {
+          _ziType = "\u665A\u5B50\u65F6";
+          _hp = calcHourPillarRenFuHong(_dp.gan, hour, true);
+        } else {
+          _ziType = "\u65E9\u5B50\u65F6";
+          var _nd = new Date(input.year, input.month - 1, input.day + 1);
+          _dp = calcDayPillar(_nd.getFullYear(), _nd.getMonth() + 1, _nd.getDate());
+          _hp = calcHourPillarRenFuHong(_dp.gan, hour, false);
+        }
       } else {
-        _ziType = "\u65E9\u5B50\u65F6";
-        var _nd = new Date(input.year, input.month - 1, input.day + 1);
-        _dp = calcDayPillar(_nd.getFullYear(), _nd.getMonth() + 1, _nd.getDate());
-        _hp = calcHourPillarRenFuHong(_dp.gan, hour, false);
+        _ziMode = "\u4F20\u7EDF\u6392\u76D8";
+        var _nd2 = new Date(input.year, input.month - 1, input.day + 1);
+        _dp = calcDayPillar(_nd2.getFullYear(), _nd2.getMonth() + 1, _nd2.getDate());
+        _hp = calcHourPillar(_dp.gan, hour);
       }
     } else {
       _hp = calcHourPillar(_dp.gan, hour);
@@ -2544,7 +2554,9 @@ var BaZi = (() => {
       wuXingAnalysis,
       deityAnalysis,
       annualDetail,
-      fortuneInteraction
+      fortuneInteraction,
+      ziType: _ziType,
+      ziMode: _ziMode
     };
   }
   return __toCommonJS(src_exports);

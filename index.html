@@ -223,7 +223,7 @@ function exportAIDocx(id){
 function initForm(){
   if($('y'))return;
   var mem=(function(){try{return JSON.parse(localStorage.getItem('bazi_inp'))||{}}catch(e){return{}}}());
-  var y=mem.y||1990,m=mem.m||8,d=mem.d||27,h=mem.h||15,mi=mem.mi||30,g=mem.g||'male',fn=mem.fn||'',lon=mem.lon||'120',lat=mem.lat||'30',tsv=mem.ts||false,ci=mem.city||'';
+  var y=mem.y||1990,m=mem.m||8,d=mem.d||27,h=mem.h||15,mi=mem.mi||30,g=mem.g||'male',fn=mem.fn||'',lon=mem.lon||'120',lat=mem.lat||'30',rfhv=mem.rfh||false,tsv=mem.ts||false,ci=mem.city||'';
   // Build ganzhi selectors
   var tgOpts=TG_ARR.map(function(t){return'<option value='+t+'>'+t+'</option>'}).join('');
   var dzOpts=DZ_ARR.map(function(z){return'<option value='+z+'>'+z+'</option>'}).join('');
@@ -248,7 +248,7 @@ function initForm(){
     +'<div id=ganzhi_fields style=display:none;margin-bottom:6px>'
     +'<div style=font-size:10px;color:#786a5e;margin-bottom:4px>'+(LOCALE==='cn'?'输入四柱干支:':'Input Pillars:')+'</div>'+gzFields
     +'</div>'
-    +'<div class=gr><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=ts onchange=toggleTs() '+(tsv?'checked':'')+'>'+(LOCALE==='cn'?'真太阳时':'TrueSolar')+'</label>'
+    +'<div class=gr><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=rfh '+(rfhv?'checked':'')+'>任付红早晚子</label><label style=display:flex;align-items:center;gap:4px><input type=checkbox id=ts onchange=toggleTs() '+(tsv?'checked':'')+'>'+(LOCALE==='cn'?'真太阳时':'TrueSolar')+'</label>'
     +'<span style=font-size:9px;color:#5a4a3a>'+(LOCALE==='cn'?'(经度/纬度)':'(Long/Lat)')+'</span></div>'
     +'<div id=ts_fields style=display:'+(tsv?'flex':'none')+';gap:4px>'
     +'<div class=fg><label>'+(LOCALE==='cn'?'城市':'City')+'</label><select id=city style=width:100%;padding:4px;border:1px solid rgba(180,140,100,.12);border-radius:4px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none onchange=setCity()>'
@@ -286,9 +286,9 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     localStorage.setItem('bazi_inp',JSON.stringify({fn:$('fn')?$('fn').value:'',g:gm,ts:ts,lon:lon,lat:lat,city:sv}));
   }else{
     var ym=+$('y').value,mm=+$('m').value,dm=+$('d').value,hm=+$('h').value,mim=+$('mi').value;
-    localStorage.setItem('bazi_inp',JSON.stringify({y:ym,m:mm,d:dm,h:hm,mi:mim,g:gm,fn:$('fn')?$('fn').value:'',lon:lon,lat:lat,ts:ts,city:sv}));
+    localStorage.setItem('bazi_inp',JSON.stringify({y:ym,m:mm,d:dm,h:hm,mi:mim,g:gm,fn:$('fn')?$('fn').value:'',lon:lon,lat:lat,ts:ts,rfh:$('rfh')&&$('rfh').checked,city:sv}));
     if(_inputMode==='lunar'){try{var cr=BaZi.lunarToSolar(ym,mm,dm,false);if(cr){ym=cr.year;mm=cr.month;dm=cr.day}}catch(e){}}
-    opts={year:ym,month:mm,day:dm,hour:hm,minute:mim,gender:gm};
+    opts={year:ym,month:mm,day:dm,hour:hm,minute:mim,gender:gm,useRenFuHongZi:$('rfh')&&$('rfh').checked};
   }
   if(ts&&lon)opts.longitude=lon;
   if(ts&&lat)opts.latitude=lat;
