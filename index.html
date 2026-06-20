@@ -399,13 +399,8 @@ if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')
   }
  h+='</div>'
   if(DA.strategy){
-    h+='<div id=ax_body style=display:none>';var _s=DA.strategy;h+='<div style=font-size:10px;color:#887a6e;line-height:1.8;white-space:pre-wrap;padding-top:4px;border-top:1px solid rgba(180,140,100,.08)>'+_s+'</div>';;
-    h+='<div>'+_s.substring(0,_p1end).replace(/；/g,'<br>').replace(/;/g,'<br>')+'</div>';
-    h+='<div style=color:#c4a265;font-size:10px;font-weight:600;margin:4px 0 2px>二、动态能量修正</div>';
-    if(_p2start>0)h+='<div>'+_s.substring(_p2start,_p2end).replace(/；/g,'<br>').replace(/;/g,'<br>')+'</div>';
-    h+='<div style=color:#c4a265;font-size:10px;font-weight:600;margin:4px 0 2px>三、最终定论+用神体系</div>';
-    if(_p2end<_s.length)h+='<div>'+_s.substring(_p2end).replace(/；/g,'<br>').replace(/;/g,'<br>')+'</div>';
-    h+='</div></div>';
+    h+='<div id=ax_body style=display:none>';var _s=DA.strategy;h+='<div style=font-size:10px;color:#887a6e;line-height:1.8;white-space:pre-wrap;padding-top:4px;border-top:1px solid rgba(180,140,100,.08)>'+_s+'</div></div>';
+   
   }
   h+='</div></div>';}
   var _precise=BaZi.calcStartAgePrecise&&BaZi.calcStartAgePrecise(r.input.year,r.input.month,r.input.day,r.input.hour,r.input.minute,r.greatFortunes[0].direction)||{years:r.greatFortunes[0].startAge,months:0,days:0,hours:0,jieName:'',jieTime:'',jiaoYunTime:''};
