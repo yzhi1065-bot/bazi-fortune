@@ -2198,7 +2198,7 @@ var BaZi = (() => {
     _s4 += "\n\u4E2D\u6027\u95F2\u795E\uFF1A" + (neutralSet.length ? neutralSet.join("/") : "\u65E0");
     let _s5 = "# \u7B2C\u4E94\u6BB5\uFF1A\u4EFB\u4ED8\u7EA2\u76F2\u6D3E\u4F53\u7528\u505A\u529F+\u5C81\u8FD0\u603B\u7ED3\uFF08\u9884\u7559\uFF09";
     _s5 += "\n\u4F53\uFF08\u81EA\u8EAB\u6839\u57FA\uFF09\uFF1A" + dm + "\u65E5\u4E3B+\u5370\u6BD4";
-    _s5 += "\n\u7528\uFF08\u4E8B\u4E1A\u540D\u5229\uFF09\uFF1A\u6708\u4EE4" + patName.replace("\u683C", "") + "\u683C\u5C40\u7528\u795E\u4E3A" + useful.slice(0, 2).join("/") + "/" + dm;
+    _s5 += "\n\u7528\uFF08\u4E8B\u4E1A\u540D\u5229\uFF09\uFF1A\u6708\u4EE4" + patName.replace("\u683C", "") + "\u683C\u5C40\u7528\u795E\u4E3A" + (useful.slice(0, 2).length ? useful.slice(0, 2).join("/") : "\u65E0");
     _s5 += "\n\u539F\u5C40\u6001\u52BF\uFF1A" + strengthLevel + "\uFF08" + Math.round(totalScore) + "\u5206\uFF09";
     _s5 += "\n\uFF08\u6CE8\uFF1A\u672C\u6BB5\u5F85\u8865\u5145\u8BE6\u7EC6\u505A\u529F\u5206\u6790\u4E0E\u5C81\u8FD0\u5E94\u671F\uFF09";
     const bookNotes = [_s1, _s2, _s3, _s4, _s5];
@@ -2215,7 +2215,7 @@ var BaZi = (() => {
       harmfulMain: harmful.slice(0, 2),
       harmfulSecondary: harmful.slice(2),
       neutralDeities: neutralSet,
-      strategy: bookNotes.join("\uFF1B"),
+      strategy: bookNotes.join("\n\n"),
       advice: `\u5FCC${harmful.slice(0, 2).join("\u3001")}\u8FC7\u65FA\u6D41\u5E74`,
       isSpecialPattern: isSpecial
     };
