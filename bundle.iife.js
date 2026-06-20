@@ -2335,7 +2335,7 @@ var BaZi = (() => {
     for (const grp of hiddenStems || []) for (const h of grp) t2[h.element] += 10;
     return t2;
   }
-  function inferDeities(dayMasterElement, _isStrong, wangShuai, fiveElements, monthZhi, pillars, hiddenStems) {
+  function inferDeities(dayMasterElement, _isStrong, wangShuai, fiveElements, monthZhi, pillars, hiddenStems, birthDay) {
     const dm = dayMasterElement;
     const dmGan = pillars?.[2]?.gan ?? 0;
     const allZhis = pillars?.map((p) => p.zhi) ?? [];
@@ -2521,17 +2521,32 @@ var BaZi = (() => {
     _s5 += "\n\u539F\u5C40\u6001\u52BF\uFF1A" + strengthLevel + "\uFF08" + Math.round(totalScore) + "\u5206\uFF09";
     _s5 += "\n\uFF08\u6CE8\uFF1A\u672C\u6BB5\u5F85\u8865\u5145\u8BE6\u7EC6\u505A\u529F\u5206\u6790\u4E0E\u5C81\u8FD0\u5E94\u671F\uFF09";
     const bookNotes = [_s1, _s2, _s3, _s4];
-    var _cx = determineConstitution(mz, dmGan, allZhis && allZhis.length > 2 ? allZhis[2] : void 0);
-    if (_cx) {
-      var _s6 = "\n\n\u7B2C\u516D\u6BB5\uFF1A\u5148\u5929\u7980\u8D4B\u4F53\u8D28\u4E13\u9879\u5206\u6790\uFF08\u300A\u5185\u7ECF\u300B\u5E72\u652F\u7980\u8D4B\u5BF9\u5E94\uFF09\n";
-      _s6 += "1\u3001\u5148\u5929\u7980\u8D4B\u5206\u578B\uFF1A\u3010" + _cx.name + "\u3011\n";
-      _s6 += "2\u3001\u4F53\u8D28\u6838\u5FC3\u75C5\u673A\uFF1A" + _cx.pathogenesis + "\n";
-      _s6 += "3\u3001\u6613\u611F\u810F\u8151\u75C5\u75C7\uFF1A" + _cx.illnessTip + "\n";
-      _s6 += "4\u3001\u60C5\u5FD7\u8C03\u517B\u5EFA\u8BAE\uFF1A" + _cx.emotion + "\n";
-      _s6 += "5\u3001\u996E\u98DF\u5B9C\u5FCC\u65B9\u6848\uFF1A" + _cx.diet + "\n";
-      _s6 += "6\u3001\u5C45\u4F4F\u73AF\u5883\u8C03\u6574\u6307\u5357\uFF1A" + _cx.environment + "\n";
-      _s6 += "7\u3001\u8FD0\u52A8\u3001\u7406\u7597\u5B9C\u5FCC\u8BF4\u660E\uFF1A" + _cx.healthAction + "\n";
-      bookNotes.push(_s6);
+    if (typeof mz === "number" && typeof dmGan === "number") {
+      var _cx = determineConstitution(mz, dmGan, birthDay);
+      if (_cx) {
+        var _s6 = "\n\n# \u516D\u3001\u300A\u5185\u7ECF\u300B\u5E72\u652F\u5148\u5929\u7980\u8D4B\u4E13\u9879\u5206\u6790\n";
+        _s6 += "\u5224\u5B9A\u4F9D\u636E\uFF1A" + DI_ZHI[mz] + "\u6708\uFF08" + _cx.season + "\u5B63\uFF09\uFF0C\u65E5\u4E3B" + TIAN_GAN[dmGan] + "\uFF08" + _cx.masterFive + "\u7980\u8D4B\uFF09\uFF0C\u5206\u578B\uFF1A\u3010" + _cx.name + "\u3011\n";
+        _s6 += "1\u3001\u5148\u5929\u6838\u5FC3\u75C5\u673A\uFF1A" + _cx.pathogenesis + "\n";
+        _s6 += "2\u3001\u4E94\u810F\u6613\u611F\u95EE\u9898\uFF1A" + _cx.illnessTip + "\n";
+        _s6 += "3\u3001\u60C5\u5FD7\u8C03\u517B\u5EFA\u8BAE\uFF1A" + _cx.emotion + "\n";
+        _s6 += "4\u3001\u996E\u98DF\u5B9C\u5FCC\u65B9\u6848\uFF1A" + _cx.diet + "\n";
+        _s6 += "5\u3001\u5C45\u4F4F\u73AF\u5883\u8C03\u6574\u6307\u5357\uFF1A" + _cx.environment + "\n";
+        _s6 += "6\u3001\u8FD0\u52A8\u4E0E\u7406\u7597\u5B9C\u5FCC\uFF1A" + _cx.healthAction + "\n";
+        var _cf = useful.filter(function(e) {
+          return _cx.avoidGod && _cx.avoidGod.includes(e);
+        });
+        var _mc = useful.filter(function(e) {
+          return _cx.matchGod && _cx.matchGod.includes(e);
+        });
+        var _ht = "";
+        if (_mc.length > 0 && _cf.length === 0) _ht = "\u4F53\u8D28\u559C\u7528\u4E0E\u683C\u5C40\u7528\u795E\u9AD8\u5EA6\u5951\u5408\uFF0C\u8C03\u517B\u65B9\u5411\u4E0E\u547D\u7406\u559C\u7528\u4E00\u81F4\u3002";
+        else if (_cf.length > 0) _ht = "\u4F53\u8D28\u5148\u5929\u5FCC\u8BB3" + _cf.join("/") + "\uFF0C\u4F46\u683C\u5C40\u53D6\u4E4B\u4E3A\u6838\u5FC3\u7528\u795E\uFF0C\u8C03\u517B\u65F6\u4EE5\u547D\u7406\u7528\u795E\u4E3A\u4E3B\u3001\u4F53\u8D28\u517B\u751F\u4E3A\u8F85\u3002";
+        else _ht = "\u4F53\u8D28\u559C\u5FCC\u4E0E\u683C\u5C40\u7528\u795E\u65E0\u660E\u663E\u51B2\u7A81\uFF0C\u53EF\u76F8\u4E92\u72EC\u7ACB\u53C2\u8003\u3002";
+        _s6 += "7\u3001\u7980\u8D4B\u4E0E\u683C\u5C40\u7528\u795E\u8C03\u548C\u8BF4\u660E\uFF1A" + _ht + "\n";
+        _s6 += "8\u3001\u5F53\u524D\u5927\u8FD0\u540E\u5929\u4F53\u8D28\u5FAE\u8C03\u63D0\u793A\uFF1A\u5F85\u7ED3\u5408\u5927\u8FD0\u4E94\u884C\u8865\u5145\u7EC6\u5316\u3002\n";
+        _s6 += "\n\uFF08\u6CE8\uFF1A\u4F53\u8D28\u5E95\u5C42\u6E90\u81EA\u300A\u7075\u67A2\xB7\u9634\u9633\u4E8C\u5341\u4E94\u4EBA\u300B\uFF0C\u672C\u4E94\u5B63\u65E5\u4E3B\u5206\u578B\u4E3A\u547D\u7406\u4E2D\u533B\u878D\u5408\u884D\u751F\u4F53\u7CFB\uFF09\n";
+        bookNotes.push(_s6);
+      }
     }
     return {
       dayMaster: { element: dm, strength: isStrong ? "\u504F\u65FA" : "\u504F\u5F31", level: strengthLevel, isStrong },
@@ -2849,7 +2864,7 @@ var BaZi = (() => {
     const shenShaDetail = zhis.map((z) => calcShenShaForBranch(dp.gan, yp.gan, yp.zhi, z, mp.zhi));
     const termIdx = findSolarTermIndex(input.year, input.month, input.day);
     const wuXingAnalysis = analyzeFiveElements(fe, dm.element, mp.zhi);
-    const deityAnalysis = inferDeities(dm.element, wuXingAnalysis.dayMaster.isStrong, wuXingAnalysis.wangShuai, fe, mp.zhi, pillars, hsWithGod);
+    const deityAnalysis = inferDeities(dm.element, wuXingAnalysis.dayMaster.isStrong, wuXingAnalysis.wangShuai, fe, mp.zhi, pillars, hsWithGod, input.day);
     const curFf = gf.find((ff) => cy - input.year >= ff.startAge && cy - input.year <= ff.endAge);
     const annualDetail = analyzeAnnualFortune(af, dp.gan, mp.zhi, pillars, {}, deityAnalysis, curFf);
     const fortuneInteraction = analyzeFortuneInteractions(gf, cy, dp.gan, pillars, input.year, deityAnalysis, preciseMonths);
