@@ -381,12 +381,12 @@ if(WXS){h+='<div class=fc><div class=ft>'+(LOCALE==='cn'?'五行旺衰':'5Elem')
   }
   h+='<div class=fc><div class=ft style=cursor:pointer onclick=toggleAnalysis()>'+(LOCALE==='cn'?'分析':'Analysis')+'</div><div style=font-size:11px;color:#9a8a7a;line-height:1.7>';
   if(WXS)h+='<span style=color:#c4a265>'+(LOCALE==='cn'?'日主：':'DM:')+'</span>'+WXS.dayMaster.element+(WXS.dayMaster.isStrong?'['+(LOCALE==='cn'?'身强':'S')+']':'['+(LOCALE==='cn'?'身弱':'W')+']')+' | '+wse.map(function(e){return'<span style=color:'+WS_COLOR[e]+'>'+e+':'+WXS.wangShuai[e]+'</span>'}).join(' ');
-  if(DA)h+='<div style=font-size:11px;color:#9a8a7a;line-height:1.7><span style=color:#4a9c6f>'+(LOCALE==='cn'?'用神：':'Use:')+'</span>'+DA.usefulDeities.join('、')+' <span style=color:#d4735e>'+(LOCALE==='cn'?'忌神：':'Harm:')+'</span>'+DA.harmfulDeities.join('、')+'</div>';
+  // 四神已在下文统一展示
   h+='<div style=display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;font-size:9px;color:#887a6e>';
-  h+='<span style=color:#e07060>核心用神：'+(DA.mainUseful?DA.mainUseful.join('/'):DA.usefulDeities.slice(0,2).join('/'))+'</span>';
-  h+='<span style=color:#6abf6a>喜神：'+(DA.secondaryUseful&&DA.secondaryUseful.length?DA.secondaryUseful.join('/'):DA.usefulDeities.slice(2).join('/')||'无')+'</span>';
-  h+='<span style=color:#d4735e>忌神：'+(DA.harmfulMain?DA.harmfulMain.join('/'):DA.harmfulDeities.slice(0,2).join('/'))+'</span>';
-  h+='<span style=color:#5a4a3a>闲神：'+(DA.neutralDeities&&DA.neutralDeities.length?DA.neutralDeities.join('/'):'无')+'</span>';
+  h+='<span style=color:#e07060>用：'+(DA.mainUseful?DA.mainUseful.join('/'):DA.usefulDeities.slice(0,2).join('/'))+'</span>';
+  h+='<span style=color:#6abf6a>喜：'+(DA.secondaryUseful&&DA.secondaryUseful.length?DA.secondaryUseful.join('/'):DA.usefulDeities.slice(2).join('/')||'无')+'</span>';
+  h+='<span style=color:#d4735e>忌：'+(DA.harmfulMain?DA.harmfulMain.join('/'):DA.harmfulDeities.slice(0,2).join('/'))+'</span>';
+  h+='<span style=color:#5a4a3a>闲：'+(DA.neutralDeities&&DA.neutralDeities.length?DA.neutralDeities.join('/'):'无')+'</span>';
  
   // 取用溯源
   if(DA&&_geEng&&_geEng.name){
