@@ -1206,10 +1206,329 @@ var BaZi = (() => {
     };
   }
 
-  // src/analysis.ts
+  // src/patterns.ts
   var SHENG = { "\u6728": "\u706B", "\u706B": "\u571F", "\u571F": "\u91D1", "\u91D1": "\u6C34", "\u6C34": "\u6728" };
   var KE = { "\u6728": "\u571F", "\u571F": "\u6C34", "\u6C34": "\u706B", "\u706B": "\u91D1", "\u91D1": "\u6728" };
   var EL_NAMES = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
+  var SAN_HE2 = {
+    "\u7533\u5B50\u8FB0": "\u6C34",
+    "\u4EA5\u536F\u672A": "\u6728",
+    "\u5BC5\u5348\u620C": "\u706B",
+    "\u5DF3\u9149\u4E11": "\u91D1"
+  };
+  var SAN_HUI2 = {
+    "\u4EA5\u5B50\u4E11": "\u6C34",
+    "\u5BC5\u536F\u8FB0": "\u6728",
+    "\u5DF3\u5348\u672A": "\u706B",
+    "\u7533\u9149\u620C": "\u91D1",
+    "\u8FB0\u620C\u4E11\u672A": "\u571F"
+  };
+  var HIDDEN = {
+    0: [9],
+    1: [5, 9, 7],
+    2: [0, 2, 4],
+    3: [1],
+    4: [4, 1, 9],
+    5: [2, 6, 4],
+    6: [3, 5],
+    7: [5, 3, 1],
+    8: [6, 8, 4],
+    9: [7],
+    10: [4, 7, 3],
+    11: [8, 0]
+  };
+  function zWx(zhi) {
+    return ZHI_WU_XING[zhi];
+  }
+  function mTenGod(dg, tg) {
+    const r = ((Math.floor(tg / 2) - Math.floor(dg / 2)) % 5 + 5) % 5;
+    const sy = dg % 2 !== tg % 2;
+    const MAP2 = [["\u52AB\u8D22", "\u6BD4\u80A9"], ["\u4F24\u5B98", "\u98DF\u795E"], ["\u6B63\u8D22", "\u504F\u8D22"], ["\u6B63\u5B98", "\u4E03\u6740"], ["\u6B63\u5370", "\u504F\u5370"]];
+    return MAP2[r][sy ? 0 : 1];
+  }
+  function hasHe(stems, pair) {
+    return stems.includes(pair[0]) && stems.includes(pair[1]);
+  }
+  function findSanHe(zhis) {
+    const names = zhis.map((z) => DI_ZHI[z]).sort().join("");
+    for (const [key, wx] of Object.entries(SAN_HE2)) {
+      const k = key.split("").sort().join("");
+      if (names.includes(k[0]) && names.includes(k[1]) && names.includes(k[2])) return wx;
+    }
+    return null;
+  }
+  function findSanHui(zhis) {
+    const names = new Set(zhis.map((z) => DI_ZHI[z]));
+    for (const [key, wx] of Object.entries(SAN_HUI2)) {
+      const ks = key.split("");
+      if (ks.every((k) => names.has(k))) return wx;
+    }
+    return null;
+  }
+  function hasSanHeOrHui(zhis, wx) {
+    const heEl = findSanHe(zhis);
+    const huiEl = findSanHui(zhis);
+    return heEl === wx || huiEl === wx;
+  }
+  function elementWeight(el, fe, hs) {
+    let w = fe[{ "\u6728": "wood", "\u706B": "fire", "\u571F": "earth", "\u91D1": "metal", "\u6C34": "water" }[el] || ""] || 0;
+    for (const arr of hs) {
+      for (const h of arr) {
+        if (h.element === el) w += 0.3;
+      }
+    }
+    return w;
+  }
+  function elementRatio(el, fe, hs) {
+    let total = 0, self = 0;
+    for (const e of EL_NAMES) {
+      const w = elementWeight(e, fe, hs);
+      total += w;
+      if (e === el) self = w;
+    }
+    return total > 0 ? self / total : 0;
+  }
+  function isDangLing(dmEl, mz) {
+    const mWx = zWx(mz);
+    const wang = { "\u6728": "\u5BC5\u536F", "\u706B": "\u5DF3\u5348", "\u571F": "\u8FB0\u620C\u4E11\u672A", "\u91D1": "\u7533\u9149", "\u6C34": "\u4EA5\u5B50" };
+    return (wang[dmEl] || "").includes(DI_ZHI[mz]);
+  }
+  function hasRoot(dg, zhis, hs) {
+    for (let i = 0; i < zhis.length; i++) {
+      for (const h of hs[i]) {
+        if (h.gan === dg) return true;
+      }
+    }
+    return false;
+  }
+  function addTrace(parts, group, passed, detail) {
+    const icon = passed ? "\u2705\u901A\u8FC7\u2192" : "\u274C\u4E0D\u6210\u7ACB";
+    parts.push(`${icon}${group}\u5224\u5B9A${detail}`);
+  }
+  function determinePattern(bazi) {
+    const { pillars, dayMaster, fiveElements: fe, hiddenStems: hs } = bazi;
+    const dg = dayMaster.gan;
+    const dmEl = dayMaster.element;
+    const zhis = [pillars.year.zhi, pillars.month.zhi, pillars.day.zhi, pillars.hour.zhi];
+    const stems = [pillars.year.gan, pillars.month.gan, pillars.day.gan, pillars.hour.gan];
+    const mz = pillars.month.zhi;
+    const traces = [];
+    const hePairs = [
+      ["\u7532\u5DF1\u5316\u571F\u683C", [0, 5], "\u571F", ["\u8FB0", "\u620C", "\u4E11", "\u672A"]],
+      ["\u4E59\u5E9A\u5316\u91D1\u683C", [1, 6], "\u91D1", ["\u7533", "\u9149"]],
+      ["\u4E19\u8F9B\u5316\u6C34\u683C", [2, 7], "\u6C34", ["\u4EA5", "\u5B50"]],
+      ["\u4E01\u58EC\u5316\u6728\u683C", [3, 8], "\u6728", ["\u5BC5", "\u536F"]],
+      ["\u620A\u7678\u5316\u706B\u683C", [4, 9], "\u706B", ["\u5DF3", "\u5348"]]
+    ];
+    for (const [name, pair, el, months] of hePairs) {
+      if (hasHe(stems, pair)) {
+        const mzName = DI_ZHI[mz];
+        const monthOk = months.includes(mzName) || hasSanHeOrHui(zhis, el);
+        const keEl = KE[el];
+        const keRatio = elementRatio(keEl, fe, hs);
+        const keOk = keRatio < 0.35;
+        if (monthOk && keOk) {
+          const trace = `\u6708\u652F${mzName}${months.includes(mzName) ? "\u5F53\u4EE4" : ""}\u52A9${el}\uFF0C${keEl}\u6C14\u4E0D\u7834\u5C40`;
+          addTrace(traces, name, true, `\uFF1A\u5929\u5E72\u6709${TIAN_GAN[pair[0]]}${TIAN_GAN[pair[1]]}\u76F8\u5408\uFF0C${trace}`);
+          return { name, group: "\u4E94\u5408\u5316\u6C14\u683C", priority: 1, trace: traces.join("\n") };
+        } else {
+          addTrace(traces, name, false, `\uFF1A\u5929\u5E72\u6709\u5408\u4F46${monthOk ? "" : "\u6708\u4EE4\u4E0D\u5F53"}${keOk ? "" : "\uFF0C\u6709\u514B\u7834"}`);
+        }
+      } else {
+        addTrace(traces, name, false, "\uFF1A\u5929\u5E72\u65E0\u6B64\u5408");
+      }
+    }
+    const zhuanWang = [
+      { name: "\u66F2\u76F4\u683C", el: "\u6728", stems: "\u7532\u4E59", branches: "\u5BC5\u536F\u8FB0\u4E09\u4F1A\u6728/\u4EA5\u536F\u672A\u4E09\u5408\u6728", ke: "\u91D1" },
+      { name: "\u708E\u4E0A\u683C", el: "\u706B", stems: "\u4E19\u4E01", branches: "\u5DF3\u5348\u672A\u4E09\u4F1A\u706B/\u5BC5\u5348\u620C\u4E09\u5408\u706B", ke: "\u6C34" },
+      { name: "\u7A3C\u7A51\u683C", el: "\u571F", stems: "\u620A\u5DF1", branches: "\u8FB0\u620C\u4E11\u672A\u56DB\u5E93\u571F", ke: "\u6728" },
+      { name: "\u4ECE\u9769\u683C", el: "\u91D1", stems: "\u5E9A\u8F9B", branches: "\u7533\u9149\u620C\u4E09\u4F1A\u91D1/\u5DF3\u9149\u4E11\u4E09\u5408\u91D1", ke: "\u706B" },
+      { name: "\u6DA6\u4E0B\u683C", el: "\u6C34", stems: "\u58EC\u7678", branches: "\u4EA5\u5B50\u4E11\u4E09\u4F1A\u6C34/\u7533\u5B50\u8FB0\u4E09\u5408\u6C34", ke: "\u6C34" }
+      // ke -> 土
+    ];
+    zhuanWang[4].ke = "\u571F";
+    for (const zw of zhuanWang) {
+      if (dmEl !== zw.el) {
+        addTrace(traces, zw.name, false, `\uFF1A\u65E5\u4E3B\u975E${zw.stems}`);
+        continue;
+      }
+      const dl = isDangLing(dmEl, mz);
+      const zh = hasSanHeOrHui(zhis, dmEl) || dmEl === "\u571F" && !zhis.some((z) => ![1, 4, 7, 10].includes(z));
+      const keRatio = elementRatio(zw.ke, fe, hs);
+      const keWeak = keRatio < 0.25;
+      if (dl && zh && keWeak) {
+        const branchDesc = hasSanHeOrHui(zhis, dmEl) ? "\u5730\u652F\u6709\u52A9" : "";
+        addTrace(traces, zw.name, true, `\uFF1A\u65E5\u4E3B${dmEl}\u5F97\u4EE4\uFF0C\u5168\u5C40${dmEl}\u52BF\u6781\u65FA\uFF0C${zw.ke}\u5F31`);
+        return { name: zw.name, group: "\u4E13\u65FA\u683C\u5C40", priority: 2, trace: traces.join("\n") };
+      } else {
+        addTrace(traces, zw.name, false, `\uFF1A${dl ? "" : "\u65E5\u4E3B\u4E0D\u5F97\u4EE4"}${zh ? "" : "\uFF0C\u5730\u652F\u4E0D\u6210\u52BF"}${keWeak ? "" : "\uFF0C\u514B\u795E\u4E0D\u5F31"}`);
+      }
+    }
+    const dmHasRoot = hasRoot(dg, zhis, hs);
+    const hasHelp = stems.some(function(s) {
+      return s === dg;
+    });
+    const hasPrint = stems.some(function(s) {
+      var _r = ((Math.floor(s / 2) - Math.floor(dg / 2)) % 5 + 5) % 5;
+      return _r === 4;
+    });
+    const hasNoHelp = !hasHelp && !hasPrint;
+    function hasOnlyWeakRoot(dg2, zhis2, hs2) {
+      let strongCount = 0;
+      for (let i = 0; i < zhis2.length; i++) {
+        for (const h of hs2[i]) {
+          if (h.gan === dg2) {
+            const idx = (HIDDEN[zhis2[i]] || []).indexOf(dg2);
+            if (idx <= 1) strongCount++;
+          }
+        }
+      }
+      return strongCount === 0;
+    }
+    const wealthRatio = elementRatio("\u91D1", fe, hs) + elementRatio("\u6C34", fe, hs);
+    function getWealthEl(dm) {
+      return KE[dm];
+    }
+    function getShaEl(dm) {
+      return KE[SHENG[dm]];
+    }
+    function getChildEl(dm) {
+      return SHENG[dm];
+    }
+    function checkCongWealth(isFake) {
+      const wEl = getWealthEl(dmEl);
+      const wR = elementRatio(wEl, fe, hs);
+      if (!hasNoHelp) return false;
+      return wR > 0.5 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
+    }
+    function checkCongSha(isFake) {
+      const sEl = getShaEl(dmEl);
+      const sR = elementRatio(sEl, fe, hs);
+      if (!hasNoHelp) return false;
+      return sR > 0.5 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
+    }
+    function checkCongChild(isFake) {
+      const cEl = getChildEl(dmEl);
+      const cR = elementRatio(cEl, fe, hs);
+      if (!hasNoHelp) return false;
+      return cR > 0.5 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
+    }
+    function checkCongWeak(isFake) {
+      const dmR = elementRatio(dmEl, fe, hs);
+      if (!hasNoHelp) return false;
+      return dmR < 0.25 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
+    }
+    const congChecks = [
+      { name: "\u4ECE\u8D22\u683C", fn: checkCongWealth, elDesc: `\u5168\u5C40${getWealthEl(dmEl)}\u65FA` },
+      { name: "\u4ECE\u6740\u683C", fn: checkCongSha, elDesc: `\u5168\u5C40${getShaEl(dmEl)}\u65FA` },
+      { name: "\u4ECE\u513F\u683C", fn: checkCongChild, elDesc: `\u5168\u5C40${getChildEl(dmEl)}\u65FA` },
+      { name: "\u4ECE\u5F31\u683C", fn: checkCongWeak, elDesc: "\u5168\u5C40\u65E0\u52A9" }
+    ];
+    for (const cc of congChecks) {
+      if (cc.fn(false)) {
+        addTrace(traces, "\u771F" + cc.name, true, `\uFF1A${cc.elDesc}\uFF0C\u65E5\u4E3B\u65E0\u6839\u65E0\u52A9` + (cc.name === "\u4ECE\u8D22\u683C" ? ",\u987A\u4ECE\u8D22\u52BF\u4E3A\u7528" : cc.name === "\u4ECE\u6740\u683C" ? ",\u987A\u4ECE\u6740\u52BF\u4E3A\u7528" : cc.name === "\u4ECE\u513F\u683C" ? ",\u987A\u52BF\u6CC4\u79C0\u4E3A\u7528" : ",\u5168\u76D8\u65E0\u751F\u6276\u4E4B\u6C14"));
+        return { name: "\u771F" + cc.name, group: "\u4ECE\u683C\uFF08\u771F/\u5047\uFF09", priority: 3, trace: traces.join("\n") };
+      }
+      if (cc.fn(true)) {
+        addTrace(traces, "\u5047" + cc.name, true, `\uFF1A${cc.elDesc}\uFF0C\u65E5\u4E3B\u4EC5\u6709\u5FAE\u6839` + (cc.name === "\u4ECE\u8D22\u683C" ? ",\u8FD0\u5236\u6839\u8F6C\u771F\u4ECE" : cc.name === "\u4ECE\u6740\u683C" ? ",\u8FD0\u5236\u6839\u8F6C\u771F\u4ECE" : cc.name === "\u4ECE\u513F\u683C" ? ",\u8FD0\u514B\u6839\u6210\u771F\u4ECE" : ",\u8FD0\u5236\u6839\u8F6C\u771F\u4ECE"));
+        return { name: "\u5047" + cc.name, group: "\u4ECE\u683C\uFF08\u771F/\u5047\uFF09", priority: 3, trace: traces.join("\n") };
+      }
+    }
+    for (const cc of congChecks) {
+      addTrace(traces, cc.name, false, `\uFF1A\u4E0D\u6EE1\u8DB3\u4ECE${cc.name.replace("\u4ECE", "").replace("\u683C", "")}\u6761\u4EF6`);
+    }
+    const mainHS = HIDDEN[mz] || [];
+    const hsOnStems = [];
+    for (let idx = 0; idx < mainHS.length; idx++) {
+      const g = mainHS[idx];
+      if (stems.includes(g)) {
+        const pri = idx === 0 ? "\u672C\u6C14" : idx === 1 ? "\u4E2D\u6C14" : "\u4F59\u6C14";
+        hsOnStems.push({ gan: g, name: TIAN_GAN[g], priority: pri });
+      }
+    }
+    hsOnStems.sort((a, b) => {
+      const order = { "\u672C\u6C14": 0, "\u4E2D\u6C14": 1, "\u4F59\u6C14": 2 };
+      return order[a.priority] - order[b.priority];
+    });
+    let selectedGan;
+    let selectedTrace;
+    if (hsOnStems.length > 0) {
+      selectedGan = hsOnStems[0].gan;
+      selectedTrace = `\u6708\u652F${DI_ZHI[mz]}\u85CF\u5E72\uFF1A${mainHS.map((g) => TIAN_GAN[g]).join("\u3001")}\uFF1B${hsOnStems[0].priority}${TIAN_GAN[selectedGan]}\u900F\u5E72`;
+    } else {
+      selectedGan = mainHS[0] || 0;
+      selectedTrace = `\u6708\u652F${DI_ZHI[mz]}\u5168\u4E0D\u900F\u5E72\uFF0C\u672C\u6C14${TIAN_GAN[selectedGan]}\u5B9A\u683C`;
+    }
+    const pg = mTenGod(dg, selectedGan);
+    const geMap = {
+      "\u6B63\u5B98": "\u6B63\u5B98\u683C",
+      "\u4E03\u6740": "\u4E03\u6740\u683C",
+      "\u6B63\u8D22": "\u6B63\u8D22\u683C",
+      "\u504F\u8D22": "\u504F\u8D22\u683C",
+      "\u6B63\u5370": "\u6B63\u5370\u683C",
+      "\u504F\u5370": "\u504F\u5370\u683C",
+      "\u98DF\u795E": "\u98DF\u795E\u683C",
+      "\u4F24\u5B98": "\u4F24\u5B98\u683C",
+      "\u6BD4\u80A9": "\u5EFA\u7984\u683C",
+      "\u52AB\u8D22": "\u7F8A\u5203\u683C"
+    };
+    const ge = geMap[pg];
+    if (ge && pg !== "\u6BD4\u80A9" && pg !== "\u52AB\u8D22") {
+      const useDesc = {
+        "\u6B63\u5B98": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u8D22\u751F\u5B98\u3001\u5370\u62A4\u5B98\uFF1B\u5FCC\u4F24\u5B98\u514B\u5B98",
+        "\u4E03\u6740": "\u56DB\u51F6\u795E\u9006\u7528\uFF0C\u559C\u98DF\u795E\u5236\u6740\u3001\u5370\u661F\u5316\u6740\uFF1B\u5FCC\u65E0\u5236\u653B\u8EAB",
+        "\u6B63\u8D22": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u62A4\u8D22\uFF1B\u5FCC\u6BD4\u52AB\u593A\u8D22",
+        "\u504F\u8D22": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u62A4\u8D22\uFF1B\u5FCC\u6BD4\u52AB\u8017\u8D22",
+        "\u5370": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u5B98\u6740\u751F\u5370\uFF1B\u5FCC\u8D22\u661F\u7834\u5370",
+        "\u98DF\u795E": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u751F\u8D22\u6CC4\u79C0\uFF1B\u5FCC\u67AD\u795E\u593A\u98DF",
+        "\u4F24\u5B98": "\u56DB\u51F6\u795E\u9006\u7528\uFF0C\u559C\u751F\u8D22\u3001\u914D\u5370\uFF1B\u5FCC\u4F24\u5B98\u89C1\u5B98",
+        "\u504F\u5370": "\u56DB\u51F6\u795E\u9006\u7528\uFF0C\u559C\u504F\u8D22\u5236\u8861\u3001\u98DF\u795E\u6CC4\u5370\uFF1B\u5FCC\u504F\u5370\u593A\u98DF"
+      };
+      const useText = useDesc[pg] || "";
+      addTrace(traces, ge, true, `\uFF1A${selectedTrace}\u2192${pg}${useText ? "\uFF0C" + useText : ""}`);
+      return { name: ge, group: "\u6B63\u7EDF\u516B\u683C", priority: 4, trace: traces.join("\n") };
+    }
+    if (pg === "\u6BD4\u80A9") {
+      addTrace(traces, "\u5EFA\u7984\u683C", true, `\uFF1A\u6708\u652F${DI_ZHI[mz]}\u4E3A\u65E5\u4E3B\u4E34\u5B98\u7984\u4F4D\uFF0C\u5341\u795E\u6BD4\u80A9\uFF0C\u65E0\u5148\u5929\u6708\u4EE4\u683C\u5C40\uFF0C\u4EE5\u8EAB\u65FA\u8EAB\u5F31\u5B9A\u75C5\u836F\uFF1A\u65FA\u5219\u5236\u6CC4\uFF0C\u5F31\u5219\u5E2E\u6276`);
+      return { name: "\u5EFA\u7984\u683C", group: "\u7984\u5203\u5916\u683C", priority: 5, trace: traces.join("\n") };
+    }
+    if (pg === "\u52AB\u8D22") {
+      addTrace(traces, "\u7F8A\u5203\u683C", true, `\uFF1A\u6708\u652F${DI_ZHI[mz]}\u4E3A\u65E5\u4E3B\u5E1D\u65FA\u7F8A\u5203\u4F4D\uFF0C\u5341\u795E\u52AB\u8D22\uFF0C\u75C5\u5728\u5203\u65FA\uFF0C\u9996\u9009\u5B98\u6740\u9A7E\u5203\u5236\u65FA\uFF0C\u6B21\u53D6\u98DF\u4F24\u6CC4\u79C0`);
+      return { name: "\u7F8A\u5203\u683C", group: "\u7984\u5203\u5916\u683C", priority: 5, trace: traces.join("\n") };
+    }
+    if (dg === 6 || dg === 7) {
+      if (findSanHe(zhis) === "\u6C34") {
+        addTrace(traces, "\u4E95\u680F\u53C9\u683C", true, "\uFF1A\u5E9A\u91D1\u65E5\u4E3B\uFF0C\u7533\u5B50\u8FB0\u4E09\u5408\u6C34\u5C40\uFF0C\u4F24\u5B98\u6CC4\u79C0\u6210\u683C");
+        return { name: "\u4E95\u680F\u53C9\u683C", group: "\u7ECF\u5178\u7279\u6B8A\u5916\u683C", priority: 6, trace: traces.join("\n") };
+      }
+    }
+    if (dg === 0 && zhis.filter((z) => z === 0).length >= 2) {
+      addTrace(traces, "\u5B50\u9065\u5DF3\u683C", true, "\uFF1A\u7532\u5B50\u65E5\u4E3B\uFF0C\u5730\u652F\u5B50\u9065\u5408\u5DF3\u706B\u5B98\u661F");
+      return { name: "\u5B50\u9065\u5DF3\u683C", group: "\u7ECF\u5178\u7279\u6B8A\u5916\u683C", priority: 6, trace: traces.join("\n") };
+    }
+    if (dg <= 1 && zhis.some((z) => z === 10 || z === 11)) {
+      addTrace(traces, "\u516D\u7532\u8D8B\u4E7E\u683C", true, "\uFF1A\u7532\u65E5\u4E3B\uFF0C\u5730\u652F\u89C1\u620C\u4EA5\u4E7E\u5BAB");
+      return { name: "\u516D\u7532\u8D8B\u4E7E\u683C", group: "\u7ECF\u5178\u7279\u6B8A\u5916\u683C", priority: 6, trace: traces.join("\n") };
+    }
+    addTrace(traces, "\u7279\u6B8A\u5916\u683C", false, "\uFF1A\u4E0D\u6EE1\u8DB3\u4EFB\u4F55\u7279\u6B8A\u5916\u683C\u6761\u4EF6");
+    addTrace(traces, "\uFF08\u515C\u5E95\uFF09", true, `\uFF1A\u6708\u4EE4\u672C\u6C14${TIAN_GAN[mainHS[0]]}\u5341\u795E${pg}\u5B9A${ge || "\u666E\u901A\u683C\u5C40"}`);
+    return { name: ge || "\u666E\u901A\u683C\u5C40", group: "\u6B63\u7EDF\u516B\u683C", priority: 4, trace: traces.join("\n") };
+  }
+  function getAllPatterns() {
+    return [
+      { group: "\u3010\u4E94\u5408\u5316\u6C14\u683C\u3011", names: ["\u7532\u5DF1\u5316\u571F\u683C", "\u4E59\u5E9A\u5316\u91D1\u683C", "\u4E19\u8F9B\u5316\u6C34\u683C", "\u4E01\u58EC\u5316\u6728\u683C", "\u620A\u7678\u5316\u706B\u683C"] },
+      { group: "\u3010\u4E13\u65FA\u683C\u5C40\u3011", names: ["\u66F2\u76F4\u683C", "\u708E\u4E0A\u683C", "\u7A3C\u7A51\u683C", "\u4ECE\u9769\u683C", "\u6DA6\u4E0B\u683C"] },
+      { group: "\u3010\u4ECE\u683C\uFF08\u771F/\u5047\uFF09\u3011", names: ["\u771F\u4ECE\u8D22\u683C", "\u5047\u4ECE\u8D22\u683C", "\u771F\u4ECE\u6740\u683C", "\u5047\u4ECE\u6740\u683C", "\u771F\u4ECE\u513F\u683C", "\u5047\u4ECE\u513F\u683C", "\u771F\u4ECE\u5F31\u683C", "\u5047\u4ECE\u5F31\u683C"] },
+      { group: "\u3010\u6B63\u7EDF\u516B\u683C\u3011", names: ["\u6B63\u5B98\u683C", "\u4E03\u6740\u683C", "\u6B63\u8D22\u683C", "\u504F\u8D22\u683C", "\u6B63\u5370\u683C", "\u504F\u5370\u683C", "\u98DF\u795E\u683C", "\u4F24\u5B98\u683C"] },
+      { group: "\u3010\u7984\u5203\u5916\u683C\u3011", names: ["\u5EFA\u7984\u683C", "\u7F8A\u5203\u683C"] },
+      { group: "\u3010\u7ECF\u5178\u7279\u6B8A\u5916\u683C\u3011", names: ["\u4E95\u680F\u53C9\u683C", "\u5B50\u9065\u5DF3\u683C", "\u516D\u7532\u8D8B\u4E7E\u683C"] }
+    ];
+  }
+
+  // src/analysis.ts
+  var SHENG2 = { "\u6728": "\u706B", "\u706B": "\u571F", "\u571F": "\u91D1", "\u91D1": "\u6C34", "\u6C34": "\u6728" };
+  var KE2 = { "\u6728": "\u571F", "\u571F": "\u6C34", "\u6C34": "\u706B", "\u706B": "\u91D1", "\u91D1": "\u6728" };
+  var EL_NAMES2 = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
   var HIDDEN_SCORE = {
     0: [[9, 100]],
     1: [[5, 60], [9, 30], [7, 10]],
@@ -1384,8 +1703,8 @@ var BaZi = (() => {
       if (i === 2) continue;
       const el = GAN_WU_XING[gans[i]];
       const wt = [15, 20, 15][i < 2 ? i : i - 1];
-      if (el === dmEl || SHENG[dmEl] === el) same += wt;
-      else if (KE[dmEl] === el || SHENG[el] === dmEl || KE[el] === dmEl) opp += wt;
+      if (el === dmEl || SHENG2[dmEl] === el) same += wt;
+      else if (KE2[dmEl] === el || SHENG2[el] === dmEl || KE2[el] === dmEl) opp += wt;
     }
     if (same > opp * 1.5) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\u5370\u6BD4\u515A\u4F17\u52BF\u5F3A(\u540C${same}/\u5F02${opp})`);
     else if (opp > same * 1.5) notes.push(`${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u515A\u4F17")}\u514B\u6CC4\u8017\u52BF\u5927(\u540C${same}/\u5F02${opp})`);
@@ -1464,10 +1783,10 @@ var BaZi = (() => {
     const sanHui = [[2, 3, 4, "\u5BC5\u536F\u8FB0", "\u6728"], [5, 6, 7, "\u5DF3\u5348\u672A", "\u706B"], [8, 9, 10, "\u7533\u9149\u620C", "\u91D1"], [11, 0, 1, "\u4EA5\u5B50\u4E11", "\u6C34"]];
     for (const [a, b, c, desc, el] of sanHui) {
       if (zhis.includes(a) && zhis.includes(b) && zhis.includes(c)) {
-        if (el === dmEl || el === SHENG[dmEl]) {
+        if (el === dmEl || el === SHENG2[dmEl]) {
           adj += 30;
           notes.push(`\u4E09\u4F1A${desc}${el}\u5C40\u751F\u6276\u65E5\u4E3B+30`);
-        } else if (el === KE[dmEl]) {
+        } else if (el === KE2[dmEl]) {
           adj -= 12;
           notes.push(`\u4E09\u4F1A${desc}${el}\u5C40\u514B\u8017\u65E5\u4E3B-12`);
         }
@@ -1476,10 +1795,10 @@ var BaZi = (() => {
     const sanHe = [[0, 4, 8, "\u7533\u5B50\u8FB0", "\u6C34"], [2, 6, 10, "\u5BC5\u5348\u620C", "\u706B"], [3, 7, 11, "\u4EA5\u536F\u672A", "\u6728"], [1, 5, 9, "\u5DF3\u9149\u4E11", "\u91D1"]];
     for (const [a, b, c, desc, el] of sanHe) {
       if (zhis.includes(a) && zhis.includes(b) && zhis.includes(c)) {
-        if (el === dmEl || el === SHENG[dmEl]) {
+        if (el === dmEl || el === SHENG2[dmEl]) {
           adj += 20;
           notes.push(`\u4E09\u5408${desc}${el}\u5C40\u751F\u6276\u65E5\u4E3B+20`);
-        } else if (el === KE[dmEl]) {
+        } else if (el === KE2[dmEl]) {
           adj -= 10;
           notes.push(`\u4E09\u5408${desc}${el}\u5C40\u514B\u8017\u65E5\u4E3B-10`);
         }
@@ -1666,15 +1985,15 @@ var BaZi = (() => {
     for (let i = 0; i < gans.length; i++) {
       if (i === 2) continue;
       const e = GAN_WU_XING[gans[i]];
-      if (e === dmEl || SHENG[dmEl] === e) same++;
+      if (e === dmEl || SHENG2[dmEl] === e) same++;
       else opp++;
     }
     for (let i = 0; i < zhis.length; i++) {
       const hg = HIDDEN_SCORE[zhis[i]] || [];
       for (const [g] of hg) {
         const e = GAN_WU_XING[g];
-        if (e === dmEl || SHENG[dmEl] === e) same++;
-        else if (KE[dmEl] === e || SHENG[e] === dmEl) opp++;
+        if (e === dmEl || SHENG2[dmEl] === e) same++;
+        else if (KE2[dmEl] === e || SHENG2[e] === dmEl) opp++;
       }
     }
     if (same >= opp * 3 && opp <= 2) return { is: true, type: "\u4E13\u65FA", note: `${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\u5168\u5C40${same}\u540C/${opp}\u5F02\u4E13\u65FA\u683C` };
@@ -1730,67 +2049,122 @@ var BaZi = (() => {
     const isStrong = strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA" || strengthLevel === "\u65FA\u6781(\u4ECE\u5F3A)";
     const tiaoHouList = TIAO_HOU[mz] ?? ["\u706B"];
     const tongGuanList = getTongGuanFn(totalsFn(dm, fiveElements, pillars, hiddenStems));
-    const useful = [];
-    const harmful = [];
-    const steps = [];
+    let useful = [];
+    let harmful = [];
+    let steps = [];
     const stemNature = getStemNature(dmGan);
-    for (const t2 of tongGuanList) useful.push(t2);
+    var patternResult = null;
+    try {
+      if (pillars && pillars.length >= 4) {
+        var _miniDM = { gan: dmGan, element: dm };
+        var _miniP = { year: pillars[0], month: pillars[1], day: pillars[2], hour: pillars[3] };
+        var _miniHS = hiddenStems || [];
+        if (_miniP.year) patternResult = determinePattern({ dayMaster: _miniDM, pillars: _miniP, fiveElements: fiveElements || {}, hiddenStems: _miniHS });
+      }
+    } catch (_pe) {
+    }
+    var patName = patternResult ? patternResult.name : "";
+    var patGroup = patternResult ? patternResult.group : "";
+    if (patName) {
+      steps.push("\u3010\u683C\u5C40\u75C5\u836F\u5B9A\u7528\u795E\u3011\u672C\u5C40" + patName);
+      useful = [];
+      harmful = [];
+    }
+    for (const t2 of tongGuanList) if (!useful.includes(t2)) useful.push(t2);
     for (const t2 of tiaoHouList) {
       if (!useful.includes(t2)) {
         useful.push(t2);
-        steps.push(`${book("\u6EF4\u5929\u9AD3\xB7\u5BD2\u6696\u71E5\u6E7F")}\u683C\u5C40\u5185\u53D6${t2}\u8C03\u5019`);
+        steps.push(`\u683C\u5C40\u5185\u8C03\u5019\u53D6${t2}`);
       }
     }
     if (isSpecial) {
-      const shen = SHENG[dm], same = dm, keWo = KE[dm], woSheng = SHENG[dm], woKe = KE[dm];
+      const shen = SHENG2[dm], same = dm, keWo = KE2[dm], woSheng = SHENG2[dm], woKe = KE2[dm];
       if (special.type === "\u4E13\u65FA") {
-        useful.push(shen, same);
-        harmful.push(keWo, woKe, woSheng);
+        for (const _e of [shen, same]) if (!useful.includes(_e)) useful.push(_e);
+        for (const _e of [keWo, woKe, woSheng]) if (!harmful.includes(_e)) harmful.push(_e);
         steps.push(`${book("\u5B50\u5E73\u771F\u8BE0", "\u8BBA\u4ECE\u5316")}\u4E13\u65FA\u683C\u987A\u52BF\u53D6${shen}${same}`);
       } else {
-        useful.push(woKe, woSheng);
-        harmful.push(shen, same);
+        for (const _e of [woKe, woSheng]) if (!useful.includes(_e)) useful.push(_e);
+        for (const _e of [shen, same]) if (!harmful.includes(_e)) harmful.push(_e);
         steps.push("\u4ECE\u683C\u987A\u52BF\u53D6\u7528");
       }
-    }
-    if (!isSpecial) {
-      const keWo = KE[dm], woSheng = SHENG[dm], shen = SHENG[dm], same = dm;
+      steps.push("\uFF08\u7279\u6B8A\u683C\u5C40>\u6B63\u7EDF\u516B\u683C\uFF09");
+    } else if (patGroup === "\u6B63\u7EDF\u516B\u683C" && patName) {
+      var _shen = SHENG2[dm], _ke = KE2[dm], _woSheng = SHENG2[dm];
+      if (["\u6B63\u5B98\u683C", "\u6B63\u8D22\u683C", "\u504F\u8D22\u683C", "\u6B63\u5370\u683C", "\u98DF\u795E\u683C"].includes(patName)) {
+        if (patName === "\u6B63\u5B98\u683C") {
+          for (const _e of [_ke, _woSheng]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [_shen, KE2[_shen]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u6B63\u5B98\u683C\u987A\u7528\uFF1A\u559C\u8D22\u751F\u5B98\u3001\u5370\u62A4\u5B98\uFF1B\u5FCC\u4F24\u5B98\u514B\u5B98\u3001\u5B98\u6740\u6DF7\u6742");
+        } else if (patName === "\u6B63\u8D22\u683C" || patName === "\u504F\u8D22\u683C") {
+          for (const _e of [_woSheng, SHENG2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [dm, KE2[_shen]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u8D22\u683C\u987A\u7528\uFF1A\u559C\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u62A4\u8D22\uFF1B\u5FCC\u6BD4\u52AB\u593A\u8D22");
+        } else if (patName === "\u6B63\u5370\u683C") {
+          for (const _e of [KE2[dm], dm]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [SHENG2[_ke]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u5370\u683C\u987A\u7528\uFF1A\u559C\u5B98\u6740\u751F\u5370\u3001\u6BD4\u52AB\u62A4\u5370\uFF1B\u5FCC\u8D22\u661F\u7834\u5370");
+        } else if (patName === "\u98DF\u795E\u683C") {
+          for (const _e of [_ke, SHENG2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[SHENG2[dm]]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u98DF\u795E\u683C\u987A\u7528\uFF1A\u559C\u98DF\u795E\u751F\u8D22\uFF1B\u5FCC\u67AD\u795E\u593A\u98DF");
+        }
+      } else {
+        if (patName === "\u4E03\u6740\u683C") {
+          for (const _e of [_woSheng, KE2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [_ke, KE2[_woSheng]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u4E03\u6740\u683C\u9006\u7528\uFF1A\u559C\u98DF\u795E\u5236\u6740\u3001\u5370\u5316\u6740\uFF1B\u5FCC\u8D22\u6ECB\u6740\u3001\u65E0\u5236\u653B\u8EAB");
+        } else if (patName === "\u4F24\u5B98\u683C") {
+          for (const _e of [_ke, _shen]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[_woSheng]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u4F24\u5B98\u683C\u9006\u7528\uFF1A\u559C\u4F24\u5B98\u751F\u8D22\u3001\u5370\u5236\u4F24\uFF1B\u5FCC\u4F24\u5B98\u89C1\u5B98");
+        } else if (patName === "\u504F\u5370\u683C") {
+          for (const _e of [SHENG2[_ke], _woSheng]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[_shen]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u504F\u5370\u683C\u9006\u7528\uFF1A\u559C\u504F\u8D22\u5236\u8861\u3001\u98DF\u795E\u6CC4\u5370\uFF1B\u5FCC\u504F\u5370\u593A\u98DF");
+        }
+      }
+      steps.push(patName + "\u7531\u683C\u5C40\u75C5\u836F\u63A8\u5BFC\uFF0C\u975E\u6276\u6291\u5224\u5B9A");
+    } else if (patGroup === "\u7984\u5203\u5916\u683C") {
+      if (patName === "\u5EFA\u7984\u683C") {
+        if (isStrong) {
+          for (const _e of [KE2[dm], _woSheng, SHENG2[_ke]]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [dm, SHENG2[dm]]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u5EFA\u7984\u683C\u8EAB\u65FA\uFF1A\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4\u4E3A\u836F");
+        } else {
+          for (const _e of [SHENG2[dm], dm]) if (!useful.includes(_e)) useful.push(_e);
+          for (const _e of [KE2[dm], _woSheng]) if (!harmful.includes(_e)) harmful.push(_e);
+          steps.push("\u5EFA\u7984\u683C\u8EAB\u5F31\uFF1A\u53D6\u5370\u6BD4\u6276\u52A9\u4E3A\u836F");
+        }
+      } else {
+        for (const _e of [KE2[dm], _woSheng]) if (!useful.includes(_e)) useful.push(_e);
+        for (const _e of [dm, SHENG2[dm]]) if (!harmful.includes(_e)) harmful.push(_e);
+        steps.push("\u7F8A\u5203\u683C\uFF1A\u9996\u9009\u5B98\u6740\u9A7E\u5203\uFF0C\u6B21\u98DF\u4F24\u6CC4\u79C0");
+      }
+    } else {
+      const keWo = KE2[dm], woSheng = SHENG2[dm], shen = SHENG2[dm], same = dm;
       if (strengthLevel === "\u504F\u65FA" || strengthLevel === "\u592A\u65FA") {
         for (const e of [keWo, woSheng, keWo]) if (e && !useful.includes(e)) useful.push(e);
         for (const e of [shen, same]) if (e && !harmful.includes(e)) harmful.push(e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40\u8EAB${strengthLevel}\uFF0C\u75C5\u5728\u65E5\u4E3B\u8FC7\u65FA\uFF0C\u53D6\u5B98\u6740\u98DF\u4F24\u8D22\u5236\u6CC4\u4E3A\u836F`);
+        steps.push("\u65FA\u8870\u6276\u6291\uFF1A\u8EAB\u65FA\u53D6\u514B\u6CC4\u8017");
       } else if (strengthLevel === "\u504F\u5F31" || strengthLevel === "\u592A\u5F31") {
         for (const e of [shen, same]) if (e && !useful.includes(e)) useful.push(e);
         for (const e of [keWo, woSheng, keWo]) if (e && !harmful.includes(e)) harmful.push(e);
-        steps.push(`${book("\u5B50\u5E73\u771F\u8BE0")}\u6708\u4EE4\u683C\u5C40\u8EAB${strengthLevel}\uFF0C\u75C5\u5728\u65E5\u4E3B\u8FC7\u5F31\uFF0C\u53D6\u5370\u6BD4\u6276\u52A9\u4E3A\u836F`);
-      } else steps.push(`\u65E5\u4E3B\u4E2D\u548C\u8C03\u5019\u4E3A\u4E3B`);
+        steps.push("\u65FA\u8870\u6276\u6291\uFF1A\u8EAB\u5F31\u53D6\u5370\u6BD4");
+      } else steps.push("\u65E5\u4E3B\u4E2D\u548C");
     }
     for (const e of harmful) {
       const i = useful.indexOf(e);
       if (i >= 0) useful.splice(i, 1);
     }
-    const neutralSet = EL_NAMES.filter((e) => !useful.includes(e) && !harmful.includes(e));
-    let natureNote = "";
-    if (stemNature.notes.length) {
-      const natLike = stemNature.like.filter((s) => useful.includes(s));
-      const natDislike = stemNature.dislike.filter((s) => harmful.includes(s));
-      const natConflictUseful = stemNature.dislike.filter((s) => useful.includes(s));
-      natureNote = stemNature.notes.join("\uFF1B");
-      if (natConflictUseful.length) natureNote += `\uFF08\u6CE8\u610F\uFF1A\u7A77\u901A\u5B9D\u9274\u63D0\u793A${dm}\u5FCC${natConflictUseful.join("/")}\uFF0C\u4F46\u6276\u6291/\u8C03\u5019\u903B\u8F91\u53D6\u4E4B\u4E3A\u7528\uFF0C\u4EE5\u8C03\u5019\u6276\u6291\u4E3A\u4E3B\uFF0C\u7A77\u901A\u5B9D\u9274\u4F5C\u53C2\u8003\uFF09`;
-    }
-    const bookNotes = [
-      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u4E94\u884C\u65FA\u76F8\u4F11\u56DA\u6B7B")}\uFF1A${deLing.note}`,
-      `${book("\u4E09\u547D\u901A\u4F1A", "\u8BBA\u6839\u57FA")}${deDi.notes.join(";")}`,
-      deShi.notes.join(";"),
-      `\u3010\u9759\u6001\u57FA\u7840\u3011${staticScore >= 0 ? "+" : ""}${Math.round(staticScore)}\u5206`,
-      tianSui.note,
-      ...dyn.notes,
-      `\u3010\u52A8\u6001\u4FEE\u6B63\u5408\u8BA1\u3011${dyn.adj >= 0 ? "+" : ""}${dyn.adj}`,
-      special.note,
-      `\u3010\u6700\u7EC8\u3011${Math.round(totalScore)}\u5206 ${strengthLevel}`,
-      ...stemNature.notes,
-      ...steps
-    ];
+    const neutralSet = EL_NAMES2.filter((e) => !useful.includes(e) && !harmful.includes(e));
+    if (harmful.length === 0 && neutralSet.length > 0) harmful.push(neutralSet[0]);
+    const _s1 = "\u3010\u4E00\u3001\u9759\u6001\u529B\u91CF\u7EDF\u8BA1\uFF08\u4E09\u547D\u901A\u4F1A\uFF09\u3011\n" + deLing.note + "\n" + deDi.notes.join(";") + "\n" + deShi.notes.join(";") + "\n\u539F\u59CB\u529B\u91CF\u53C2\u8003\uFF1A" + strengthLevel + "\n\u5F97\u4EE4" + deLing.score + "\u5206/\u5F97\u5730" + deDi.score + "\u5206/\u5F97\u52BF" + (deShi.same - deShi.opp) * 0.3 + "\u5206";
+    const _s2 = "\u3010\u4E8C\u3001\u6838\u5FC3\u51B3\u7B56\uFF1A\u683C\u5C40\u75C5\u836F\u5B9A\u7528\u795E\uFF08\u5B50\u5E73\u771F\u8BE0\uFF09\u3011\n\u672C\u5C40\u5B9A\u683C\uFF1A" + patName + "\u3010" + patGroup + "\u3011\n" + steps.join("\n") + "\n\u683C\u5C40\u54C1\u7EA7\uFF1A" + special.note;
+    const _s3 = "\u3010\u4E09\u3001\u6EF4\u5929\u9AD3\u52A8\u6001\u4FEE\u6B63\u3011\n" + tianSui.note + "\n" + dyn.notes.join("\n") + "\n\u52A8\u6001\u4FEE\u6B63\u5408\u8BA1\uFF1A" + (dyn.adj >= 0 ? "+" : "") + dyn.adj;
+    let _s4 = "\u3010\u56DB\u3001\u7A77\u901A\u5B9D\u9274\u65E5\u5E72\u6821\u6B63+\u56DB\u795E\u5B9A\u7A3F\u3011\n" + (stemNature.notes.length ? stemNature.notes.join("\n") : "(\u65E0\u51B2\u7A81)");
+    _s4 += "\n\u7B2C\u4E00\u6838\u5FC3\u7528\u795E\uFF1A" + useful.slice(0, 2).join("/") + "\n\u8F85\u52A9\u559C\u795E\uFF1A" + (useful.slice(2).length ? useful.slice(2).join("/") : "\u65E0") + "\n\u5934\u53F7\u5FCC\u795E\uFF1A" + (harmful.length ? harmful.slice(0, 2).join("/") : "\u65E0") + "\n\u4E2D\u6027\u95F2\u795E\uFF1A" + (neutralSet.length ? neutralSet.join("/") : "\u65E0");
+    const bookNotes = [_s1, _s2, _s3, _s4];
     return {
       dayMaster: { element: dm, strength: isStrong ? "\u504F\u65FA" : "\u504F\u5F31", level: strengthLevel, isStrong },
       strengthScore: Math.round(totalScore),
@@ -2031,325 +2405,6 @@ var BaZi = (() => {
   }
   function getLang() {
     return window.__LANG || "zh";
-  }
-
-  // src/patterns.ts
-  var SHENG2 = { "\u6728": "\u706B", "\u706B": "\u571F", "\u571F": "\u91D1", "\u91D1": "\u6C34", "\u6C34": "\u6728" };
-  var KE2 = { "\u6728": "\u571F", "\u571F": "\u6C34", "\u6C34": "\u706B", "\u706B": "\u91D1", "\u91D1": "\u6728" };
-  var EL_NAMES2 = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
-  var SAN_HE2 = {
-    "\u7533\u5B50\u8FB0": "\u6C34",
-    "\u4EA5\u536F\u672A": "\u6728",
-    "\u5BC5\u5348\u620C": "\u706B",
-    "\u5DF3\u9149\u4E11": "\u91D1"
-  };
-  var SAN_HUI2 = {
-    "\u4EA5\u5B50\u4E11": "\u6C34",
-    "\u5BC5\u536F\u8FB0": "\u6728",
-    "\u5DF3\u5348\u672A": "\u706B",
-    "\u7533\u9149\u620C": "\u91D1",
-    "\u8FB0\u620C\u4E11\u672A": "\u571F"
-  };
-  var HIDDEN = {
-    0: [9],
-    1: [5, 9, 7],
-    2: [0, 2, 4],
-    3: [1],
-    4: [4, 1, 9],
-    5: [2, 6, 4],
-    6: [3, 5],
-    7: [5, 3, 1],
-    8: [6, 8, 4],
-    9: [7],
-    10: [4, 7, 3],
-    11: [8, 0]
-  };
-  function zWx(zhi) {
-    return ZHI_WU_XING[zhi];
-  }
-  function mTenGod(dg, tg) {
-    const r = ((Math.floor(tg / 2) - Math.floor(dg / 2)) % 5 + 5) % 5;
-    const sy = dg % 2 !== tg % 2;
-    const MAP2 = [["\u52AB\u8D22", "\u6BD4\u80A9"], ["\u4F24\u5B98", "\u98DF\u795E"], ["\u6B63\u8D22", "\u504F\u8D22"], ["\u6B63\u5B98", "\u4E03\u6740"], ["\u6B63\u5370", "\u504F\u5370"]];
-    return MAP2[r][sy ? 0 : 1];
-  }
-  function hasHe(stems, pair) {
-    return stems.includes(pair[0]) && stems.includes(pair[1]);
-  }
-  function findSanHe(zhis) {
-    const names = zhis.map((z) => DI_ZHI[z]).sort().join("");
-    for (const [key, wx] of Object.entries(SAN_HE2)) {
-      const k = key.split("").sort().join("");
-      if (names.includes(k[0]) && names.includes(k[1]) && names.includes(k[2])) return wx;
-    }
-    return null;
-  }
-  function findSanHui(zhis) {
-    const names = new Set(zhis.map((z) => DI_ZHI[z]));
-    for (const [key, wx] of Object.entries(SAN_HUI2)) {
-      const ks = key.split("");
-      if (ks.every((k) => names.has(k))) return wx;
-    }
-    return null;
-  }
-  function hasSanHeOrHui(zhis, wx) {
-    const heEl = findSanHe(zhis);
-    const huiEl = findSanHui(zhis);
-    return heEl === wx || huiEl === wx;
-  }
-  function elementWeight(el, fe, hs) {
-    let w = fe[{ "\u6728": "wood", "\u706B": "fire", "\u571F": "earth", "\u91D1": "metal", "\u6C34": "water" }[el] || ""] || 0;
-    for (const arr of hs) {
-      for (const h of arr) {
-        if (h.element === el) w += 0.3;
-      }
-    }
-    return w;
-  }
-  function elementRatio(el, fe, hs) {
-    let total = 0, self = 0;
-    for (const e of EL_NAMES2) {
-      const w = elementWeight(e, fe, hs);
-      total += w;
-      if (e === el) self = w;
-    }
-    return total > 0 ? self / total : 0;
-  }
-  function isDangLing(dmEl, mz) {
-    const mWx = zWx(mz);
-    const wang = { "\u6728": "\u5BC5\u536F", "\u706B": "\u5DF3\u5348", "\u571F": "\u8FB0\u620C\u4E11\u672A", "\u91D1": "\u7533\u9149", "\u6C34": "\u4EA5\u5B50" };
-    return (wang[dmEl] || "").includes(DI_ZHI[mz]);
-  }
-  function hasRoot(dg, zhis, hs) {
-    for (let i = 0; i < zhis.length; i++) {
-      for (const h of hs[i]) {
-        if (h.gan === dg) return true;
-      }
-    }
-    return false;
-  }
-  function addTrace(parts, group, passed, detail) {
-    const icon = passed ? "\u2705\u901A\u8FC7\u2192" : "\u274C\u4E0D\u6210\u7ACB";
-    parts.push(`${icon}${group}\u5224\u5B9A${detail}`);
-  }
-  function determinePattern(bazi) {
-    const { pillars, dayMaster, fiveElements: fe, hiddenStems: hs } = bazi;
-    const dg = dayMaster.gan;
-    const dmEl = dayMaster.element;
-    const zhis = [pillars.year.zhi, pillars.month.zhi, pillars.day.zhi, pillars.hour.zhi];
-    const stems = [pillars.year.gan, pillars.month.gan, pillars.day.gan, pillars.hour.gan];
-    const mz = pillars.month.zhi;
-    const traces = [];
-    const hePairs = [
-      ["\u7532\u5DF1\u5316\u571F\u683C", [0, 5], "\u571F", ["\u8FB0", "\u620C", "\u4E11", "\u672A"]],
-      ["\u4E59\u5E9A\u5316\u91D1\u683C", [1, 6], "\u91D1", ["\u7533", "\u9149"]],
-      ["\u4E19\u8F9B\u5316\u6C34\u683C", [2, 7], "\u6C34", ["\u4EA5", "\u5B50"]],
-      ["\u4E01\u58EC\u5316\u6728\u683C", [3, 8], "\u6728", ["\u5BC5", "\u536F"]],
-      ["\u620A\u7678\u5316\u706B\u683C", [4, 9], "\u706B", ["\u5DF3", "\u5348"]]
-    ];
-    for (const [name, pair, el, months] of hePairs) {
-      if (hasHe(stems, pair)) {
-        const mzName = DI_ZHI[mz];
-        const monthOk = months.includes(mzName) || hasSanHeOrHui(zhis, el);
-        const keEl = KE2[el];
-        const keRatio = elementRatio(keEl, fe, hs);
-        const keOk = keRatio < 0.35;
-        if (monthOk && keOk) {
-          const trace = `\u6708\u652F${mzName}${months.includes(mzName) ? "\u5F53\u4EE4" : ""}\u52A9${el}\uFF0C${keEl}\u6C14\u4E0D\u7834\u5C40`;
-          addTrace(traces, name, true, `\uFF1A\u5929\u5E72\u6709${TIAN_GAN[pair[0]]}${TIAN_GAN[pair[1]]}\u76F8\u5408\uFF0C${trace}`);
-          return { name, group: "\u4E94\u5408\u5316\u6C14\u683C", priority: 1, trace: traces.join("\n") };
-        } else {
-          addTrace(traces, name, false, `\uFF1A\u5929\u5E72\u6709\u5408\u4F46${monthOk ? "" : "\u6708\u4EE4\u4E0D\u5F53"}${keOk ? "" : "\uFF0C\u6709\u514B\u7834"}`);
-        }
-      } else {
-        addTrace(traces, name, false, "\uFF1A\u5929\u5E72\u65E0\u6B64\u5408");
-      }
-    }
-    const zhuanWang = [
-      { name: "\u66F2\u76F4\u683C", el: "\u6728", stems: "\u7532\u4E59", branches: "\u5BC5\u536F\u8FB0\u4E09\u4F1A\u6728/\u4EA5\u536F\u672A\u4E09\u5408\u6728", ke: "\u91D1" },
-      { name: "\u708E\u4E0A\u683C", el: "\u706B", stems: "\u4E19\u4E01", branches: "\u5DF3\u5348\u672A\u4E09\u4F1A\u706B/\u5BC5\u5348\u620C\u4E09\u5408\u706B", ke: "\u6C34" },
-      { name: "\u7A3C\u7A51\u683C", el: "\u571F", stems: "\u620A\u5DF1", branches: "\u8FB0\u620C\u4E11\u672A\u56DB\u5E93\u571F", ke: "\u6728" },
-      { name: "\u4ECE\u9769\u683C", el: "\u91D1", stems: "\u5E9A\u8F9B", branches: "\u7533\u9149\u620C\u4E09\u4F1A\u91D1/\u5DF3\u9149\u4E11\u4E09\u5408\u91D1", ke: "\u706B" },
-      { name: "\u6DA6\u4E0B\u683C", el: "\u6C34", stems: "\u58EC\u7678", branches: "\u4EA5\u5B50\u4E11\u4E09\u4F1A\u6C34/\u7533\u5B50\u8FB0\u4E09\u5408\u6C34", ke: "\u6C34" }
-      // ke -> 土
-    ];
-    zhuanWang[4].ke = "\u571F";
-    for (const zw of zhuanWang) {
-      if (dmEl !== zw.el) {
-        addTrace(traces, zw.name, false, `\uFF1A\u65E5\u4E3B\u975E${zw.stems}`);
-        continue;
-      }
-      const dl = isDangLing(dmEl, mz);
-      const zh = hasSanHeOrHui(zhis, dmEl) || dmEl === "\u571F" && !zhis.some((z) => ![1, 4, 7, 10].includes(z));
-      const keRatio = elementRatio(zw.ke, fe, hs);
-      const keWeak = keRatio < 0.25;
-      if (dl && zh && keWeak) {
-        const branchDesc = hasSanHeOrHui(zhis, dmEl) ? "\u5730\u652F\u6709\u52A9" : "";
-        addTrace(traces, zw.name, true, `\uFF1A\u65E5\u4E3B${dmEl}\u5F97\u4EE4\uFF0C\u5168\u5C40${dmEl}\u52BF\u6781\u65FA\uFF0C${zw.ke}\u5F31`);
-        return { name: zw.name, group: "\u4E13\u65FA\u683C\u5C40", priority: 2, trace: traces.join("\n") };
-      } else {
-        addTrace(traces, zw.name, false, `\uFF1A${dl ? "" : "\u65E5\u4E3B\u4E0D\u5F97\u4EE4"}${zh ? "" : "\uFF0C\u5730\u652F\u4E0D\u6210\u52BF"}${keWeak ? "" : "\uFF0C\u514B\u795E\u4E0D\u5F31"}`);
-      }
-    }
-    const dmHasRoot = hasRoot(dg, zhis, hs);
-    const hasHelp = stems.some(function(s) {
-      return s === dg;
-    });
-    const hasPrint = stems.some(function(s) {
-      var _r = ((Math.floor(s / 2) - Math.floor(dg / 2)) % 5 + 5) % 5;
-      return _r === 4;
-    });
-    const hasNoHelp = !hasHelp && !hasPrint;
-    function hasOnlyWeakRoot(dg2, zhis2, hs2) {
-      let strongCount = 0;
-      for (let i = 0; i < zhis2.length; i++) {
-        for (const h of hs2[i]) {
-          if (h.gan === dg2) {
-            const idx = (HIDDEN[zhis2[i]] || []).indexOf(dg2);
-            if (idx <= 1) strongCount++;
-          }
-        }
-      }
-      return strongCount === 0;
-    }
-    const wealthRatio = elementRatio("\u91D1", fe, hs) + elementRatio("\u6C34", fe, hs);
-    function getWealthEl(dm) {
-      return KE2[dm];
-    }
-    function getShaEl(dm) {
-      return KE2[SHENG2[dm]];
-    }
-    function getChildEl(dm) {
-      return SHENG2[dm];
-    }
-    function checkCongWealth(isFake) {
-      const wEl = getWealthEl(dmEl);
-      const wR = elementRatio(wEl, fe, hs);
-      if (!hasNoHelp) return false;
-      return wR > 0.5 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
-    }
-    function checkCongSha(isFake) {
-      const sEl = getShaEl(dmEl);
-      const sR = elementRatio(sEl, fe, hs);
-      if (!hasNoHelp) return false;
-      return sR > 0.5 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
-    }
-    function checkCongChild(isFake) {
-      const cEl = getChildEl(dmEl);
-      const cR = elementRatio(cEl, fe, hs);
-      if (!hasNoHelp) return false;
-      return cR > 0.5 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
-    }
-    function checkCongWeak(isFake) {
-      const dmR = elementRatio(dmEl, fe, hs);
-      if (!hasNoHelp) return false;
-      return dmR < 0.25 && (isFake ? dmHasRoot && hasOnlyWeakRoot(dg, zhis, hs) : !dmHasRoot);
-    }
-    const congChecks = [
-      { name: "\u4ECE\u8D22\u683C", fn: checkCongWealth, elDesc: `\u5168\u5C40${getWealthEl(dmEl)}\u65FA` },
-      { name: "\u4ECE\u6740\u683C", fn: checkCongSha, elDesc: `\u5168\u5C40${getShaEl(dmEl)}\u65FA` },
-      { name: "\u4ECE\u513F\u683C", fn: checkCongChild, elDesc: `\u5168\u5C40${getChildEl(dmEl)}\u65FA` },
-      { name: "\u4ECE\u5F31\u683C", fn: checkCongWeak, elDesc: "\u5168\u5C40\u65E0\u52A9" }
-    ];
-    for (const cc of congChecks) {
-      if (cc.fn(false)) {
-        addTrace(traces, "\u771F" + cc.name, true, `\uFF1A${cc.elDesc}\uFF0C\u65E5\u4E3B\u65E0\u6839\u65E0\u52A9` + (cc.name === "\u4ECE\u8D22\u683C" ? ",\u987A\u4ECE\u8D22\u52BF\u4E3A\u7528" : cc.name === "\u4ECE\u6740\u683C" ? ",\u987A\u4ECE\u6740\u52BF\u4E3A\u7528" : cc.name === "\u4ECE\u513F\u683C" ? ",\u987A\u52BF\u6CC4\u79C0\u4E3A\u7528" : ",\u5168\u76D8\u65E0\u751F\u6276\u4E4B\u6C14"));
-        return { name: "\u771F" + cc.name, group: "\u4ECE\u683C\uFF08\u771F/\u5047\uFF09", priority: 3, trace: traces.join("\n") };
-      }
-      if (cc.fn(true)) {
-        addTrace(traces, "\u5047" + cc.name, true, `\uFF1A${cc.elDesc}\uFF0C\u65E5\u4E3B\u4EC5\u6709\u5FAE\u6839` + (cc.name === "\u4ECE\u8D22\u683C" ? ",\u8FD0\u5236\u6839\u8F6C\u771F\u4ECE" : cc.name === "\u4ECE\u6740\u683C" ? ",\u8FD0\u5236\u6839\u8F6C\u771F\u4ECE" : cc.name === "\u4ECE\u513F\u683C" ? ",\u8FD0\u514B\u6839\u6210\u771F\u4ECE" : ",\u8FD0\u5236\u6839\u8F6C\u771F\u4ECE"));
-        return { name: "\u5047" + cc.name, group: "\u4ECE\u683C\uFF08\u771F/\u5047\uFF09", priority: 3, trace: traces.join("\n") };
-      }
-    }
-    for (const cc of congChecks) {
-      addTrace(traces, cc.name, false, `\uFF1A\u4E0D\u6EE1\u8DB3\u4ECE${cc.name.replace("\u4ECE", "").replace("\u683C", "")}\u6761\u4EF6`);
-    }
-    const mainHS = HIDDEN[mz] || [];
-    const hsOnStems = [];
-    for (let idx = 0; idx < mainHS.length; idx++) {
-      const g = mainHS[idx];
-      if (stems.includes(g)) {
-        const pri = idx === 0 ? "\u672C\u6C14" : idx === 1 ? "\u4E2D\u6C14" : "\u4F59\u6C14";
-        hsOnStems.push({ gan: g, name: TIAN_GAN[g], priority: pri });
-      }
-    }
-    hsOnStems.sort((a, b) => {
-      const order = { "\u672C\u6C14": 0, "\u4E2D\u6C14": 1, "\u4F59\u6C14": 2 };
-      return order[a.priority] - order[b.priority];
-    });
-    let selectedGan;
-    let selectedTrace;
-    if (hsOnStems.length > 0) {
-      selectedGan = hsOnStems[0].gan;
-      selectedTrace = `\u6708\u652F${DI_ZHI[mz]}\u85CF\u5E72\uFF1A${mainHS.map((g) => TIAN_GAN[g]).join("\u3001")}\uFF1B${hsOnStems[0].priority}${TIAN_GAN[selectedGan]}\u900F\u5E72`;
-    } else {
-      selectedGan = mainHS[0] || 0;
-      selectedTrace = `\u6708\u652F${DI_ZHI[mz]}\u5168\u4E0D\u900F\u5E72\uFF0C\u672C\u6C14${TIAN_GAN[selectedGan]}\u5B9A\u683C`;
-    }
-    const pg = mTenGod(dg, selectedGan);
-    const geMap = {
-      "\u6B63\u5B98": "\u6B63\u5B98\u683C",
-      "\u4E03\u6740": "\u4E03\u6740\u683C",
-      "\u6B63\u8D22": "\u6B63\u8D22\u683C",
-      "\u504F\u8D22": "\u504F\u8D22\u683C",
-      "\u6B63\u5370": "\u6B63\u5370\u683C",
-      "\u504F\u5370": "\u504F\u5370\u683C",
-      "\u98DF\u795E": "\u98DF\u795E\u683C",
-      "\u4F24\u5B98": "\u4F24\u5B98\u683C",
-      "\u6BD4\u80A9": "\u5EFA\u7984\u683C",
-      "\u52AB\u8D22": "\u7F8A\u5203\u683C"
-    };
-    const ge = geMap[pg];
-    if (ge && pg !== "\u6BD4\u80A9" && pg !== "\u52AB\u8D22") {
-      const useDesc = {
-        "\u6B63\u5B98": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u8D22\u751F\u5B98\u3001\u5370\u62A4\u5B98\uFF1B\u5FCC\u4F24\u5B98\u514B\u5B98",
-        "\u4E03\u6740": "\u56DB\u51F6\u795E\u9006\u7528\uFF0C\u559C\u98DF\u795E\u5236\u6740\u3001\u5370\u661F\u5316\u6740\uFF1B\u5FCC\u65E0\u5236\u653B\u8EAB",
-        "\u6B63\u8D22": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u62A4\u8D22\uFF1B\u5FCC\u6BD4\u52AB\u593A\u8D22",
-        "\u504F\u8D22": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u62A4\u8D22\uFF1B\u5FCC\u6BD4\u52AB\u8017\u8D22",
-        "\u5370": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u5B98\u6740\u751F\u5370\uFF1B\u5FCC\u8D22\u661F\u7834\u5370",
-        "\u98DF\u795E": "\u56DB\u5409\u795E\u987A\u7528\uFF0C\u559C\u751F\u8D22\u6CC4\u79C0\uFF1B\u5FCC\u67AD\u795E\u593A\u98DF",
-        "\u4F24\u5B98": "\u56DB\u51F6\u795E\u9006\u7528\uFF0C\u559C\u751F\u8D22\u3001\u914D\u5370\uFF1B\u5FCC\u4F24\u5B98\u89C1\u5B98",
-        "\u504F\u5370": "\u56DB\u51F6\u795E\u9006\u7528\uFF0C\u559C\u504F\u8D22\u5236\u8861\u3001\u98DF\u795E\u6CC4\u5370\uFF1B\u5FCC\u504F\u5370\u593A\u98DF"
-      };
-      const useText = useDesc[pg] || "";
-      addTrace(traces, ge, true, `\uFF1A${selectedTrace}\u2192${pg}${useText ? "\uFF0C" + useText : ""}`);
-      return { name: ge, group: "\u6B63\u7EDF\u516B\u683C", priority: 4, trace: traces.join("\n") };
-    }
-    if (pg === "\u6BD4\u80A9") {
-      addTrace(traces, "\u5EFA\u7984\u683C", true, `\uFF1A\u6708\u652F${DI_ZHI[mz]}\u4E3A\u65E5\u4E3B\u4E34\u5B98\u7984\u4F4D\uFF0C\u5341\u795E\u6BD4\u80A9\uFF0C\u65E0\u5148\u5929\u6708\u4EE4\u683C\u5C40\uFF0C\u4EE5\u8EAB\u65FA\u8EAB\u5F31\u5B9A\u75C5\u836F\uFF1A\u65FA\u5219\u5236\u6CC4\uFF0C\u5F31\u5219\u5E2E\u6276`);
-      return { name: "\u5EFA\u7984\u683C", group: "\u7984\u5203\u5916\u683C", priority: 5, trace: traces.join("\n") };
-    }
-    if (pg === "\u52AB\u8D22") {
-      addTrace(traces, "\u7F8A\u5203\u683C", true, `\uFF1A\u6708\u652F${DI_ZHI[mz]}\u4E3A\u65E5\u4E3B\u5E1D\u65FA\u7F8A\u5203\u4F4D\uFF0C\u5341\u795E\u52AB\u8D22\uFF0C\u75C5\u5728\u5203\u65FA\uFF0C\u9996\u9009\u5B98\u6740\u9A7E\u5203\u5236\u65FA\uFF0C\u6B21\u53D6\u98DF\u4F24\u6CC4\u79C0`);
-      return { name: "\u7F8A\u5203\u683C", group: "\u7984\u5203\u5916\u683C", priority: 5, trace: traces.join("\n") };
-    }
-    if (dg === 6 || dg === 7) {
-      if (findSanHe(zhis) === "\u6C34") {
-        addTrace(traces, "\u4E95\u680F\u53C9\u683C", true, "\uFF1A\u5E9A\u91D1\u65E5\u4E3B\uFF0C\u7533\u5B50\u8FB0\u4E09\u5408\u6C34\u5C40\uFF0C\u4F24\u5B98\u6CC4\u79C0\u6210\u683C");
-        return { name: "\u4E95\u680F\u53C9\u683C", group: "\u7ECF\u5178\u7279\u6B8A\u5916\u683C", priority: 6, trace: traces.join("\n") };
-      }
-    }
-    if (dg === 0 && zhis.filter((z) => z === 0).length >= 2) {
-      addTrace(traces, "\u5B50\u9065\u5DF3\u683C", true, "\uFF1A\u7532\u5B50\u65E5\u4E3B\uFF0C\u5730\u652F\u5B50\u9065\u5408\u5DF3\u706B\u5B98\u661F");
-      return { name: "\u5B50\u9065\u5DF3\u683C", group: "\u7ECF\u5178\u7279\u6B8A\u5916\u683C", priority: 6, trace: traces.join("\n") };
-    }
-    if (dg <= 1 && zhis.some((z) => z === 10 || z === 11)) {
-      addTrace(traces, "\u516D\u7532\u8D8B\u4E7E\u683C", true, "\uFF1A\u7532\u65E5\u4E3B\uFF0C\u5730\u652F\u89C1\u620C\u4EA5\u4E7E\u5BAB");
-      return { name: "\u516D\u7532\u8D8B\u4E7E\u683C", group: "\u7ECF\u5178\u7279\u6B8A\u5916\u683C", priority: 6, trace: traces.join("\n") };
-    }
-    addTrace(traces, "\u7279\u6B8A\u5916\u683C", false, "\uFF1A\u4E0D\u6EE1\u8DB3\u4EFB\u4F55\u7279\u6B8A\u5916\u683C\u6761\u4EF6");
-    addTrace(traces, "\uFF08\u515C\u5E95\uFF09", true, `\uFF1A\u6708\u4EE4\u672C\u6C14${TIAN_GAN[mainHS[0]]}\u5341\u795E${pg}\u5B9A${ge || "\u666E\u901A\u683C\u5C40"}`);
-    return { name: ge || "\u666E\u901A\u683C\u5C40", group: "\u6B63\u7EDF\u516B\u683C", priority: 4, trace: traces.join("\n") };
-  }
-  function getAllPatterns() {
-    return [
-      { group: "\u3010\u4E94\u5408\u5316\u6C14\u683C\u3011", names: ["\u7532\u5DF1\u5316\u571F\u683C", "\u4E59\u5E9A\u5316\u91D1\u683C", "\u4E19\u8F9B\u5316\u6C34\u683C", "\u4E01\u58EC\u5316\u6728\u683C", "\u620A\u7678\u5316\u706B\u683C"] },
-      { group: "\u3010\u4E13\u65FA\u683C\u5C40\u3011", names: ["\u66F2\u76F4\u683C", "\u708E\u4E0A\u683C", "\u7A3C\u7A51\u683C", "\u4ECE\u9769\u683C", "\u6DA6\u4E0B\u683C"] },
-      { group: "\u3010\u4ECE\u683C\uFF08\u771F/\u5047\uFF09\u3011", names: ["\u771F\u4ECE\u8D22\u683C", "\u5047\u4ECE\u8D22\u683C", "\u771F\u4ECE\u6740\u683C", "\u5047\u4ECE\u6740\u683C", "\u771F\u4ECE\u513F\u683C", "\u5047\u4ECE\u513F\u683C", "\u771F\u4ECE\u5F31\u683C", "\u5047\u4ECE\u5F31\u683C"] },
-      { group: "\u3010\u6B63\u7EDF\u516B\u683C\u3011", names: ["\u6B63\u5B98\u683C", "\u4E03\u6740\u683C", "\u6B63\u8D22\u683C", "\u504F\u8D22\u683C", "\u6B63\u5370\u683C", "\u504F\u5370\u683C", "\u98DF\u795E\u683C", "\u4F24\u5B98\u683C"] },
-      { group: "\u3010\u7984\u5203\u5916\u683C\u3011", names: ["\u5EFA\u7984\u683C", "\u7F8A\u5203\u683C"] },
-      { group: "\u3010\u7ECF\u5178\u7279\u6B8A\u5916\u683C\u3011", names: ["\u4E95\u680F\u53C9\u683C", "\u5B50\u9065\u5DF3\u683C", "\u516D\u7532\u8D8B\u4E7E\u683C"] }
-    ];
   }
 
   // src/index.ts
