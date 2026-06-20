@@ -2524,14 +2524,43 @@ var BaZi = (() => {
     if (typeof mz === "number" && typeof dmGan === "number") {
       var _cx = determineConstitution(mz, dmGan, birthDay);
       if (_cx) {
+        var _patho = _cx.pathogenesis.replace(/^根据《内经》禀赋干支平衡分析[，。]?/, "").replace(/，具体分析如下[：:]?/, "").replace(/。+$/, "").trim();
+        var _emo = _cx.emotion.replace(/\n/g, "").replace(/^[\s　]+/, "").replace(/^[^\u4e00-\u9fff]+/, "").substring(0, 100);
+        var _dl = _cx.diet.split("\n").filter(function(l) {
+          return l.trim();
+        });
+        var _dyi = [], _dji = [];
+        for (var _i = 0; _i < _dl.length; _i++) {
+          var _lt = _dl[_i].replace(/^\d+/, "").replace(/^[：:、\s]+/, "").trim();
+          if (!_lt) continue;
+          if (/^宜/ui.test(_lt)) _dyi.push(_lt.replace(/^宜[：:]?[、\s]*/, ""));
+          else if (/^(忌|不宜)/ui.test(_lt)) _dji.push(_lt.replace(/^(忌|不宜)[：:]?[、\s]*/, ""));
+          else if (/^可/ui.test(_lt)) _dyi.push(_lt.replace(/^可[：:]?[、\s]*/, ""));
+          else if (/^适合/ui.test(_lt)) _dyi.push(_lt.replace(/^适合[：:]?/, ""));
+          else if (/^少/ui.test(_lt)) _dji.push(_lt);
+          else if (/^口味/ui.test(_lt)) _dyi.push(_lt.replace(/^口味[：:]?/, ""));
+          else _dyi.push(_lt);
+        }
         var _s6 = "\n\n# \u516D\u3001\u300A\u5185\u7ECF\u300B\u5E72\u652F\u5148\u5929\u7980\u8D4B\u4E13\u9879\u5206\u6790\n";
-        _s6 += "\u5224\u5B9A\u4F9D\u636E\uFF1A" + DI_ZHI[mz] + "\u6708\uFF08" + _cx.season + "\u5B63\uFF09\uFF0C\u65E5\u4E3B" + TIAN_GAN[dmGan] + "\uFF08" + _cx.masterFive + "\u7980\u8D4B\uFF09\uFF0C\u5206\u578B\uFF1A\u3010" + _cx.name + "\u3011\n";
-        _s6 += "1\u3001\u5148\u5929\u6838\u5FC3\u75C5\u673A\uFF1A" + _cx.pathogenesis + "\n";
-        _s6 += "2\u3001\u4E94\u810F\u6613\u611F\u95EE\u9898\uFF1A" + _cx.illnessTip + "\n";
-        _s6 += "3\u3001\u60C5\u5FD7\u8C03\u517B\u5EFA\u8BAE\uFF1A" + _cx.emotion + "\n";
-        _s6 += "4\u3001\u996E\u98DF\u5B9C\u5FCC\u65B9\u6848\uFF1A" + _cx.diet + "\n";
-        _s6 += "5\u3001\u5C45\u4F4F\u73AF\u5883\u8C03\u6574\u6307\u5357\uFF1A" + _cx.environment + "\n";
-        _s6 += "6\u3001\u8FD0\u52A8\u4E0E\u7406\u7597\u5B9C\u5FCC\uFF1A" + _cx.healthAction + "\n";
+        _s6 += "\u5224\u5B9A\u4F9D\u636E\uFF1A" + DI_ZHI[mz] + "\u6708\uFF08" + _cx.season + "\uFF09\uFF0C\u65E5\u4E3B" + TIAN_GAN[dmGan] + "\uFF08" + _cx.masterFive + "\u7980\u8D4B\uFF09\u2192\u3010" + _cx.name + "\u3011\n";
+        _s6 += "1\u3001\u5148\u5929\u75C5\u673A\uFF1A" + (_patho || "\u706B\u91D1\u76F8\u640F\u3001\u6C14\u673A\u4E0D\u5229") + "\n";
+        _s6 += "2\u3001\u6613\u611F\u75C5\u75C7\uFF1A" + _cx.illnessTip + "\n";
+        _s6 += "3\u3001\u60C5\u5FD7\u8C03\u517B\uFF1A" + (_emo || "\u5E73\u548C\u5FC3\u6001\u3001\u653E\u677E\u8EAB\u5FC3") + "\n";
+        _s6 += "4\u3001\u996E\u98DF\u8C03\u517B\n";
+        _s6 += "\u2705\u5B9C\uFF1A" + (_dyi.join("\uFF1B").replace(/[；]+/g, "\uFF1B") || "\u65E0\u660E\u663E\u504F\u55DC") + "\n";
+        _s6 += "\u274C\u5FCC\uFF1A" + (_dji.join("\uFF1B").replace(/[；]+/g, "\uFF1B") || "\u65E0\u660E\u663E\u7981\u5FCC") + "\n";
+        _s6 += "5\u3001\u5C45\u5BB6\u73AF\u5883\n";
+        var _env = _cx.environment.replace(/\n/g, "").replace(/[\s　]+/g, "").replace(/\d/g, "");
+        var _ey = _env.match(/宜[^。；！]*[。；]?/g) || [];
+        var _ej = _env.match(/忌[^。；！]*[。；]?/g) || [];
+        _s6 += "\u5B9C\uFF1A" + (_ey.join("\uFF1B").replace(/宜[：:]?/g, "").replace(/[。；]$/, "") || "\u6E29\u6696\u91C7\u5149\u826F\u597D\u73AF\u5883") + "\n";
+        _s6 += "\u5FCC\uFF1A" + (_ej.join("\uFF1B").replace(/忌[：:]?/g, "").replace(/[。；]$/, "") || "\u9634\u51B7\u6F6E\u6E7F") + "\n";
+        _s6 += "6\u3001\u8FD0\u52A8\u4E0E\u7406\u7597\n";
+        var _ha = _cx.healthAction.replace(/\n/g, "").replace(/[\s　]+/g, "").replace(/\d/g, "").replace(/[一二三四五六七八九十]+/g, "");
+        var _haRec = _ha.match(/(?:宜|可|适合)[^。]*[。]?/g) || [];
+        var _haAvoid = _ha.match(/(?:不宜|忌|不适合|避免)[^。]*[。]?/g) || [];
+        _s6 += "\u2705\u63A8\u8350\uFF1A" + (_haRec.join("\uFF1B").replace(/^(宜|可|适合)[：:]?/, "") || "\u9002\u91CF\u6709\u6C27\u8FD0\u52A8") + "\n";
+        _s6 += "\u274C\u4E0D\u9002\u5408\uFF1A" + (_haAvoid.join("\uFF1B").replace(/^(不宜|忌|不适合|避免)[：:]?/, "") || "\u65E0\u660E\u663E\u7981\u5FCC") + "\n";
         var _cf = useful.filter(function(e) {
           return _cx.avoidGod && _cx.avoidGod.includes(e);
         });
@@ -2539,12 +2568,12 @@ var BaZi = (() => {
           return _cx.matchGod && _cx.matchGod.includes(e);
         });
         var _ht = "";
-        if (_mc.length > 0 && _cf.length === 0) _ht = "\u4F53\u8D28\u559C\u7528\u4E0E\u683C\u5C40\u7528\u795E\u9AD8\u5EA6\u5951\u5408\uFF0C\u8C03\u517B\u65B9\u5411\u4E0E\u547D\u7406\u559C\u7528\u4E00\u81F4\u3002";
-        else if (_cf.length > 0) _ht = "\u4F53\u8D28\u5148\u5929\u5FCC\u8BB3" + _cf.join("/") + "\uFF0C\u4F46\u683C\u5C40\u53D6\u4E4B\u4E3A\u6838\u5FC3\u7528\u795E\uFF0C\u8C03\u517B\u65F6\u4EE5\u547D\u7406\u7528\u795E\u4E3A\u4E3B\u3001\u4F53\u8D28\u517B\u751F\u4E3A\u8F85\u3002";
-        else _ht = "\u4F53\u8D28\u559C\u5FCC\u4E0E\u683C\u5C40\u7528\u795E\u65E0\u660E\u663E\u51B2\u7A81\uFF0C\u53EF\u76F8\u4E92\u72EC\u7ACB\u53C2\u8003\u3002";
+        if (_mc.length > 0 && _cf.length === 0) _ht = "\u4F53\u8D28\u559C\u5FCC\u4E0E\u683C\u5C40\u7528\u795E\u65E0\u77DB\u76FE\uFF0C\u517B\u751F\u65B9\u6848\u53EF\u76F4\u63A5\u6267\u884C";
+        else if (_cf.length > 0) _ht = "\u5148\u5929\u4F53\u8D28\u4E0E\u683C\u5C40\u7528\u795E\u76F8\u6096\uFF0C\u65E5\u5E38\u8C03\u517B\u4E8C\u8005\u6298\u4E2D\u517C\u987E";
+        else _ht = "\u4F53\u8D28\u559C\u5FCC\u4E0E\u683C\u5C40\u7528\u795E\u65E0\u660E\u663E\u51B2\u7A81\uFF0C\u53EF\u76F8\u4E92\u53C2\u8003";
         _s6 += "7\u3001\u7980\u8D4B\u4E0E\u683C\u5C40\u7528\u795E\u8C03\u548C\u8BF4\u660E\uFF1A" + _ht + "\n";
-        _s6 += "8\u3001\u5F53\u524D\u5927\u8FD0\u540E\u5929\u4F53\u8D28\u5FAE\u8C03\u63D0\u793A\uFF1A\u5F85\u7ED3\u5408\u5927\u8FD0\u4E94\u884C\u8865\u5145\u7EC6\u5316\u3002\n";
-        _s6 += "\n\uFF08\u6CE8\uFF1A\u4F53\u8D28\u5E95\u5C42\u6E90\u81EA\u300A\u7075\u67A2\xB7\u9634\u9633\u4E8C\u5341\u4E94\u4EBA\u300B\uFF0C\u672C\u4E94\u5B63\u65E5\u4E3B\u5206\u578B\u4E3A\u547D\u7406\u4E2D\u533B\u878D\u5408\u884D\u751F\u4F53\u7CFB\uFF09\n";
+        _s6 += "8\u3001\u5927\u8FD0\u540E\u5929\u5FAE\u8C03\u63D0\u793A\uFF1A\u5F85\u7ED3\u5408\u5927\u8FD0\u4E94\u884C\u8865\u5145\u7EC6\u5316\n";
+        _s6 += "\n\uFF08\u5907\u6CE8\uFF1A\u4F53\u8D28\u7406\u8BBA\u6839\u57FA\u4E3A\u300A\u7075\u67A2\xB7\u9634\u9633\u4E8C\u5341\u4E94\u4EBA\u300B\uFF0C\u672C\u5206\u578B\u4E3A\u516B\u5B57\u5E72\u652F\u7ED3\u5408\u56DB\u5B63\u884D\u751F\u517B\u751F\u53C2\u8003\u4F53\u7CFB\uFF09\n";
         bookNotes.push(_s6);
       }
     }
