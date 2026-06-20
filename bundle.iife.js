@@ -2491,9 +2491,6 @@ var BaZi = (() => {
         if (isLateZiHour(hour)) {
           _hp = calcHourPillar(_dp.gan, hour);
         } else {
-          var _pd2 = new Date(input.year, input.month - 1, input.day - 1);
-          var _pdp2 = calcDayPillar(_pd2.getFullYear(), _pd2.getMonth() + 1, _pd2.getDate());
-          _dp = _pdp2;
           _hp = calcHourPillar(_dp.gan, hour);
         }
       }
