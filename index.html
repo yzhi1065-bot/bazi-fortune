@@ -600,61 +600,81 @@ el.innerHTML=html;
 var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+function showAcu(name,fixedPair,extraNote){
+  try{var info=BaZi.getAcupointInfo?BaZi.getAcupointInfo(name):null;if(!info)return '<div style=font-size:11px;color:#9a8a7a>'+name+'</div>';
+  var h='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:6px>'+info.name+'</div>';
+  h+='<div style=font-size:11px;color:#9a8a7a;line-height:1.8>';
+  h+='1. 经络归属：'+info.meridian+(info.type?'('+info.type+')':'')+(extraNote?','+extraNote:'')+'<br>';
+  h+='2. 标准定位：'+info.location+'<br>';
+  h+='3. 主治：'+info.indications+'<br>';
+  h+='4. 配伍搭配：';if(fixedPair)h+='<b style=color:#d4735e>【固定配对】</b>'+fixedPair+'<br>';
+  if(info.pairings)h+=info.pairings.join('；');
+  h+='</div>';return h;}catch(ex){return '<div>'+name+'</div>';}
+}
+var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 function renderAcupoint(){
 var el=document.getElementById('cal_det');if(!el)return;
 var y=_calSelY||2026,m=_calSelM||6,d=_calSelD||21;
 var hsel=document.getElementById('cal_hour');var h=_calSelH=hsel?+hsel.value:12;
 var ec=null;try{ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:h,minute:0,gender:'male'});}catch(ex){}
-var html='<div style=font-size:10px;color:#887a6e;margin-bottom:6px>已选：'+y+'/'+m+'/'+d+' 时辰：'+_hr[h/2]+'</div>';
-function showAcu(name,fixedPair,extraNote){
-  var info=null;try{info=BaZi.getAcupointInfo?BaZi.getAcupointInfo(name):null;}catch(ex){}
-  if(!info)return '<div style=font-size:11px;color:#9a8a7a>'+name+'</div>';
-  var h='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:6px>'+info.name+'</div>';
-  h+='<div style=font-size:11px;color:#9a8a7a;line-height:1.8>';
-  h+='1. 经络归属：'+info.meridian+(info.type?'('+info.type+')':'')+(extraNote?'，'+extraNote:'')+'<br>';
-  h+='2. 标准定位：'+info.location+'<br>';
-  h+='3. 主治：'+info.indications+'<br>';
-  h+='4. 配伍搭配：';
-  if(fixedPair)h+='<b style=color:#d4735e>【固定配对】</b>'+fixedPair+'<br>';
-  if(info.pairings)h+=info.pairings.join('；');
-  h+='</div>';return h;
+var dg=ec&&ec.pillars?ec.pillars.day.gan:2,dz=ec&&ec.pillars?ec.pillars.day.zhi:2;
+var hg=ec&&ec.pillars?ec.pillars.hour.gan:0,hz=ec&&ec.pillars?ec.pillars.hour.zhi:6;
+var tgan=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var dzhi=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var mer=['胆经','肝经','小肠经','心经','胃经','脾经','大肠经','肺经','膀胱经','肾经'];
+var typeOrder=['井','荥','输','经','合'];
+var html='<div style=font-size:10px;color:#887a6e;margin-bottom:6px>已选：'+y+'/'+m+'/'+d+' '+dzhi[hz]+'时('+tgan[hg]+dzhi[hz]+')</div>';
+html+='<div style=background:rgba(196,162,101,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#c4a265;margin-bottom:4px>① 子午流注</div>';
+var szMap={0:'胆经',1:'肝经',2:'肺经',3:'大肠经',4:'胃经',5:'脾经',6:'心经',7:'小肠经',8:'膀胱经',9:'肾经',10:'心包经',11:'三焦经'};
+var hzIdx=Math.floor(((h+1)%24)/2);var merName=szMap[hzIdx]||'';
+html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+merName+'当令</div>';
+if(merName){var md=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS[merName]:null;
+if(md&&md.wushu&&md.wushu.length>=3){html+=showAcu(md.wushu[2].name,'','');
+html+='<div style=font-size:10px;color:#6a5e50>五输穴：'+md.wushu.map(function(p){return p.name+'('+p.type+')';}).join('、')+' 原穴：'+(md.yuan?md.yuan.name:'-')+'</div>';}}
+var isYang=dg%2===0,hgIsYang=hg%2===0;
+if(isYang&&hgIsYang){
+  var mIdx=hg%10;var njMer=mer[mIdx]||'';var njMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS[njMer]:null;var tIdx=hg%5;
+  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>阳日阳时开阳经穴</div>';
+  if(njMd){html+=showAcu(njMd.wushu[tIdx]?njMd.wushu[tIdx].name:'',njMer,'');if(typeOrder[tIdx]==='输'&&njMd.yuan)html+='<div style=font-size:10px;color:#6a5e50>返本还原：'+njMd.yuan.name+'</div>';}
+}else if(!isYang&&!hgIsYang){
+  var mIdx=hg%10;var njMer=mer[mIdx]||'';var njMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS[njMer]:null;var tIdx=hg%5;
+  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>阴日阴时开阴经穴</div>';
+  if(njMd){html+=showAcu(njMd.wushu[tIdx]?njMd.wushu[tIdx].name:'',njMer,'');if(typeOrder[tIdx]==='输'&&njMd.yuan)html+='<div style=font-size:10px;color:#6a5e50>返本还原：'+njMd.yuan.name+'</div>';}
+}else if(isYang&&!hgIsYang){
+  // 气纳三焦
+  var sjMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS['三焦经']:null;
+  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>气纳三焦</div>';
+  if(sjMd){var sjIdx=(hg%5+2)%5;html+=showAcu(sjMd.wushu[sjIdx]?sjMd.wushu[sjIdx].name:'','','');}
+}else{
+  // 血归包络
+  var xbMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS['心包经']:null;
+  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>血归包络</div>';
+  if(xbMd){var xbIdx=(hg%5+2)%5;html+=showAcu(xbMd.wushu[xbIdx]?xbMd.wushu[xbIdx].name:'','','');}
 }
-html+='<div id=sec1 style=background:rgba(196,162,101,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#c4a265;margin-bottom:4px>① 子午流注</div>';
-try{
-if(BaZi.calcNaZiFa){var nz=BaZi.calcNaZiFa(h);if(nz&&nz.wushuPoints){
-  html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+nz.dangLingMeridian+'当令</div>';
-  html+=showAcu(nz.wushuPoints[2].name,'配内关治心慌失眠；配三阴交调理心神不宁','');
-  html+='<div style=font-size:10px;color:#6a5e50>五输穴：'+nz.wushuPoints.map(function(p){return p.name+'('+p.type+')';}).join('、')+' 原穴：'+(nz.yuanPoint?nz.yuanPoint.name:'-')+'</div>';
-}}
-if(BaZi.calcNaJiaFa&&ec&&ec.pillars){var nj=BaZi.calcNaJiaFa(ec.pillars.day.gan,ec.pillars.hour.gan);if(nj&&nj.openingAcupoint){
-  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>'+nj.openingAcupoint+'</div>';
-  html+=showAcu(nj.openingAcupoint,'配外关疏通三焦经络；配肩井缓解肩颈僵硬；配神门改善失眠烦躁','');
-  if(nj.yuanReturn)html+='<div style=font-size:10px;color:#6a5e50>返本还原：'+nj.yuanReturn+'</div>';
-  if(nj.note)html+='<div style=font-size:10px;color:#6a5e50>'+nj.note+'</div>';
-}}
-}catch(ex){}
 html+='</div>';
 html+='<div style=background:rgba(212,115,94,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#d4735e;margin-bottom:4px>② 灵龟八法</div>';
-try{
-if(BaZi.calcLingGuiBaFa&&ec&&ec.pillars){var dg=ec.pillars.day,hg=ec.pillars.hour;var lg=BaZi.calcLingGuiBaFa(dg.gan,dg.zhi,hg.gan,hg.zhi);if(lg){
-  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>主开穴：'+lg.mainAcupoint+'</div>';
-  html+=showAcu(lg.mainAcupoint,'','通'+lg.bagua+'卦('+lg.direction+')');
-  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin:4px 0 2px>配对合穴：'+lg.pairedAcupoint+'</div>';
-  html+=showAcu(lg.pairedAcupoint,'固定配对'+lg.mainAcupoint,'');
-}}
-}catch(ex){}
+var dgBase=[10,9,7,8,7,10,9,7,8,7];var dzBase=[7,6,5,4,3,2,7,6,5,4,3,2];
+var hgBase=[9,8,7,6,5,9,8,7,6,5];var hzBase=[9,8,7,6,5,4,9,8,7,6,5,4];
+var total=(dgBase[dg]||0)+(dzBase[dz]||0)+(hgBase[hg]||0)+(hzBase[hz]||0);
+var div=dg%2===0?9:6;var rem=total%div;if(rem===0)rem=div;if(rem===5)rem=6;
+var bgMap={1:{gua:'坎',dir:'北'},2:{gua:'坤',dir:'西南'},3:{gua:'震',dir:'东'},4:{gua:'巽',dir:'东南'},6:{gua:'乾',dir:'西北'},7:{gua:'兑',dir:'西'},8:{gua:'艮',dir:'东北'},9:{gua:'离',dir:'南'}};
+var acuMap={1:{main:'公孙',pair:'内关'},2:{main:'照海',pair:'列缺'},3:{main:'后溪',pair:'申脉'},4:{main:'足临泣',pair:'外关'},6:{main:'列缺',pair:'照海'},7:{main:'申脉',pair:'后溪'},8:{main:'外关',pair:'足临泣'},9:{main:'内关',pair:'公孙'}};
+var bg=bgMap[rem]||{gua:'?',dir:'?'};var acu=acuMap[rem]||{main:'?',pair:'?'};
+html+='<div style=font-size:11px;color:#9a8a7a>'+bg.gua+'卦('+bg.dir+') 日干'+tgan[dg]+dzhi[dz]+' 时干'+tgan[hg]+dzhi[hz]+' 和'+total+'÷'+div+'余'+rem+'</div>';
+html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>主开穴：'+acu.main+'</div>';
+html+=showAcu(acu.main,'','通'+bg.gua+'卦('+bg.dir+')');
+html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>配对合穴：'+acu.pair+'</div>';
+html+=showAcu(acu.pair,'固定配对'+acu.main,'');
 html+='</div>';
 html+='<div style=background:rgba(106,191,106,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#6abf6a;margin-bottom:4px>③ 飞腾八法</div>';
-try{
-if(BaZi.calcFeiTengBaFa&&ec&&ec.pillars){var hg3=ec.pillars.hour.gan;var ft=BaZi.calcFeiTengBaFa(hg3);if(ft){
-  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin:4px 0 2px>主开穴：'+ft.mainAcupoint+'</div>';
-  html+=showAcu(ft.mainAcupoint,'配对合穴'+ft.pairedAcupoint,ft.bagua+'卦');
-  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin:4px 0 2px>配对合穴：'+ft.pairedAcupoint+'</div>';
-  html+=showAcu(ft.pairedAcupoint,'固定配对'+ft.mainAcupoint,ft.bagua+'卦');
-}}
-}catch(ex){}
+var ftMap=[{main:'内关',pair:'公孙',bagua:'艮'},{main:'内关',pair:'公孙',bagua:'震'},{main:'后溪',pair:'申脉',bagua:'巽'},{main:'申脉',pair:'后溪',bagua:'兑'},{main:'足临泣',pair:'外关',bagua:'乾'},{main:'内关',pair:'公孙',bagua:'艮'},{main:'内关',pair:'公孙',bagua:'震'},{main:'后溪',pair:'申脉',bagua:'巽'},{main:'申脉',pair:'后溪',bagua:'兑'},{main:'足临泣',pair:'外关',bagua:'乾'}];
+var ft=ftMap[hg]||ftMap[0];
+html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>主开穴：'+ft.main+'</div>';
+html+=showAcu(ft.main,'配对合穴'+ft.pair,ft.bagua+'卦');
+html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>配对合穴：'+ft.pair+'</div>';
+html+=showAcu(ft.pair,'固定配对'+ft.main,ft.bagua+'卦');
 html+='</div>';
-html+='<div style=font-size:9px;color:#5a4a3a;text-align:center;padding:4px;line-height:1.4>本内容仅作传统文化娱乐参考，不构成医疗诺断、针灸施治依据。</div>';
+html+='<div style=font-size:9px;color:#5a4a3a;text-align:center;padding:4px;line-height:1.4>本内容仅作传统文化娱乐参考，不构成医疗诊断、针灸施治依据。</div>';
 html+='<div style=text-align:center;margin-top:2px><span class=btn-s onclick=_calTab=0;showCalDay(y,m,d) style=cursor:pointer;padding:2px 8px;font-size:11px>← 返回日历</span></div>';
 el.innerHTML=html;
 }</script>
