@@ -689,34 +689,92 @@ function getHuangLi(y,m,d){
   try{var L=new Lunar();L.yueLiCalc(y,m);var dy=L.lun[d-1];if(!dy)return{error:'invalid date'};var jd=dy.d0;
   var ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:12,minute:0,gender:'male'});var dg=ec.pillars.day.gan,dz=ec.pillars.day.zhi;
   var SX=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];var chong=[6,7,8,9,10,11,0,1,2,3,4,5];var dirs=['北','西南','东北','东','东南','西北','南','西南','东北','西','西北','东南'];
-  var zs=['青龙','明堂','天刑','朱雀','金匮','天德','白虎','玉堂','天牢','玄武','司命','勾陈'];var XX=['角木蛟','亢金龙','氐土貉','房日兔','心月狐','尾火虎','箕水豹','斗木獬','牛金牛','女土蝠','虚日鼠','危月燕','室火猪','壁水貐','奎木狼','娄金狗','胃土雉','昴日鸡','毕月乌','觜火猴','参水猿','井木犴','鬼金羊','柳土獐','星日马','张月鹿','翼火蛇','轸水蚓'];
+  var zs=['青龙','明堂','天刑','朱雀','金匮','天德','白虎','玉堂','天牢','玄武','司命','勾陈'];var PG=['甲不开仓','乙不栽植','丙不修灶','丁不剃头','戊不受田','己不破券','庚不经络','辛不合酱','壬不泱水','癸不词讼'];var PZ=['子不问卜','丑不冠带','寅不祭祀','卯不穿井','辰不哭泣','巳不远行','午不苫盖','未不服药','申不安床','酉不宴客','戌不吃犬','亥不嫁娶'];var XI=['东北','西北','西南','正南','东南','东北','西北','西南','正南','东南'];var CA=['东北','正东','正南','西南','正北','东北','正东','正南','西南','正北'];var FU=['正北','正北','西北','正南','东南','正北','西北','西北','东南','正南'];var YG=['西南','正西','西北','正北','东北','西南','正西','西北','正北','东北'];var YI=['正北','东北','正西','西南','西北','正北','东北','正西','西南','西北'];var TS=['正北','东北','东北','正东','东南','东南','正南','西南','西南','正西','西北','西北'];var YD={0:0,1:6,2:2,3:8,4:4,5:10,6:0,7:6,8:2,9:8,10:4,11:10};var TD={0:8,1:6,2:4,3:2,4:0,5:10,6:8,7:6,8:4,9:2,10:0,11:10};var XX=['角木蛟','亢金龙','氐土貉','房日兔','心月狐','尾火虎','箕水豹','斗木獬','牛金牛','女土蝠','虚日鼠','危月燕','室火猪','壁水貐','奎木狼','娄金狗','胃土雉','昴日鸡','毕月乌','觜火猴','参水猿','井木犴','鬼金羊','柳土獐','星日马','张月鹿','翼火蛇','轸水蚓'];
   var jc=['建','除','满','平','定','执','破','危','成','收','开','闭'];var ms=[2,3,4,5,6,7,8,9,10,11,0,1];
   var li=-1;for(var i=3;i<24;i+=2){if(SSQ.ZQ[i]<=jd)li=i;}var mz=li>0?((li-3)/2+2)%12:2;
   var term='';for(var i=0;i<24;i++)if(SSQ.ZQ[i]===jd)term=['冬至','小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪'][i];
   var isYang=jd<SSQ.ZQ[12];
   var hourList=[];var ok=[true,true,false,false,true,true,false,true,false,false,true,false];
-  for(var h=0;h<12;h++){var hi=(dz+h)%12;hourList.push({hourIndex:h,hourName:['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][h],isGood:ok[hi]});}
-  return{dayGZ:ec.pillars.day.ganName+ec.pillars.day.zhiName,chongSha:'冲'+SX[chong[dz]]+'煞'+dirs[chong[dz]],valueGod:zs[dz],jianChu:jc[(dz-ms[(mz-2+12)%12]+12)%12],solarTerm:term,isYangDun:!isYang,hourList:hourList,xingXiu:XX[dz%12]};}catch(e){return{error:e.message}}
+  for(var h=0;h<12;h++){var hi=(dz+h)%12;hourList.push({hourIndex:h,hourGZ:TG[([0,2,4,6,8][dg%5]+h)%10]+['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][h],hourName:['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][h],isGood:ok[hi]});}
+  var jn=jc[(dz-ms[(mz-2+12)%12]+12)%12];var yi=[];if(['除','满','平','定','执','成','开'].includes(jn))yi.push('祭祀');if(['建','满','定','成','开'].includes(jn))yi.push('嫁娶');if(['除','定','成','开'].includes(jn))yi.push('出行');var ji=[];if(['破','闭'].includes(jn))ji.push('开市');if(['建','破'].includes(jn))ji.push('动土');var lk=[];if(dz===YD[mz])lk.push('月德');if(dz===TD[mz])lk.push('天德');var ek=[];if([1,7].includes(dz))ek.push('四离');return{dayGZ:ec.pillars.day.ganName+ec.pillars.day.zhiName,chongSha:'冲'+SX[chong[dz]]+'煞'+dirs[chong[dz]],valueGod:zs[dz],jianChu:jn,solarTerm:term,isYangDun:!isYang,hourList:hourList,xingXiu:XX[dz%12],pengZu:PG[dg]+' '+PZ[dz],xiShen:XI[dg],caiShen:CA[dg],fuShen:FU[dg],yangGui:YG[dg],yinGui:YI[dg],taiShen:TS[y%12],good:yi,bad:ji,luckyGods:lk,evilGods:ek};}catch(e){return{error:e.message}}
 }
 function renderHuangLi(){
   var el=document.getElementById('cal_det');if(!el)return;
   var y=_calSelY||2026,m=_calSelM||6,d=_calSelD||21;
   var hl=getHuangLi(y,m,d);if(hl.error){el.innerHTML=hl.error;return;}
-  var html='<div style=font-size:13px;font-weight:700;color:#c4a265;text-align:center;margin-bottom:6px>'+y+'/'+m+'/'+d+' '+hl.dayGZ+'</div>';
-  html+='<div style=display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px>';
-  html+='<div style=text-align:center;padding:6px 3px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(180,140,100,.08)><div style=color:#887a6e;font-size:11px>冲煞</div><div style=color:#e0d8d0;font-size:13px;margin-top:3px>'+hl.chongSha+'</div></div>';
-  html+='<div style=text-align:center;padding:6px 3px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(180,140,100,.08)><div style=color:#887a6e;font-size:11px>值神</div><div style=color:#e0d8d0;font-size:13px;margin-top:3px>'+hl.valueGod+'</div></div>';
-  html+='<div style=text-align:center;padding:6px 3px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(180,140,100,.08)><div style=color:#887a6e;font-size:11px>建除</div><div style=color:#e0d8d0;font-size:13px;margin-top:3px>'+hl.jianChu+'</div></div>';
-  html+='<div style=text-align:center;padding:6px 3px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(180,140,100,.08)><div style=color:#887a6e;font-size:11px>节气</div><div style=color:'+(hl.solarTerm?'#d4735e':'#887a6e')+';font-size:13px;margin-top:3px>'+(hl.solarTerm||'—')+'</div></div>';
-  html+='<div style=text-align:center;padding:6px 3px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(180,140,100,.08)><div style=color:#887a6e;font-size:11px>遁</div><div style=color:#e0d8d0;font-size:13px;margin-top:3px>'+(hl.isYangDun?'阳遁':'阴遁')+'</div></div>';
-  html+='<div style=text-align:center;padding:6px 3px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(180,140,100,.08)><div style=color:#887a6e;font-size:11px>星宿</div><div style=color:#e0d8d0;font-size:13px;margin-top:3px>'+(hl.xingXiu||'—')+'</div></div></div>';
-  html+='<div style=font-size:12px;color:#c4a265;margin:8px 0 4px;font-weight:600>十二时辰</div>';
-  html+='<div style=display:grid;grid-template-columns:repeat(6,1fr);gap:2px>';
-  for(var h=0;h<12;h++){var hh=hl.hourList[h];
-    html+='<div style=text-align:center;padding:5px 2px;border-radius:5px;font-size:12px;background:'+(hh.isGood?'rgba(106,191,106,0.12)':'rgba(212,115,94,0.08)')+';color:'+(hh.isGood?'#6abf6a':'#d4735e')+';border:1px solid '+(hh.isGood?'rgba(106,191,106,0.2)':'rgba(212,115,94,0.15)')+'>'+hh.hourName+'<br><span style=font-size:10px>'+(hh.isGood?'吉':'凶')+'</span></div>';}
+  var Q='<div style=background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);border:1px solid rgba(180,140,100,.12)>';
+  var C='#333';
+  var G='#2e7d32';
+  var R='#c62828';
+  var B='#c4a265';
+
+  // 1. 日期头部
+  var html=Q;
+  html+='<div style=display:flex;align-items:center;gap:8px;margin-bottom:8px>';
+  html+='<span style=font-size:16px;font-weight:700;color:'+C+'>'+y+'/'+m+'/'+d+'</span>';
+  html+='<span style=background:#f5f0e8;color:#8b7355;padding:2px 10px;border-radius:10px;font-size:11px>农历六月</span>';
   html+='</div>';
-  html+='<div style=font-size:10px;color:#5a4a3a;text-align:center;padding:6px>本内容仅作传统文化娱乐参考</div>';
-  html+='<div style=text-align:center;margin-top:4px><span class=btn-s onclick=_calTab=0;showCalDay(y,m,d) style=cursor:pointer;padding:2px 8px;font-size:11px>← 返回日历</span></div>';
+  html+='<div style=display:flex;flex-wrap:wrap;gap:6px>';
+  html+='<span style=background:#faf6ee;color:#8b6914;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:600>'+hl.dayGZ+'日</span>';
+  if(hl.solarTerm)html+='<span style=background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:6px;font-size:11px>节气·'+hl.solarTerm+'</span>';
+  if(hl.xingXiu)html+='<span style=background:#e8f5e9;color:'+G+';padding:2px 8px;border-radius:6px;font-size:11px>星宿·'+hl.xingXiu+'</span>';
+  html+='<span style=background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:6px;font-size:11px>'+(hl.isYangDun?'阳遁':'阴遁')+'</span>';
+  html+='</div></div>';
+
+  // 2. 冲煞/值神/建除/彭祖
+  html+=Q;
+  html+='<div style=display:grid;grid-template-columns:1fr 1fr;gap:6px>';
+  html+='<div style=background:#fcfaf7;border-radius:6px;padding:6px 8px><div style=font-size:10px;color:#999>冲煞</div><div style=font-size:13px;font-weight:600;color:'+R+';margin-top:2px>'+hl.chongSha+'</div></div>';
+  html+='<div style=background:#fcfaf7;border-radius:6px;padding:6px 8px><div style=font-size:10px;color:#999>值神</div><div style=font-size:13px;font-weight:600;color:'+C+';margin-top:2px>'+hl.valueGod+'<span style=background:'+(hl.isHuangDao?'#fff8e1':'#f5f5f5')+';color:'+(hl.isHuangDao?'#c4a265':'#999')+';font-size:9px;padding:1px 6px;border-radius:4px;margin-left:4px>'+(hl.isHuangDao?'黄道':'黑道')+'</span></div></div>';
+  html+='<div style=background:#fcfaf7;border-radius:6px;padding:6px 8px><div style=font-size:10px;color:#999>建除</div><div style=font-size:13px;font-weight:600;color:'+C+';margin-top:2px>'+hl.jianChu+'</div></div>';
+  html+='<div style=background:#fcfaf7;border-radius:6px;padding:6px 8px><div style=font-size:10px;color:#999>星宿</div><div style=font-size:13px;font-weight:600;color:'+C+';margin-top:2px>'+(hl.xingXiu||'—')+'</div></div>';
+  html+='</div>';
+  html+='<div style=margin-top:8px;padding:6px 8px;background:#fff8f0;border-radius:6px;display:flex;gap:6px><span style=font-size:10px;color:#999;white-space:nowrap>彭祖百忌</span><span style=font-size:11px;color:#c45c00;line-height:1.6>'+(hl.pengZu||'—')+'</span></div></div>';
+
+  // 3. 宜忌
+  html+=Q;
+  html+='<div style=display:grid;grid-template-columns:1fr 1fr;gap:6px>';
+  html+='<div style=background:#e8f5e9;border-radius:8px;padding:8px><div style=font-size:12px;font-weight:700;color:'+G+';margin-bottom:4px>宜</div><div style=display:flex;flex-wrap:wrap;gap:3px>';
+  if(hl.good&&hl.good.length)for(var i=0;i<hl.good.length;i++)html+='<span style=background:#c8e6c9;color:#1b5e20;padding:2px 8px;border-radius:12px;font-size:10px>'+hl.good[i]+'</span>';
+  else html+='<span style=color:#bbb;font-size:11px>—</span>';
+  html+='</div></div>';
+  html+='<div style=background:#fafafa;border-radius:8px;padding:8px><div style=font-size:12px;font-weight:700;color:#888;margin-bottom:4px>忌</div><div style=display:flex;flex-wrap:wrap;gap:3px>';
+  if(hl.bad&&hl.bad.length)for(var i=0;i<hl.bad.length;i++)html+='<span style=background:#e0e0e0;color:#555;padding:2px 8px;border-radius:12px;font-size:10px>'+hl.bad[i]+'</span>';
+  else html+='<span style=color:#bbb;font-size:11px>—</span>';
+  html+='</div></div></div></div>';
+
+  // 4. 吉神凶神
+  html+=Q;
+  html+='<div style=display:grid;grid-template-columns:1fr 1fr;gap:6px>';
+  html+='<div style=background:#fcfaf7;border-radius:6px;padding:6px 8px><span style=font-size:10px;color:#999>吉神</span><span style=font-size:12px;color:'+G+';font-weight:600;margin-left:4px>'+(hl.luckyGods&&hl.luckyGods.length?hl.luckyGods.join('、'):'—')+'</span></div>';
+  html+='<div style=background:#fcfaf7;border-radius:6px;padding:6px 8px><span style=font-size:10px;color:#999>凶神</span><span style=font-size:12px;color:#888;margin-left:4px>'+(hl.evilGods&&hl.evilGods.length?hl.evilGods.join('、'):'—')+'</span></div>';
+  html+='</div></div>';
+
+  // 5. 方位
+  html+=Q;
+  html+='<div style=display:grid;grid-template-columns:repeat(3,1fr);gap:4px>';
+  var dirs2=['喜神','财神','福神','阳贵','阴贵','太岁'];
+  var keys=['xiShen','caiShen','fuShen','yangGui','yinGui','taiShen'];
+  for(var i=0;i<6;i++){
+    html+='<div style=text-align:center;padding:6px 2px;background:#fcfaf7;border-radius:6px><div style=font-size:10px;color:#999>'+dirs2[i]+'</div><div style=font-size:13px;font-weight:600;color:'+C+';margin-top:2px>'+(hl[keys[i]]||'—')+'</div></div>';
+  }
+  html+='</div></div>';
+
+  // 6. 十二时辰表格
+  html+='<div style=background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);border:1px solid rgba(180,140,100,.12)>';
+  html+='<div style=font-size:13px;font-weight:600;color:'+C+';margin-bottom:8px>十二时辰吉凶表</div>';
+  html+='<table style=width:100%;border-collapse:collapse;font-size:11px;text-align:center>';
+  html+='<thead><tr style=background:#f5f0eb><th style=padding:6px 3px;border:1px solid #e0dbd4;font-weight:600;color:#555>时辰</th><th style=padding:6px 3px;border:1px solid #e0dbd4;font-weight:600;color:#555>干支</th><th style=padding:6px 3px;border:1px solid #e0dbd4;font-weight:600;color:#555>吉凶</th><th style=padding:6px 3px;border:1px solid #e0dbd4;font-weight:600;color:#555>宜</th><th style=padding:6px 3px;border:1px solid #e0dbd4;font-weight:600;color:#555>忌</th></tr></thead><tbody>';
+  for(var h=0;h<12;h++){
+    var hh=hl.hourList[h];
+    var bg=h%2===0?'':'background:#fcfaf7';
+    html+='<tr style='+bg+'><td style=padding:5px 3px;border:1px solid #e8e3db;font-weight:600;color:'+C+'>'+hh.hourName+'</td><td style=padding:5px 3px;border:1px solid #e8e3db;color:#888>'+hh.hourGZ+'</td><td style=padding:5px 3px;border:1px solid #e8e3db><span style=background:'+(hh.isGood?'#e8f5e9':'#fbe9e7')+';color:'+(hh.isGood?G:R)+';padding:2px 10px;border-radius:10px;font-weight:700;font-size:11px>'+(hh.isGood?'吉':'凶')+'</span></td><td style=padding:5px 3px;border:1px solid #e8e3db;color:#666;font-size:10px>'+(hh.hourYi?hh.hourYi.join('、'):'—')+'</td><td style=padding:5px 3px;border:1px solid #e8e3db;color:#666;font-size:10px>'+(hh.hourJi?hh.hourJi.join('、'):'—')+'</td></tr>';
+  }
+  html+='</tbody></table></div>';
+
+  // 底部
+  html+='<div style=text-align:center;font-size:10px;color:#bbb;padding:8px 0>本内容仅作传统文化娱乐参考</div>';
+  html+='<div style=text-align:center;margin-top:2px><span class=btn-s onclick=_calTab=0;showCalDay(y,m,d) style=cursor:pointer;padding:2px 8px;font-size:11px>← 返回日历</span></div>';
   el.innerHTML=html;
 }
 
