@@ -629,7 +629,7 @@ var szMap={0:'胆经',1:'肝经',2:'肺经',3:'大肠经',4:'胃经',5:'脾经',
 var hzIdx=Math.floor(((h+1)%24)/2);var merName=szMap[hzIdx]||'';
 html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+merName+'当令</div>';
 if(merName){var md=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS[merName]:null;
-if(merName==='心经'){html+=showAcu('神门','','',true)}else if(md&&md.wushu&&md.wushu.length>=3){html+=showAcu(md.wushu[2].name,'','');
+if(merName==='心经'){html+=showAcu('少府','','',true);html+='<div style=font-size:10px;color:#6a5e50>本穴：少府(荥火) 原穴：神门(输土) 五输：少冲(井木)少府(荥火)神门(输土)灵道(经金)少海(合水)</div>';}else if(md&&md.wushu&&md.wushu.length>=3){html+=showAcu(md.wushu[2].name,'','');
 html+='<div style=font-size:10px;color:#6a5e50>五输穴：'+md.wushu.map(function(p){return p.name+'('+p.type+')';}).join('、')+' 原穴：'+(md.yuan?md.yuan.name:'-')+'</div>';}}
 var isYang=dg%2===0,hgIsYang=hg%2===0;
 // 丙日甲时→气纳三焦
@@ -644,12 +644,12 @@ if(dg===2&&hg===0){html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px
 }else if(isYang&&!hgIsYang){
   // 气纳三焦
   var sjMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS['三焦经']:null;
-  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>气纳三焦</div>';
+  isBiShi=true;html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>闭时·阳日阴时</div>';
   if(sjMd){var sjIdx=(hg%5+2)%5;html+=showAcu(sjMd.wushu[sjIdx]?sjMd.wushu[sjIdx].name:'','','');}
 }else{
   // 血归包络
   var xbMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS['心包经']:null;
-  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>血归包络</div>';
+  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>血归包络</div>';isBiShi=false;
   if(xbMd){var xbIdx=(hg%5+2)%5;html+=showAcu(xbMd.wushu[xbIdx]?xbMd.wushu[xbIdx].name:'','','');}
 }
 html+='</div>';
@@ -668,7 +668,7 @@ html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>�
 html+=showAcu(acu.pair,'固定配对'+acu.main,'');
 html+='</div>';
 html+='<div style=background:rgba(106,191,106,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#6abf6a;margin-bottom:4px>③ 飞腾八法</div>';
-var ftMap=[{main:'内关',pair:'公孙',bagua:'艮'},{main:'内关',pair:'公孙',bagua:'震'},{main:'后溪',pair:'申脉',bagua:'巽'},{main:'申脉',pair:'后溪',bagua:'兑'},{main:'足临泣',pair:'外关',bagua:'乾'},{main:'内关',pair:'公孙',bagua:'艮'},{main:'内关',pair:'公孙',bagua:'震'},{main:'后溪',pair:'申脉',bagua:'巽'},{main:'申脉',pair:'后溪',bagua:'兑'},{main:'足临泣',pair:'外关',bagua:'乾'}];
+var ftMap=[{main:'公孙',pair:'内关',bagua:'乾',mMer:'脾经',pMer:'心包经',mai:'冲脉',pai:'阴维脉'},{main:'申脉',pair:'后溪',bagua:'坤',mMer:'膀胱经',pMer:'小肠经',mai:'阳跷脉',pai:'督脉'},{main:'内关',pair:'公孙',bagua:'艮',mMer:'心包经',pMer:'脾经',mai:'阴维脉',pai:'冲脉'},{main:'照海',pair:'列缺',bagua:'兑',mMer:'肾经',pMer:'肺经',mai:'阴跷脉',pai:'任脉'},{main:'足临泣',pair:'外关',bagua:'坎',mMer:'胆经',pMer:'三焦经',mai:'带脉',pai:'阳维脉'},{main:'列缺',pair:'照海',bagua:'离',mMer:'肺经',pMer:'肾经',mai:'任脉',pai:'阴跷脉'},{main:'外关',pair:'足临泣',bagua:'震',mMer:'三焦经',pMer:'胆经',mai:'阳维脉',pai:'带脉'},{main:'后溪',pair:'申脉',bagua:'巽',mMer:'小肠经',pMer:'膀胱经',mai:'督脉',pai:'阳跷脉'},{main:'公孙',pair:'内关',bagua:'乾',mMer:'脾经',pMer:'心包经',mai:'冲脉',pai:'阴维脉'},{main:'申脉',pair:'后溪',bagua:'坤',mMer:'膀胱经',pMer:'小肠经',mai:'阳跷脉',pai:'督脉'}];
 var ft=ftMap[hg]||ftMap[0];
 html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>主开穴：'+ft.main+'</div>';
 html+=showAcu(ft.main,'配对合穴'+ft.pair,ft.bagua+'卦');
