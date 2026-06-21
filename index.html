@@ -598,24 +598,64 @@ if(ec&&ec.pillars){
 el.innerHTML=html;
 }
 var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 function renderAcupoint(){
 var el=document.getElementById('cal_det');if(!el)return;
 var y=_calSelY||2026,m=_calSelM||6,d=_calSelD||21;
 var hsel=document.getElementById('cal_hour');var h=_calSelH=hsel?+hsel.value:12;
 var ec=null;try{ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:h,minute:0,gender:'male'});}catch(ex){}
 var html='<div style=font-size:10px;color:#887a6e;margin-bottom:6px>已选：'+y+'/'+m+'/'+d+' 时辰：'+_hr[h/2]+'</div>';
-html+='<div style=background:rgba(196,162,101,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#c4a265;margin-bottom:4px>① 子午流注</div>';
-try{if(BaZi.calcNaZiFa){var nz=BaZi.calcNaZiFa(h);if(nz){html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+nz.dangLingMeridian+'当令→'+nz.wushuPoints[2].name+'('+nz.wushuPoints[2].type+')<br><span style=font-size:9px;color:#6a5e50>五输：'+nz.wushuPoints.map(function(p){return p.name+'('+p.type+')';}).join(' ')+'</span><br><b>原穴：</b>'+nz.yuanPoint.name+' - '+nz.yuanPoint.indications+'</div>';}}if(BaZi.calcNaJiaFa&&ec&&ec.pillars){var nj=BaZi.calcNaJiaFa(ec.pillars.day.gan,ec.pillars.hour.gan);if(nj){html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法：</b>'+(nj.openingAcupoint?nj.openingAcupoint:'-')+(nj.note?' ('+nj.note+')':'')+'</div>';}}}catch(ex){}
+function showAcu(name,fixedPair,extraNote){
+  var info=null;try{info=BaZi.getAcupointInfo?BaZi.getAcupointInfo(name):null;}catch(ex){}
+  if(!info)return '<div style=font-size:11px;color:#9a8a7a>'+name+'</div>';
+  var h='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:6px>'+info.name+'</div>';
+  h+='<div style=font-size:11px;color:#9a8a7a;line-height:1.8>';
+  h+='1. 经络归属：'+info.meridian+(info.type?'('+info.type+')':'')+(extraNote?'，'+extraNote:'')+'<br>';
+  h+='2. 标准定位：'+info.location+'<br>';
+  h+='3. 主治：'+info.indications+'<br>';
+  h+='4. 配伍搭配：';
+  if(fixedPair)h+='<b style=color:#d4735e>【固定配对】</b>'+fixedPair+'<br>';
+  if(info.pairings)h+=info.pairings.join('；');
+  h+='</div>';return h;
+}
+html+='<div id=sec1 style=background:rgba(196,162,101,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#c4a265;margin-bottom:4px>① 子午流注</div>';
+try{
+if(BaZi.calcNaZiFa){var nz=BaZi.calcNaZiFa(h);if(nz&&nz.wushuPoints){
+  html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+nz.dangLingMeridian+'当令</div>';
+  html+=showAcu(nz.wushuPoints[2].name,'配内关治心慌失眠；配三阴交调理心神不宁','');
+  html+='<div style=font-size:10px;color:#6a5e50>五输穴：'+nz.wushuPoints.map(function(p){return p.name+'('+p.type+')';}).join('、')+' 原穴：'+(nz.yuanPoint?nz.yuanPoint.name:'-')+'</div>';
+}}
+if(BaZi.calcNaJiaFa&&ec&&ec.pillars){var nj=BaZi.calcNaJiaFa(ec.pillars.day.gan,ec.pillars.hour.gan);if(nj&&nj.openingAcupoint){
+  html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>'+nj.openingAcupoint+'</div>';
+  html+=showAcu(nj.openingAcupoint,'配外关疏通三焦经络；配肩井缓解肩颈僵硬；配神门改善失眠烦躁','');
+  if(nj.yuanReturn)html+='<div style=font-size:10px;color:#6a5e50>返本还原：'+nj.yuanReturn+'</div>';
+  if(nj.note)html+='<div style=font-size:10px;color:#6a5e50>'+nj.note+'</div>';
+}}
+}catch(ex){}
 html+='</div>';
 html+='<div style=background:rgba(212,115,94,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#d4735e;margin-bottom:4px>② 灵龟八法</div>';
-try{if(BaZi.calcLingGuiBaFa&&ec&&ec.pillars){var dg=ec.pillars.day,hg=ec.pillars.hour;var lg=BaZi.calcLingGuiBaFa(dg.gan,dg.zhi,hg.gan,hg.zhi);if(lg){html+='<div style=font-size:11px;color:#9a8a7a><b>主开穴：</b>'+lg.mainAcupoint+'('+lg.mainMeridian+')<br><b>配对合穴：</b>'+lg.pairedAcupoint+'('+lg.pairedMeridian+')<br><span style=font-size:9px;color:#6a5e50>'+lg.bagua+'卦('+lg.direction+') 主治：'+lg.indications+'</span></div>';}}}catch(ex){}
+try{
+if(BaZi.calcLingGuiBaFa&&ec&&ec.pillars){var dg=ec.pillars.day,hg=ec.pillars.hour;var lg=BaZi.calcLingGuiBaFa(dg.gan,dg.zhi,hg.gan,hg.zhi);if(lg){
+  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin-top:4px>主开穴：'+lg.mainAcupoint+'</div>';
+  html+=showAcu(lg.mainAcupoint,'','通'+lg.bagua+'卦('+lg.direction+')');
+  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin:4px 0 2px>配对合穴：'+lg.pairedAcupoint+'</div>';
+  html+=showAcu(lg.pairedAcupoint,'固定配对'+lg.mainAcupoint,'');
+}}
+}catch(ex){}
 html+='</div>';
 html+='<div style=background:rgba(106,191,106,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#6abf6a;margin-bottom:4px>③ 飞腾八法</div>';
-try{if(BaZi.calcFeiTengBaFa&&ec&&ec.pillars){var hg3=ec.pillars.hour.gan;var ft=BaZi.calcFeiTengBaFa(hg3);if(ft){html+='<div style=font-size:11px;color:#9a8a7a><b>主开穴：</b>'+ft.mainAcupoint+'('+ft.mainMeridian+')<br><b>配对合穴：</b>'+ft.pairedAcupoint+'('+ft.pairedMeridian+')<br><span style=font-size:9px;color:#6a5e50>'+ft.bagua+'卦 主治：'+ft.indications+'</span></div>';}}}catch(ex){}
+try{
+if(BaZi.calcFeiTengBaFa&&ec&&ec.pillars){var hg3=ec.pillars.hour.gan;var ft=BaZi.calcFeiTengBaFa(hg3);if(ft){
+  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin:4px 0 2px>主开穴：'+ft.mainAcupoint+'</div>';
+  html+=showAcu(ft.mainAcupoint,'配对合穴'+ft.pairedAcupoint,ft.bagua+'卦');
+  html+='<div style=font-size:12px;color:#e0d8d0;font-weight:600;margin:4px 0 2px>配对合穴：'+ft.pairedAcupoint+'</div>';
+  html+=showAcu(ft.pairedAcupoint,'固定配对'+ft.mainAcupoint,ft.bagua+'卦');
+}}
+}catch(ex){}
 html+='</div>';
-html+='<div style=font-size:9px;color:#5a4a3a;text-align:center;padding:4px;line-height:1.4>本内容仅作传统文化娱乐参考，不构成医疗诊断、针灸施治依据。</div>';
+html+='<div style=font-size:9px;color:#5a4a3a;text-align:center;padding:4px;line-height:1.4>本内容仅作传统文化娱乐参考，不构成医疗诺断、针灸施治依据。</div>';
 html+='<div style=text-align:center;margin-top:2px><span class=btn-s onclick=_calTab=0;showCalDay(y,m,d) style=cursor:pointer;padding:2px 8px;font-size:11px>← 返回日历</span></div>';
 el.innerHTML=html;
-}
-</script>
+}</script>
 </body></html>
