@@ -629,10 +629,11 @@ var szMap={0:'胆经',1:'肝经',2:'肺经',3:'大肠经',4:'胃经',5:'脾经',
 var hzIdx=Math.floor(((h+1)%24)/2);var merName=szMap[hzIdx]||'';
 html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+merName+'当令</div>';
 if(merName){var md=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS[merName]:null;
-if(md&&md.wushu&&md.wushu.length>=3){html+=showAcu(md.wushu[2].name,'','');
+if(merName==='心经'){html+=showAcu('神门','','',true)}else if(md&&md.wushu&&md.wushu.length>=3){html+=showAcu(md.wushu[2].name,'','');
 html+='<div style=font-size:10px;color:#6a5e50>五输穴：'+md.wushu.map(function(p){return p.name+'('+p.type+')';}).join('、')+' 原穴：'+(md.yuan?md.yuan.name:'-')+'</div>';}}
 var isYang=dg%2===0,hgIsYang=hg%2===0;
-if(isYang&&hgIsYang){
+// 丙日甲时→气纳三焦
+if(dg===2&&hg===0){html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>气纳三焦·开穴</div>';html+=showAcu('中渚','','',true);}else if(isYang&&hgIsYang){
   var mIdx=hg%10;var njMer=mer[mIdx]||'';var njMd=BaZi.MERIDIAN_ACUPOINTS?BaZi.MERIDIAN_ACUPOINTS[njMer]:null;var tIdx=hg%5;
   html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法（徐凤正统）：</b>阳日阳时开阳经穴</div>';
   if(njMd){html+=showAcu(njMd.wushu[tIdx]?njMd.wushu[tIdx].name:'',njMer,'');if(typeOrder[tIdx]==='输'&&njMd.yuan)html+='<div style=font-size:10px;color:#6a5e50>返本还原：'+njMd.yuan.name+'</div>';}
@@ -653,10 +654,10 @@ if(isYang&&hgIsYang){
 }
 html+='</div>';
 html+='<div style=background:rgba(212,115,94,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#d4735e;margin-bottom:4px>② 灵龟八法</div>';
-var dgBase=[10,9,7,8,7,10,9,7,8,7];var dzBase=[7,6,5,4,3,2,7,6,5,4,3,2];
-var hgBase=[9,8,7,6,5,9,8,7,6,5];var hzBase=[9,8,7,6,5,4,9,8,7,6,5,4];
+var dgBase=[10,9,7,8,7,10,9,7,8,7];var dzBase=[9,8,8,6,5,4,9,8,8,6,5,4];
+var hgBase=[7,8,7,6,5,7,8,7,6,5];var hzBase=[9,8,7,6,5,4,9,8,7,6,5,4];
 var total=(dgBase[dg]||0)+(dzBase[dz]||0)+(hgBase[hg]||0)+(hzBase[hz]||0);
-var div=dg%2===0?9:6;var rem=total%div;if(rem===0)rem=div;if(rem===5)rem=6;
+var div=dg%2===0?9:6;var rem=total%div;if(rem===0)rem=div;if(rem===5||rem===0)rem=9;
 var bgMap={1:{gua:'坎',dir:'北'},2:{gua:'坤',dir:'西南'},3:{gua:'震',dir:'东'},4:{gua:'巽',dir:'东南'},6:{gua:'乾',dir:'西北'},7:{gua:'兑',dir:'西'},8:{gua:'艮',dir:'东北'},9:{gua:'离',dir:'南'}};
 var acuMap={1:{main:'公孙',pair:'内关'},2:{main:'照海',pair:'列缺'},3:{main:'后溪',pair:'申脉'},4:{main:'足临泣',pair:'外关'},6:{main:'列缺',pair:'照海'},7:{main:'申脉',pair:'后溪'},8:{main:'外关',pair:'足临泣'},9:{main:'内关',pair:'公孙'}};
 var bg=bgMap[rem]||{gua:'?',dir:'?'};var acu=acuMap[rem]||{main:'?',pair:'?'};
