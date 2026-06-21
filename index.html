@@ -560,9 +560,9 @@ function renderCalendar(y,m){
     var ti=null;try{var tii=BaZi.getSolarTermIndex?BaZi.getSolarTermIndex(y,m,d):-1;if(tii>=0)ti=BaZi.getSolarTermName?BaZi.getSolarTermName(tii):'';}catch(ex){}
     var isTerm=!!ti;var termLabel=ti?ti.substring(0,2):'';
     h+='<div onclick=showCalDay('+y+','+m+','+d+') style=cursor:pointer;text-align:center;padding:3px 1px;border-radius:5px;background:'+(it?'rgba(196,162,101,0.25)':isTerm?'rgba(212,115,94,0.12)':'rgba(255,255,255,0.03)')+';border:1px solid '+(it?'rgba(196,162,101,0.5)':isTerm?'rgba(212,115,94,0.3)':'transparent')+'>';
-    h+='<div style=font-size:13px;font-weight:600;color:'+(isTerm?'#d4735e':it?'#c4a265':'#e0d8d0')+'>'+(termLabel||d)+'</div>';
+    h+='<div style=font-size:13px;font-weight:600;color:'+(isTerm?'#d4735e':it?'#c4a265':'#e0d8d0')+'>'+d+'</div>';h+='<div style=font-size:8px;color:'+(isTerm?'#d4735e':'#5a4a3a')+';line-height:1.2>'+(isTerm?termLabel:'')+'</div>';
     h+='<div style=font-size:8px;color:#5a4a3a;line-height:1.2>'+(ldi?ldi.dayName:'')+'</div>';
-    h+='<div style=font-size:7px;color:#6a5e50;line-height:1.2>'+(gz?gz.substring(0,1):'')+'</div></div>';
+    h+='</div>';
   }
   h+='</div>';
   h+='<div style=margin:8px 0 0;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06)>';
