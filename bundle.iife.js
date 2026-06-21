@@ -22,8 +22,10 @@ var BaZi = (() => {
   var src_exports = {};
   __export(src_exports, {
     DI_ZHI: () => DI_ZHI,
+    EIGHT_CONFLUENT_POINTS: () => EIGHT_CONFLUENT_POINTS,
     FIVE_ELEMENT_MED: () => FIVE_ELEMENT_MED,
     GAN_WU_XING: () => GAN_WU_XING,
+    MERIDIAN_ACUPOINTS: () => MERIDIAN_ACUPOINTS,
     MONTH_ZHI_FROM_TERM: () => MONTH_ZHI_FROM_TERM,
     SHENG_XIAO: () => SHENG_XIAO,
     TIAN_GAN: () => TIAN_GAN,
@@ -32,12 +34,17 @@ var BaZi = (() => {
     calcAnnualShenSha: () => calcAnnualShenSha,
     calcBranchInteractions: () => calcBranchInteractions,
     calcDaYunFuYinFanYin: () => calcDaYunFuYinFanYin,
+    calcFeiTengBaFa: () => calcFeiTengBaFa,
     calcFiveElementScore: () => calcFiveElementScore,
     calcFortuneWithAnnual: () => calcFortuneWithAnnual,
     calcFourPillarShenSha: () => calcFourPillarShenSha,
     calcFuYinFanYin: () => calcFuYinFanYin,
     calcGanTenGods: () => calcGanTenGods,
+    calcHourGan: () => calcHourGan,
+    calcLingGuiBaFa: () => calcLingGuiBaFa,
     calcLiuNianFuYinFanYin: () => calcLiuNianFuYinFanYin,
+    calcNaJiaFa: () => calcNaJiaFa,
+    calcNaZiFa: () => calcNaZiFa,
     calcNatalWithAnnual: () => calcNatalWithAnnual,
     calcNatalWithFortune: () => calcNatalWithFortune,
     calcShenSha: () => calcShenSha,
@@ -50,12 +57,16 @@ var BaZi = (() => {
     determinePattern: () => determinePattern,
     getAllPatterns: () => getAllPatterns,
     getConstitutionName: () => getConstitutionName,
+    getDayGanIndex: () => getDayGanIndex,
     getDayMasterInfo: () => getDayMasterInfo,
+    getDayZhiIndex: () => getDayZhiIndex,
     getFourPillarHiddenStems: () => getFourPillarHiddenStems,
     getFourPillarNaYin: () => getFourPillarNaYin,
     getHiddenStems: () => getHiddenStems,
+    getHourZhiIndex: () => getHourZhiIndex,
     getLang: () => getLang,
     getNaYin: () => getNaYin,
+    isYangDay: () => isYangDay,
     lunarToSolar: () => lunarToSolar,
     setLang: () => setLang,
     solarToLunar: () => solarToLunar,
@@ -2770,6 +2781,350 @@ var BaZi = (() => {
   }
   function getLang() {
     return window.__LANG || "zh";
+  }
+
+  // src/tcm-acu.ts
+  var MERIDIAN_ACUPOINTS = {
+    "\u80C6\u7ECF": {
+      wushu: [
+        { name: "\u8DB3\u7A8D\u9634", meridian: "\u80C6\u7ECF", type: "\u4E95", indications: "\u5934\u75DB\u3001\u76EE\u7729\u3001\u8033\u9E23\u3001\u80C1\u75DB\u3001\u8DB3\u80CC\u80BF\u75DB" },
+        { name: "\u4FA0\u6EAA", meridian: "\u80C6\u7ECF", type: "\u8365", indications: "\u5934\u75DB\u3001\u7729\u6655\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u8033\u9E23\u3001\u80C1\u75DB" },
+        { name: "\u8DB3\u4E34\u6CE3", meridian: "\u80C6\u7ECF", type: "\u8F93", indications: "\u5934\u75DB\u3001\u76EE\u7729\u3001\u4E73\u75C8\u3001\u7630\u75AC\u3001\u8DB3\u8DD7\u80BF\u75DB" },
+        { name: "\u9633\u8F85", meridian: "\u80C6\u7ECF", type: "\u7ECF", indications: "\u504F\u5934\u75DB\u3001\u76EE\u5916\u7726\u75DB\u3001\u814B\u4E0B\u75DB\u3001\u7630\u75AC" },
+        { name: "\u9633\u9675\u6CC9", meridian: "\u80C6\u7ECF", type: "\u5408", indications: "\u80C1\u75DB\u3001\u53E3\u82E6\u3001\u9EC4\u75B8\u3001\u4E0B\u80A2\u75FF\u75F9\u3001\u7B4B\u6025" }
+      ],
+      yuan: { name: "\u4E18\u589F", meridian: "\u80C6\u7ECF", indications: "\u80F8\u80C1\u80C0\u75DB\u3001\u4E0B\u80A2\u75FF\u75F9\u3001\u759F\u75BE" }
+    },
+    "\u809D\u7ECF": {
+      wushu: [
+        { name: "\u5927\u6566", meridian: "\u809D\u7ECF", type: "\u4E95", indications: "\u759D\u6C14\u3001\u9057\u5C3F\u3001\u5D29\u6F0F\u3001\u766B\u75EB\u3001\u6708\u7ECF\u4E0D\u8C03" },
+        { name: "\u884C\u95F4", meridian: "\u809D\u7ECF", type: "\u8365", indications: "\u80C1\u75DB\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u6708\u7ECF\u4E0D\u8C03\u3001\u75DB\u7ECF\u3001\u4E2D\u98CE" },
+        { name: "\u592A\u51B2", meridian: "\u809D\u7ECF", type: "\u8F93", indications: "\u5934\u75DB\u3001\u7729\u6655\u3001\u80C1\u75DB\u3001\u6708\u7ECF\u4E0D\u8C03\u3001\u5C0F\u513F\u60CA\u98CE" },
+        { name: "\u4E2D\u5C01", meridian: "\u809D\u7ECF", type: "\u7ECF", indications: "\u759D\u6C14\u3001\u9057\u7CBE\u3001\u5C0F\u4FBF\u4E0D\u5229\u3001\u80C1\u75DB" },
+        { name: "\u66F2\u6CC9", meridian: "\u809D\u7ECF", type: "\u5408", indications: "\u8179\u75DB\u3001\u5C0F\u4FBF\u4E0D\u5229\u3001\u9057\u7CBE\u3001\u819D\u80A1\u5185\u4FA7\u75DB" }
+      ],
+      yuan: { name: "\u592A\u51B2", meridian: "\u809D\u7ECF", indications: "\u5934\u75DB\u3001\u7729\u6655\u3001\u80C1\u75DB\u3001\u6708\u7ECF\u4E0D\u8C03\u3001\u9AD8\u8840\u538B" }
+    },
+    "\u80BA\u7ECF": {
+      wushu: [
+        { name: "\u5C11\u5546", meridian: "\u80BA\u7ECF", type: "\u4E95", indications: "\u54BD\u5589\u80BF\u75DB\u3001\u54B3\u55FD\u3001\u53D1\u70ED\u3001\u660F\u8FF7\u3001\u766B\u72C2" },
+        { name: "\u9C7C\u9645", meridian: "\u80BA\u7ECF", type: "\u8365", indications: "\u54B3\u55FD\u3001\u54B3\u8840\u3001\u54BD\u5589\u80BF\u75DB\u3001\u5931\u97F3\u3001\u53D1\u70ED" },
+        { name: "\u592A\u6E0A", meridian: "\u80BA\u7ECF", type: "\u8F93", indications: "\u54B3\u55FD\u3001\u6C14\u5598\u3001\u80F8\u75DB\u3001\u65E0\u8109\u75C7\u3001\u8155\u81C2\u75DB" },
+        { name: "\u7ECF\u6E20", meridian: "\u80BA\u7ECF", type: "\u7ECF", indications: "\u54B3\u55FD\u3001\u6C14\u5598\u3001\u80F8\u75DB\u3001\u54BD\u5589\u80BF\u75DB\u3001\u624B\u8155\u75DB" },
+        { name: "\u5C3A\u6CFD", meridian: "\u80BA\u7ECF", type: "\u5408", indications: "\u54B3\u55FD\u3001\u6C14\u5598\u3001\u54B3\u8840\u3001\u6F6E\u70ED\u3001\u5C0F\u513F\u60CA\u98CE" }
+      ],
+      yuan: { name: "\u592A\u6E0A", meridian: "\u80BA\u7ECF", indications: "\u54B3\u55FD\u3001\u6C14\u5598\u3001\u80F8\u75DB\u3001\u65E0\u8109\u75C7\u3001\u8155\u81C2\u75DB" }
+    },
+    "\u5927\u80A0\u7ECF": {
+      wushu: [
+        { name: "\u5546\u9633", meridian: "\u5927\u80A0\u7ECF", type: "\u4E95", indications: "\u54BD\u5589\u80BF\u75DB\u3001\u9F7F\u75DB\u3001\u8033\u9E23\u3001\u660F\u8FF7\u3001\u624B\u6307\u9EBB\u6728" },
+        { name: "\u4E8C\u95F4", meridian: "\u5927\u80A0\u7ECF", type: "\u8365", indications: "\u9F7F\u75DB\u3001\u54BD\u5589\u80BF\u75DB\u3001\u53E3\u6B6A\u3001\u76EE\u75DB\u3001\u70ED\u75C5" },
+        { name: "\u4E09\u95F4", meridian: "\u5927\u80A0\u7ECF", type: "\u8F93", indications: "\u9F7F\u75DB\u3001\u54BD\u5589\u80BF\u75DB\u3001\u8179\u6EE1\u3001\u80A0\u9E23\u3001\u624B\u6307\u75DB" },
+        { name: "\u9633\u6EAA", meridian: "\u5927\u80A0\u7ECF", type: "\u7ECF", indications: "\u5934\u75DB\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u9F7F\u75DB\u3001\u624B\u8155\u75DB" },
+        { name: "\u66F2\u6C60", meridian: "\u5927\u80A0\u7ECF", type: "\u5408", indications: "\u70ED\u75C5\u3001\u54BD\u5589\u80BF\u75DB\u3001\u624B\u81C2\u80BF\u75DB\u3001\u9AD8\u8840\u538B\u3001\u6E7F\u75B9" }
+      ],
+      yuan: { name: "\u5408\u8C37", meridian: "\u5927\u80A0\u7ECF", indications: "\u5934\u75DB\u3001\u9F7F\u75DB\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u53E3\u773C\u6B6A\u659C\u3001\u611F\u5192" }
+    },
+    "\u80C3\u7ECF": {
+      wushu: [
+        { name: "\u5389\u5151", meridian: "\u80C3\u7ECF", type: "\u4E95", indications: "\u9F7F\u75DB\u3001\u54BD\u5589\u80BF\u75DB\u3001\u9F3B\u8844\u3001\u8DB3\u80CC\u80BF\u75DB\u3001\u766B\u72C2" },
+        { name: "\u5185\u5EAD", meridian: "\u80C3\u7ECF", type: "\u8365", indications: "\u9F7F\u75DB\u3001\u54BD\u5589\u80BF\u75DB\u3001\u53E3\u6B6A\u3001\u8179\u75DB\u3001\u70ED\u75C5" },
+        { name: "\u9677\u8C37", meridian: "\u80C3\u7ECF", type: "\u8F93", indications: "\u8179\u75DB\u3001\u80A0\u9E23\u3001\u8DB3\u80CC\u80BF\u75DB\u3001\u9762\u76EE\u6D6E\u80BF" },
+        { name: "\u89E3\u6EAA", meridian: "\u80C3\u7ECF", type: "\u7ECF", indications: "\u5934\u75DB\u3001\u7729\u6655\u3001\u8179\u80C0\u3001\u8DB3\u8E1D\u80BF\u75DB\u3001\u766B\u72C2" },
+        { name: "\u8DB3\u4E09\u91CC", meridian: "\u80C3\u7ECF", type: "\u5408", indications: "\u80C3\u75DB\u3001\u5455\u5410\u3001\u8179\u80C0\u3001\u6CC4\u6CFB\u3001\u4E0B\u80A2\u75FF\u75F9\u3001\u5F3A\u58EE\u4FDD\u5065" }
+      ],
+      yuan: { name: "\u51B2\u9633", meridian: "\u80C3\u7ECF", indications: "\u80C3\u75DB\u3001\u8179\u80C0\u3001\u53E3\u773C\u6B6A\u659C\u3001\u8DB3\u80CC\u80BF\u75DB" }
+    },
+    "\u813E\u7ECF": {
+      wushu: [
+        { name: "\u9690\u767D", meridian: "\u813E\u7ECF", type: "\u4E95", indications: "\u6708\u7ECF\u8FC7\u591A\u3001\u5D29\u6F0F\u3001\u4FBF\u8840\u3001\u8179\u80C0\u3001\u766B\u72C2" },
+        { name: "\u5927\u90FD", meridian: "\u813E\u7ECF", type: "\u8365", indications: "\u8179\u80C0\u3001\u80C3\u75DB\u3001\u6CC4\u6CFB\u3001\u4FBF\u79D8\u3001\u8DB3\u8DBE\u75DB" },
+        { name: "\u592A\u767D", meridian: "\u813E\u7ECF", type: "\u8F93", indications: "\u80C3\u75DB\u3001\u8179\u80C0\u3001\u6CC4\u6CFB\u3001\u4FBF\u79D8\u3001\u80A2\u4F53\u6C89\u91CD" },
+        { name: "\u5546\u4E18", meridian: "\u813E\u7ECF", type: "\u7ECF", indications: "\u8179\u80C0\u3001\u6CC4\u6CFB\u3001\u4FBF\u79D8\u3001\u9EC4\u75B8\u3001\u8DB3\u8E1D\u75DB" },
+        { name: "\u9634\u9675\u6CC9", meridian: "\u813E\u7ECF", type: "\u5408", indications: "\u8179\u80C0\u3001\u6CC4\u6CFB\u3001\u6C34\u80BF\u3001\u5C0F\u4FBF\u4E0D\u5229\u3001\u819D\u75DB" }
+      ],
+      yuan: { name: "\u592A\u767D", meridian: "\u813E\u7ECF", indications: "\u80C3\u75DB\u3001\u8179\u80C0\u3001\u6CC4\u6CFB\u3001\u4FBF\u79D8\u3001\u80A2\u4F53\u6C89\u91CD" }
+    },
+    "\u5FC3\u7ECF": {
+      wushu: [
+        { name: "\u5C11\u51B2", meridian: "\u5FC3\u7ECF", type: "\u4E95", indications: "\u5FC3\u60B8\u3001\u5FC3\u75DB\u3001\u660F\u8FF7\u3001\u70ED\u75C5\u3001\u766B\u72C2" },
+        { name: "\u5C11\u5E9C", meridian: "\u5FC3\u7ECF", type: "\u8365", indications: "\u5FC3\u60B8\u3001\u80F8\u75DB\u3001\u5C0F\u4FBF\u4E0D\u5229\u3001\u638C\u4E2D\u70ED\u3001\u9634\u75D2" },
+        { name: "\u795E\u95E8", meridian: "\u5FC3\u7ECF", type: "\u8F93", indications: "\u5FC3\u60B8\u3001\u5931\u7720\u3001\u5065\u5FD8\u3001\u766B\u72C2\u3001\u80F8\u80C1\u75DB" },
+        { name: "\u7075\u9053", meridian: "\u5FC3\u7ECF", type: "\u7ECF", indications: "\u5FC3\u60B8\u3001\u5FC3\u75DB\u3001\u66B4\u5591\u3001\u8098\u81C2\u75DB" },
+        { name: "\u5C11\u6D77", meridian: "\u5FC3\u7ECF", type: "\u5408", indications: "\u5FC3\u75DB\u3001\u8098\u81C2\u75DB\u3001\u624B\u98A4\u3001\u7630\u75AC\u3001\u814B\u80C1\u75DB" }
+      ],
+      yuan: { name: "\u795E\u95E8", meridian: "\u5FC3\u7ECF", indications: "\u5FC3\u60B8\u3001\u5931\u7720\u3001\u5065\u5FD8\u3001\u766B\u72C2\u3001\u80F8\u80C1\u75DB" }
+    },
+    "\u5C0F\u80A0\u7ECF": {
+      wushu: [
+        { name: "\u5C11\u6CFD", meridian: "\u5C0F\u80A0\u7ECF", type: "\u4E95", indications: "\u5934\u75DB\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u4E73\u6C41\u4E0D\u8DB3\u3001\u660F\u8FF7\u3001\u54BD\u5589\u80BF\u75DB" },
+        { name: "\u524D\u8C37", meridian: "\u5C0F\u80A0\u7ECF", type: "\u8365", indications: "\u5934\u75DB\u3001\u76EE\u75DB\u3001\u8033\u9E23\u3001\u70ED\u75C5\u3001\u624B\u6307\u9EBB\u6728" },
+        { name: "\u540E\u6EAA", meridian: "\u5C0F\u80A0\u7ECF", type: "\u8F93", indications: "\u5934\u9879\u5F3A\u75DB\u3001\u8170\u80CC\u75DB\u3001\u76EE\u8D64\u3001\u8033\u804B\u3001\u766B\u72C2" },
+        { name: "\u9633\u8C37", meridian: "\u5C0F\u80A0\u7ECF", type: "\u7ECF", indications: "\u5934\u75DB\u3001\u76EE\u7729\u3001\u8033\u9E23\u3001\u8155\u75DB\u3001\u70ED\u75C5" },
+        { name: "\u5C0F\u6D77", meridian: "\u5C0F\u80A0\u7ECF", type: "\u5408", indications: "\u8098\u81C2\u75DB\u3001\u80A9\u80CC\u75DB\u3001\u5934\u75DB\u3001\u8033\u804B\u3001\u766B\u75EB" }
+      ],
+      yuan: { name: "\u8155\u9AA8", meridian: "\u5C0F\u80A0\u7ECF", indications: "\u5934\u9879\u5F3A\u75DB\u3001\u8033\u9E23\u3001\u9EC4\u75B8\u3001\u70ED\u75C5\u3001\u6307\u631B" }
+    },
+    "\u8180\u80F1\u7ECF": {
+      wushu: [
+        { name: "\u81F3\u9634", meridian: "\u8180\u80F1\u7ECF", type: "\u4E95", indications: "\u5934\u75DB\u3001\u76EE\u75DB\u3001\u9F3B\u585E\u3001\u80CE\u4F4D\u4E0D\u6B63\u3001\u96BE\u4EA7" },
+        { name: "\u901A\u8C37", meridian: "\u8180\u80F1\u7ECF", type: "\u8365", indications: "\u5934\u75DB\u3001\u76EE\u7729\u3001\u9F3B\u8844\u3001\u9879\u5F3A" },
+        { name: "\u675F\u9AA8", meridian: "\u8180\u80F1\u7ECF", type: "\u8F93", indications: "\u5934\u75DB\u3001\u9879\u5F3A\u3001\u76EE\u7729\u3001\u8170\u80CC\u75DB\u3001\u766B\u72C2" },
+        { name: "\u6606\u4ED1", meridian: "\u8180\u80F1\u7ECF", type: "\u7ECF", indications: "\u5934\u75DB\u3001\u9879\u5F3A\u3001\u8170\u80CC\u75DB\u3001\u8DB3\u8E1D\u80BF\u75DB\u3001\u96BE\u4EA7" },
+        { name: "\u59D4\u4E2D", meridian: "\u8180\u80F1\u7ECF", type: "\u5408", indications: "\u8170\u80CC\u75DB\u3001\u4E0B\u80A2\u75FF\u75F9\u3001\u8179\u75DB\u3001\u5C0F\u4FBF\u4E0D\u5229" }
+      ],
+      yuan: { name: "\u4EAC\u9AA8", meridian: "\u8180\u80F1\u7ECF", indications: "\u5934\u75DB\u3001\u9879\u5F3A\u3001\u76EE\u7729\u3001\u8170\u80CC\u75DB\u3001\u766B\u75EB" }
+    },
+    "\u80BE\u7ECF": {
+      wushu: [
+        { name: "\u6D8C\u6CC9", meridian: "\u80BE\u7ECF", type: "\u4E95", indications: "\u5934\u75DB\u3001\u7729\u6655\u3001\u660F\u8FF7\u3001\u54BD\u5589\u80BF\u75DB\u3001\u5C0F\u513F\u60CA\u98CE" },
+        { name: "\u7136\u8C37", meridian: "\u80BE\u7ECF", type: "\u8365", indications: "\u6708\u7ECF\u4E0D\u8C03\u3001\u9057\u7CBE\u3001\u6D88\u6E34\u3001\u6CC4\u6CFB\u3001\u8DB3\u80CC\u80BF\u75DB" },
+        { name: "\u592A\u6EAA", meridian: "\u80BE\u7ECF", type: "\u8F93", indications: "\u8170\u75DB\u3001\u8033\u9E23\u3001\u6708\u7ECF\u4E0D\u8C03\u3001\u9057\u7CBE\u3001\u6D88\u6E34\u3001\u5931\u7720" },
+        { name: "\u590D\u6E9C", meridian: "\u80BE\u7ECF", type: "\u7ECF", indications: "\u6C34\u80BF\u3001\u8179\u80C0\u3001\u6CC4\u6CFB\u3001\u76D7\u6C57\u3001\u4E0B\u80A2\u75FF\u75F9" },
+        { name: "\u9634\u8C37", meridian: "\u80BE\u7ECF", type: "\u5408", indications: "\u8179\u75DB\u3001\u9633\u75FF\u3001\u6708\u7ECF\u4E0D\u8C03\u3001\u819D\u80A1\u5185\u4FA7\u75DB" }
+      ],
+      yuan: { name: "\u592A\u6EAA", meridian: "\u80BE\u7ECF", indications: "\u8170\u75DB\u3001\u8033\u9E23\u3001\u6708\u7ECF\u4E0D\u8C03\u3001\u9057\u7CBE\u3001\u6D88\u6E34\u3001\u5931\u7720" }
+    },
+    "\u5FC3\u5305\u7ECF": {
+      wushu: [
+        { name: "\u4E2D\u51B2", meridian: "\u5FC3\u5305\u7ECF", type: "\u4E95", indications: "\u660F\u8FF7\u3001\u4E2D\u6691\u3001\u5FC3\u75DB\u3001\u820C\u5F3A\u80BF\u75DB\u3001\u5C0F\u513F\u60CA\u98CE" },
+        { name: "\u52B3\u5BAB", meridian: "\u5FC3\u5305\u7ECF", type: "\u8365", indications: "\u5FC3\u75DB\u3001\u53E3\u75AE\u3001\u5455\u5410\u3001\u766B\u75EB\u3001\u638C\u4E2D\u70ED" },
+        { name: "\u5927\u9675", meridian: "\u5FC3\u5305\u7ECF", type: "\u8F93", indications: "\u5FC3\u75DB\u3001\u5FC3\u60B8\u3001\u80C3\u75DB\u3001\u5455\u5410\u3001\u766B\u72C2\u3001\u8155\u75DB" },
+        { name: "\u95F4\u4F7F", meridian: "\u5FC3\u5305\u7ECF", type: "\u7ECF", indications: "\u5FC3\u75DB\u3001\u5FC3\u60B8\u3001\u80C3\u75DB\u3001\u5455\u5410\u3001\u759F\u75BE" },
+        { name: "\u66F2\u6CFD", meridian: "\u5FC3\u5305\u7ECF", type: "\u5408", indications: "\u5FC3\u75DB\u3001\u5FC3\u60B8\u3001\u80C3\u75DB\u3001\u5455\u5410\u3001\u8098\u81C2\u75DB" }
+      ],
+      yuan: { name: "\u5927\u9675", meridian: "\u5FC3\u5305\u7ECF", indications: "\u5FC3\u75DB\u3001\u5FC3\u60B8\u3001\u80C3\u75DB\u3001\u5455\u5410\u3001\u766B\u72C2\u3001\u8155\u75DB" }
+    },
+    "\u4E09\u7126\u7ECF": {
+      wushu: [
+        { name: "\u5173\u51B2", meridian: "\u4E09\u7126\u7ECF", type: "\u4E95", indications: "\u5934\u75DB\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u54BD\u5589\u80BF\u75DB\u3001\u70ED\u75C5\u3001\u660F\u8FF7" },
+        { name: "\u6DB2\u95E8", meridian: "\u4E09\u7126\u7ECF", type: "\u8365", indications: "\u5934\u75DB\u3001\u76EE\u8D64\u3001\u8033\u804B\u3001\u54BD\u5589\u80BF\u75DB\u3001\u624B\u6307\u75DB" },
+        { name: "\u4E2D\u6E1A", meridian: "\u4E09\u7126\u7ECF", type: "\u8F93", indications: "\u5934\u75DB\u3001\u76EE\u7729\u3001\u8033\u9E23\u3001\u8033\u804B\u3001\u624B\u6307\u5C48\u4F38\u4E0D\u5229" },
+        { name: "\u652F\u6C9F", meridian: "\u4E09\u7126\u7ECF", type: "\u7ECF", indications: "\u8033\u9E23\u3001\u80C1\u75DB\u3001\u4FBF\u79D8\u3001\u80A9\u80CC\u75DB\u3001\u66B4\u5591" },
+        { name: "\u5929\u4E95", meridian: "\u4E09\u7126\u7ECF", type: "\u5408", indications: "\u504F\u5934\u75DB\u3001\u80C1\u75DB\u3001\u9888\u80A9\u75DB\u3001\u7630\u75AC\u3001\u766B\u75EB" }
+      ],
+      yuan: { name: "\u9633\u6C60", meridian: "\u4E09\u7126\u7ECF", indications: "\u5934\u75DB\u3001\u76EE\u8D64\u80BF\u75DB\u3001\u8033\u804B\u3001\u6D88\u6E34\u3001\u8155\u75DB" }
+    }
+  };
+  var EIGHT_CONFLUENT_POINTS = [
+    { name: "\u516C\u5B59", meridian: "\u813E\u7ECF", pairedName: "\u5185\u5173", pairedMeridian: "\u5FC3\u5305\u7ECF", indications: "\u5FC3\u3001\u80F8\u3001\u80C3\u90E8\u75BE\u75C5" },
+    { name: "\u5185\u5173", meridian: "\u5FC3\u5305\u7ECF", pairedName: "\u516C\u5B59", pairedMeridian: "\u813E\u7ECF", indications: "\u5FC3\u3001\u80F8\u3001\u80C3\u90E8\u75BE\u75C5" },
+    { name: "\u540E\u6EAA", meridian: "\u5C0F\u80A0\u7ECF", pairedName: "\u7533\u8109", pairedMeridian: "\u8180\u80F1\u7ECF", indications: "\u76EE\u5185\u7726\u3001\u9888\u9879\u3001\u8033\u3001\u80A9\u90E8\u75BE\u75C5" },
+    { name: "\u7533\u8109", meridian: "\u8180\u80F1\u7ECF", pairedName: "\u540E\u6EAA", pairedMeridian: "\u5C0F\u80A0\u7ECF", indications: "\u76EE\u5185\u7726\u3001\u9888\u9879\u3001\u8033\u3001\u80A9\u90E8\u75BE\u75C5" },
+    { name: "\u8DB3\u4E34\u6CE3", meridian: "\u80C6\u7ECF", pairedName: "\u5916\u5173", pairedMeridian: "\u4E09\u7126\u7ECF", indications: "\u76EE\u5916\u7726\u3001\u8033\u540E\u3001\u988A\u3001\u80A9\u90E8\u75BE\u75C5" },
+    { name: "\u5916\u5173", meridian: "\u4E09\u7126\u7ECF", pairedName: "\u8DB3\u4E34\u6CE3", pairedMeridian: "\u80C6\u7ECF", indications: "\u76EE\u5916\u7726\u3001\u8033\u540E\u3001\u988A\u3001\u80A9\u90E8\u75BE\u75C5" },
+    { name: "\u5217\u7F3A", meridian: "\u80BA\u7ECF", pairedName: "\u7167\u6D77", pairedMeridian: "\u80BE\u7ECF", indications: "\u80BA\u7CFB\u3001\u54BD\u5589\u3001\u80F8\u8188\u75BE\u75C5" },
+    { name: "\u7167\u6D77", meridian: "\u80BE\u7ECF", pairedName: "\u5217\u7F3A", pairedMeridian: "\u80BA\u7ECF", indications: "\u80BA\u7CFB\u3001\u54BD\u5589\u3001\u80F8\u8188\u75BE\u75C5" }
+  ];
+  var ACUPOINT_LOOKUP = {};
+  EIGHT_CONFLUENT_POINTS.forEach((p) => {
+    ACUPOINT_LOOKUP[p.name] = p;
+  });
+  var TIAN_GAN2 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+  var DI_ZHI2 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+  function getHourZhiIndex(hour) {
+    if (hour < 0 || hour > 23) hour = 12;
+    return Math.floor((hour + 1) % 24 / 2);
+  }
+  function calcHourGan(dayGanIndex, hourZhiIndex) {
+    const offset = [0, 2, 4, 6, 8][dayGanIndex % 5];
+    return (offset + hourZhiIndex) % 10;
+  }
+  function getDayGanIndex(year, month, day) {
+    const d = new Date(year, month - 1, day);
+    const ref = new Date(2e3, 0, 1);
+    const diff = Math.round((d.getTime() - ref.getTime()) / 864e5);
+    return ((5 + diff) % 10 + 10) % 10;
+  }
+  function getDayZhiIndex(year, month, day) {
+    const d = new Date(year, month - 1, day);
+    const ref = new Date(2e3, 0, 1);
+    const diff = Math.round((d.getTime() - ref.getTime()) / 864e5);
+    return ((3 + diff) % 12 + 12) % 12;
+  }
+  function isYangDay(dayGanIndex) {
+    return dayGanIndex % 2 === 0;
+  }
+  var SHI_CHEN_MERIDIAN = {
+    0: { name: "\u5B50", meridian: "\u80C6\u7ECF", chi: "\u5B50(23-01)" },
+    1: { name: "\u4E11", meridian: "\u809D\u7ECF", chi: "\u4E11(01-03)" },
+    2: { name: "\u5BC5", meridian: "\u80BA\u7ECF", chi: "\u5BC5(03-05)" },
+    3: { name: "\u536F", meridian: "\u5927\u80A0\u7ECF", chi: "\u536F(05-07)" },
+    4: { name: "\u8FB0", meridian: "\u80C3\u7ECF", chi: "\u8FB0(07-09)" },
+    5: { name: "\u5DF3", meridian: "\u813E\u7ECF", chi: "\u5DF3(09-11)" },
+    6: { name: "\u5348", meridian: "\u5FC3\u7ECF", chi: "\u5348(11-13)" },
+    7: { name: "\u672A", meridian: "\u5C0F\u80A0\u7ECF", chi: "\u672A(13-15)" },
+    8: { name: "\u7533", meridian: "\u8180\u80F1\u7ECF", chi: "\u7533(15-17)" },
+    9: { name: "\u9149", meridian: "\u80BE\u7ECF", chi: "\u9149(17-19)" },
+    10: { name: "\u620C", meridian: "\u5FC3\u5305\u7ECF", chi: "\u620C(19-21)" },
+    11: { name: "\u4EA5", meridian: "\u4E09\u7126\u7ECF", chi: "\u4EA5(21-23)" }
+  };
+  function calcNaZiFa(hour) {
+    const zhiIdx = getHourZhiIndex(hour);
+    const info = SHI_CHEN_MERIDIAN[zhiIdx];
+    if (!info) return { shiChen: "\u672A\u77E5", dangLingMeridian: "\u672A\u77E5", wushuPoints: [] };
+    const md = MERIDIAN_ACUPOINTS[info.meridian];
+    return {
+      shiChen: info.chi,
+      dangLingMeridian: info.meridian,
+      wushuPoints: md ? md.wushu : [],
+      yuanPoint: md ? md.yuan : void 0
+    };
+  }
+  var DAY_GAN_MERIDIAN = {
+    0: "\u80C6\u7ECF",
+    1: "\u809D\u7ECF",
+    2: "\u5C0F\u80A0\u7ECF",
+    3: "\u5FC3\u7ECF",
+    4: "\u80C3\u7ECF",
+    5: "\u813E\u7ECF",
+    6: "\u5927\u80A0\u7ECF",
+    7: "\u80BA\u7ECF",
+    8: "\u8180\u80F1\u7ECF",
+    9: "\u80BE\u7ECF"
+  };
+  function calcNaJiaFa(year, month, day, hour) {
+    const dayGanIdx = getDayGanIndex(year, month, day);
+    const dayGan = TIAN_GAN2[dayGanIdx];
+    const zhiIdx = getHourZhiIndex(hour);
+    const hourGanIdx = calcHourGan(dayGanIdx, zhiIdx);
+    const hourGan = TIAN_GAN2[hourGanIdx];
+    const isYang = isYangDay(dayGanIdx);
+    const hourIsYang = hourGanIdx % 2 === 0;
+    let openingMeridian = "";
+    let openingAcupoint = null;
+    let yuanReturn = null;
+    let note = "";
+    if (isYang && hourIsYang) {
+      openingMeridian = DAY_GAN_MERIDIAN[hourGanIdx % 10] || "";
+      const md = MERIDIAN_ACUPOINTS[openingMeridian];
+      if (md) {
+        const typeOrder = ["\u4E95", "\u8365", "\u8F93", "\u7ECF", "\u5408"];
+        const typeIdx = hourGanIdx % 5;
+        openingAcupoint = md.wushu.find((p) => p.type === typeOrder[typeIdx]) || md.wushu[typeIdx] || null;
+        if (typeOrder[typeIdx] === "\u8F93" && md.yuan) yuanReturn = md.yuan;
+      }
+      note = "\u9633\u65E5\u9633\u65F6\u5F00\u9633\u7ECF\u7A74";
+    } else if (!isYang && !hourIsYang) {
+      openingMeridian = DAY_GAN_MERIDIAN[hourGanIdx % 10] || "";
+      const md = MERIDIAN_ACUPOINTS[openingMeridian];
+      if (md) {
+        const typeOrder = ["\u4E95", "\u8365", "\u8F93", "\u7ECF", "\u5408"];
+        const typeIdx = hourGanIdx % 5;
+        openingAcupoint = md.wushu.find((p) => p.type === typeOrder[typeIdx]) || md.wushu[typeIdx] || null;
+        if (typeOrder[typeIdx] === "\u8F93" && md.yuan) yuanReturn = md.yuan;
+      }
+      note = "\u9634\u65E5\u9634\u65F6\u5F00\u9634\u7ECF\u7A74";
+    } else if (isYang && !hourIsYang) {
+      openingMeridian = "\u4E09\u7126\u7ECF";
+      const md = MERIDIAN_ACUPOINTS[openingMeridian];
+      if (md) {
+        openingAcupoint = md.wushu[(hourGanIdx % 5 + 2) % 5] || null;
+      }
+      note = "\u9633\u65E5\u9634\u65F6\xB7\u6C14\u7EB3\u4E09\u7126";
+    } else {
+      openingMeridian = "\u5FC3\u5305\u7ECF";
+      const md = MERIDIAN_ACUPOINTS[openingMeridian];
+      if (md) {
+        openingAcupoint = md.wushu[(hourGanIdx % 5 + 2) % 5] || null;
+      }
+      note = "\u9634\u65E5\u9633\u65F6\xB7\u8840\u5F52\u5305\u7EDC";
+    }
+    return { dayGan, hourGan, openingMeridian, openingAcupoint, yuanReturn, note };
+  }
+  var DAY_GAN_BASE = { 0: 10, 1: 9, 2: 7, 3: 8, 4: 7, 5: 10, 6: 9, 7: 7, 8: 8, 9: 7 };
+  var DAY_ZHI_BASE = { 0: 7, 1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 7, 7: 6, 8: 5, 9: 4, 10: 3, 11: 2 };
+  var HOUR_GAN_BASE = { 0: 7, 1: 5, 2: 3, 3: 6, 4: 4, 5: 7, 6: 5, 7: 3, 8: 6, 9: 4 };
+  var HOUR_ZHI_BASE = { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0, 5: 9, 6: 4, 7: 3, 8: 2, 9: 1, 10: 0, 11: 9 };
+  var BAGUA_MAP = {
+    1: { gua: "\u574E", dir: "\u5317" },
+    2: { gua: "\u5764", dir: "\u897F\u5357" },
+    3: { gua: "\u9707", dir: "\u4E1C" },
+    4: { gua: "\u5DFD", dir: "\u4E1C\u5357" },
+    6: { gua: "\u4E7E", dir: "\u897F\u5317" },
+    7: { gua: "\u5151", dir: "\u897F" },
+    8: { gua: "\u826E", dir: "\u4E1C\u5317" },
+    9: { gua: "\u79BB", dir: "\u5357" }
+  };
+  var BAGUA_ACU = {
+    1: { main: "\u516C\u5B59", pair: "\u5185\u5173" },
+    3: { main: "\u540E\u6EAA", pair: "\u7533\u8109" },
+    4: { main: "\u8DB3\u4E34\u6CE3", pair: "\u5916\u5173" },
+    6: { main: "\u5217\u7F3A", pair: "\u7167\u6D77" },
+    2: { main: "\u7167\u6D77", pair: "\u5217\u7F3A" },
+    7: { main: "\u7533\u8109", pair: "\u540E\u6EAA" },
+    8: { main: "\u5916\u5173", pair: "\u8DB3\u4E34\u6CE3" },
+    9: { main: "\u5185\u5173", pair: "\u516C\u5B59" }
+  };
+  function calcLingGuiBaFa(year, month, day, hour) {
+    const dayGanIdx = getDayGanIndex(year, month, day);
+    const dayZhiIdx = getDayZhiIndex(year, month, day);
+    const hourZhiIdx = getHourZhiIndex(hour);
+    const hourGanIdx = calcHourGan(dayGanIdx, hourZhiIdx);
+    const total = (DAY_GAN_BASE[dayGanIdx] || 0) + (DAY_ZHI_BASE[dayZhiIdx] || 0) + (HOUR_GAN_BASE[hourGanIdx] || 0) + (HOUR_ZHI_BASE[hourZhiIdx] || 0);
+    const divisor = isYangDay(dayGanIdx) ? 9 : 6;
+    let rem = total % divisor;
+    if (rem === 0) rem = divisor;
+    let baguaNum = rem === 5 ? 6 : rem;
+    const bg = BAGUA_MAP[baguaNum] || { gua: "?", dir: "?" };
+    const acuPair = BAGUA_ACU[baguaNum];
+    let mainPoint = "", pairPoint = "", mainMeridian = "", pairMeridian = "", indications = "";
+    if (acuPair) {
+      mainPoint = acuPair.main;
+      pairPoint = acuPair.pair;
+      const mp = ACUPOINT_LOOKUP[mainPoint], pp = ACUPOINT_LOOKUP[pairPoint];
+      if (mp) {
+        mainMeridian = mp.meridian;
+        indications = mp.indications;
+      }
+      if (pp) pairMeridian = pp.meridian;
+    }
+    return {
+      dayGan: TIAN_GAN2[dayGanIdx],
+      dayZhi: DI_ZHI2[dayZhiIdx],
+      hourGan: TIAN_GAN2[hourGanIdx],
+      hourZhi: DI_ZHI2[hourZhiIdx],
+      totalSum: total,
+      divisor,
+      remainder: rem,
+      bagua: bg.gua,
+      direction: bg.dir,
+      mainAcupoint: mainPoint,
+      mainMeridian,
+      pairedAcupoint: pairPoint,
+      pairedMeridian: pairMeridian,
+      indications
+    };
+  }
+  var FEI_TENG_ACU = {
+    0: { main: "\u516C\u5B59", pair: "\u5185\u5173", bagua: "\u826E" },
+    1: { main: "\u5185\u5173", pair: "\u516C\u5B59", bagua: "\u9707" },
+    2: { main: "\u540E\u6EAA", pair: "\u7533\u8109", bagua: "\u5DFD" },
+    3: { main: "\u7533\u8109", pair: "\u540E\u6EAA", bagua: "\u5151" },
+    4: { main: "\u8DB3\u4E34\u6CE3", pair: "\u5916\u5173", bagua: "\u4E7E" },
+    5: { main: "\u516C\u5B59", pair: "\u5185\u5173", bagua: "\u826E" },
+    6: { main: "\u5185\u5173", pair: "\u516C\u5B59", bagua: "\u9707" },
+    7: { main: "\u540E\u6EAA", pair: "\u7533\u8109", bagua: "\u5DFD" },
+    8: { main: "\u7533\u8109", pair: "\u540E\u6EAA", bagua: "\u5151" },
+    9: { main: "\u8DB3\u4E34\u6CE3", pair: "\u5916\u5173", bagua: "\u4E7E" }
+  };
+  function calcFeiTengBaFa(year, month, day, hour) {
+    const dayGanIdx = getDayGanIndex(year, month, day);
+    const zhiIdx = getHourZhiIndex(hour);
+    const hourGanIdx = calcHourGan(dayGanIdx, zhiIdx);
+    const ft = FEI_TENG_ACU[hourGanIdx] || FEI_TENG_ACU[0];
+    const main = ACUPOINT_LOOKUP[ft.main];
+    const pair = ACUPOINT_LOOKUP[ft.pair];
+    return {
+      dayGan: TIAN_GAN2[dayGanIdx],
+      hourGan: TIAN_GAN2[hourGanIdx],
+      bagua: ft.bagua,
+      mainAcupoint: ft.main,
+      mainMeridian: main ? main.meridian : "",
+      pairedAcupoint: ft.pair,
+      pairedMeridian: pair ? pair.meridian : "",
+      indications: main ? main.indications : ""
+    };
   }
 
   // src/index.ts
