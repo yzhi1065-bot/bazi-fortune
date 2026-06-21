@@ -1,31 +1,34 @@
+// ====== 四柱 ======
 export interface FourPillar {
- year: string;
- month: string;
- day: string;
- hour: string;
+ year: string  // "丙午"
+ month: string
+ day: string
+ hour: string
 }
 
+// ====== 农历结果 ======
 export interface LunarResult {
- solarY: number;
- solarM: number;
- solarD: number;
- lunarY: number;
- lunarM: number;
- lunarD: number;
- isLeapMonth: boolean;
- yearPillar: string;
- monthPillar: string;
- dayPillar: string;
- solarTerm: string;
- isYangDun: boolean;
- sanYuan: string;
- yiList: string[];
- jiList: string[];
- chongSha: string;
+ solarY: number
+ solarM: number
+ solarD: number
+ lunarY: number
+ lunarM: number
+ lunarD: number
+ isLeapMonth: boolean
+ yearPillar: string
+ monthPillar: string
+ dayPillar: string
+ solarTerm: string
+ isYangDun: boolean
+ sanYuan: string
+ yiList: string[]
+ jiList: string[]
+ chongSha: string
 }
 
+// ====== 黄历 ======
 export interface HuangLiInfo {
- // 基础
+ // 基础干支
  yearGZ: string
  monthGZ: string
  dayGZ: string
@@ -38,22 +41,22 @@ export interface HuangLiInfo {
  chongSha: string
  chongAnimal: string
 
- // 值日、建除、黄道
+ // 值神、建除、黄道
  valueGod: string
  jianChu: string
- isHuangDao: boolean // 是否黄道吉日
+ isHuangDao: boolean
 
  // 传统内容
- pengZu: string // 彭祖百忌
- xingSu: string // 二十八星宿
+ pengZu: string     // "丙不修灶 寅不祭祀"
+ xingSu: string     // 二十八星宿 "角木蛟"
 
  // 宜忌
  good: string[]
  bad: string[]
 
- // 神煞
- luckyGods: string[] // 吉神
- evilGods: string[] // 凶神
+ // 吉神凶神
+ luckyGods: string[]
+ evilGods: string[]
 
  // 方位
  xiShen: string
@@ -64,20 +67,24 @@ export interface HuangLiInfo {
  taiShen: string
 
  // 十二时辰
- hourList: Array<{
- hourIndex: number
- hourGZ: string
- hourName: string
- isGood: boolean
- hourYi: string[]
- hourJi: string[]
- }>
+ hourList: HourInfo[]
 
  // 奇门
  isYangDun: boolean
  sanYuan: string
 }
 
+// ====== 时辰 ======
+export interface HourInfo {
+ hourIndex: number  // 0-11
+ hourGZ: string     // "甲午"
+ hourName: string   // "子"
+ isGood: boolean
+ hourYi: string[]
+ hourJi: string[]
+}
+
+// ====== 择日查询 ======
 export interface ZeRiQuery {
  startY: number
  startM: number
@@ -90,9 +97,10 @@ export interface ZeRiQuery {
  needHuangDao?: boolean
 }
 
+// ====== 择日结果 ======
 export interface ZeRiResult {
- dateStr: string
- lunarStr: string
+ dateStr: string      // "2026-06-21"
+ lunarStr: string     // "丙午年五月廿一"
  dayGZ: string
  jianChu: string
  valueGod: string
