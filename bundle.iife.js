@@ -2527,6 +2527,7 @@ var BaZi = (() => {
       _s6 += "\u5224\u5B9A\u4F9D\u636E\uFF1A" + DI_ZHI[mz] + "\u6708\uFF08" + _cx2.season + "\uFF09\uFF0C\u65E5\u4E3B" + TIAN_GAN[dmGan] + "\uFF08" + _cx2.masterFive + "\u7980\u8D4B\uFF09\u2192\u3010" + _cx2.name + "\u3011\n";
       _s6 += "\u75C5\u673A\uFF1A" + _cx2.pathogenesis + "\n";
       _s6 += "\u6613\u611F\uFF1A" + _cx2.illnessTip + "\n";
+      _s6 += "\n\uFF08\u672C\u5185\u5BB9\u4EC5\u4F5C\u4F20\u7EDF\u6587\u5316\u5A31\u4E50\u53C2\u8003\uFF0C\u4E0D\u6784\u6210\u533B\u7597\u8BCA\u65AD\u4E0E\u4EBA\u751F\u51B3\u7B56\u4F9D\u636E\uFF09";
       bookNotes.push(_s6);
     }
     return {
