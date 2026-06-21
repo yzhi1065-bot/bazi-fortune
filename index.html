@@ -336,7 +336,7 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
   if(ts)infoNote+=' '+(LOCALE==='cn'?'真太阳时':'TST')+(lon?' ('+lon+'\u00B0,'+lat+'\u00B0)':'');
   var h='<div style=display:flex;gap:5px;justify-content:flex-end;margin-bottom:6px>'
     +'<button onclick=openAI() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83E\uDD16 AI分析':'\uD83E\uDD16 AI')+'</button>'
-    +'<button onclick=window.print() <button onclick=openCalendar() class=btn-s style=background:rgba(255,255,255,.04);color:#6abf6a>📅 完整黄历</button> style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83D\uDCC4 导出PDF':'\uD83D\uDCC4 PDF')+'</button>'
+    +'<button onclick=window.print()  style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83D\uDCC4 导出PDF':'\uD83D\uDCC4 PDF')+'</button>'
     +'</div>';
   h+='<div style=display:flex;gap:12px;align-items:center;background:linear-gradient(145deg,rgba(28,24,20,.96),rgba(18,16,14,.96));border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid rgba(180,140,100,.15)>'
     +'<div style=width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#c4a265,#8b6914);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0>'+r.zodiac+'</div>'
