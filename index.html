@@ -230,7 +230,7 @@ function initForm(){
   var gzFields=[0,1,2,3].map(function(i){var pl=['年柱','月柱','日柱','时柱'];return'<span style=display:inline-flex;gap:2px;margin:2px;align-items:center;font-size:10px;color:#786a5e>'+pl[i]+': <select id=gzg'+i+' style=padding:2px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none>'+tgOpts+'</select><select id=gzz'+i+' style=padding:2px;border:1px solid rgba(180,140,100,.12);border-radius:3px;font-size:10px;background:rgba(255,255,255,.05);color:#e0d8d0;outline:none>'+dzOpts+'</select></span>'}).join('<br>');
   $('app').innerHTML=
     '<div style=display:flex;gap:5px;justify-content:flex-end;margin-bottom:4px>'
-    +'<button onclick=showLunar() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83C\uDF1B 公历转农历':'\uD83C\uDF1B Solar\u2192Lunar')+'</button>'
+    +'<button onclick=showLunar() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\u2601\u5386\u6CD5':'\u2601Calendar')+'</button>'
     +'<button onclick=toggleLang() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'EN':'\u4E2D\u6587')+'</button>'
     +'<button onclick=showHist() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>'+(LOCALE==='cn'?'\uD83D\uDCCB 历史':'\uD83D\uDCCB History')+'</button>'+'<button onclick=showKefu() class=btn-s style=background:rgba(255,255,255,.04);color:#c4a265>💬 客服</button>'
     +'</div>'
@@ -525,5 +525,39 @@ if(window.BaZi){
       if(((pillars[i].gan-pillars[j].gan+10)%10)===5&&((pillars[i].zhi-pillars[j].zhi+12)%12)===6)
         r.push({pillarA:i,pillarB:j,type:'反吟',desc:'柱位'+i+'与'+j+'反吟'});
     return r;}catch(e){return[]}};}
+
+var _calY=0,_calM=0;
+function showLunar(){renderCalendar(new Date().getFullYear(),new Date().getMonth()+1);}
+function renderCalendar(y,m){
+  _calY=y;_calM=m;
+  var h='<div class=mk-s id=mk_lunar onclick=if(event.target===this)closeMk()><div class=mk-c style=max-height:85vh><div class=ft>\u2601\u5386\u6CD5<span style=float:right;cursor:pointer;font-size:16px onclick=closeMk()>\u2715</span></div>';
+  h+='<div style=display:flex;gap:4px;margin:6px 0;align-items:center>';
+  h+='<button class=btn-s onclick=renderCalendar('+(y-1)+','+m+') style=font-size:14px>\u25C0</button>';
+  h+='<button class=btn-s onclick=renderCalendar('+y+','+(m-1)+')>\u4E0A\u6708</button>';
+  h+='<span style=flex:1;text-align:center;font-size:14px;color:#c4a265;font-weight:600>'+y+'\u5E74'+m+'\u6708</span>';
+  h+='<button class=btn-s onclick=renderCalendar('+y+','+(m+1)+')>\u4E0B\u6708</button>';
+  h+='<button class=btn-s onclick=renderCalendar('+(y+1)+','+m+') style=font-size:14px>\u25B6</button></div>';
+  h+='<div style=display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:11px;color:#887a6e>';
+  h+='<div style=text-align:center;padding:2px;color:#5a4a3a>\u65E5\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D</div>';
+  var fd=new Date(y,m-1,1).getDay(),ld=new Date(y,m,0).getDate(),td=new Date();
+  for(var i=0;i<fd;i++)h+='<div></div>';
+  for(var d=1;d<=ld;d++){
+    var it=(y===td.getFullYear()&&m===td.getMonth()+1&&d===td.getDate());
+    var ldi;try{ldi=BaZi.solarToLunar(y,m,d);}catch(e){}
+    var gz;try{gz=BaZi.calcDayPillar(y,m,d);gz=gz.ganName+gz.zhiName;}catch(e){gz='';}
+    var ti;try{ti=BaZi.findSolarTermIndex(y,m,d);if(ti>=0)ti=BaZi.getSolarTermName(ti);}catch(e){ti='';}
+    h+='<div onclick=showCalDay('+y+','+m+','+d+') style=cursor:pointer;text-align:center;padding:3px;border-radius:4px;background:'+(it?'rgba(196,162,101,.2)':'rgba(255,255,255,.03)')+';border:1px solid '+(it?'rgba(196,162,101,.4)':'transparent')+'>';
+    h+='<div style=font-size:12px;color:#e0d8d0>'+(ti?ti.substring(0,2):d)+'</div>';
+    h+='<div style=font-size:8px;color:#5a4a3a>'+(ldi?ldi.dayName:'')+'</div>';
+    h+='<div style=font-size:7px;color:#6a5e50>'+gz.substring(0,1)+'</div></div>';
+  }
+  h+='</div>';
+  h+='<div class=fr style=margin:6px 0><div class=fg><label>\u5E74</label><input type=number id=cal_y value='+y+'></div><div class=fg><label>\u6708</label><input type=number id=cal_m value='+m+'></div><div class=fg><label>\u65E5</label><input type=number id=cal_d value=1></div></div>';
+  h+='<div style=display:flex;gap:4px><button class=btn-s onclick=goCal()>\u8F6C\u6362</button><button class=btn-s onclick=renderCalendar(td.getFullYear(),td.getMonth()+1) style=color:#6abf6a>\u4ECA\u5929</button></div>';
+  h+='<div id=cal_det style=font-size:11px;color:#9a8a7a;padding:6px;background:rgba(255,255,255,.02);border-radius:4px;line-height:1.7;min-height:20px;margin-top:4px>\u70B9\u51FB\u65E5\u671F\u67E5\u770B\u8BE6\u60C5</div>';
+  h+='</div></div>';document.body.insertAdjacentHTML('beforeend',h);
+}
+function goCal(){var y=+$('cal_y').value,m=+$('cal_m').value;if(y&&m)renderCalendar(y,m);}
+function showCalDay(y,m,d){var h=$('cal_det');if(!h)return;try{var ld=BaZi.solarToLunar(y,m,d);var gz=BaZi.calcDayPillar(y,m,d);var ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:12,gender:'male'});var ti=BaZi.findSolarTermIndex(y,m,d);var tn=ti>=0?BaZi.getSolarTermName(ti):'';var txt=y+'/'+m+'/'+d+' '+(ld?ld.monthName+ld.dayName:'')+'\n\u5E72\u652F\uFF1A'+gz.ganName+gz.zhiName+'\n\u65E5\u4E3B\uFF1A'+ec.dayMaster.name;if(tn)txt+='\n\u8282\u6C14\uFF1A'+tn;if(ld)txt+='\n\u5C5E\u76F8\uFF1A'+ld.zodiac;h.textContent=txt;}catch(e){h.textContent='Error';}}
 </script>
 </body></html>
