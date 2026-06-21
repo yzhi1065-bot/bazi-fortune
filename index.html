@@ -526,51 +526,16 @@ if(window.BaZi){
         r.push({pillarA:i,pillarB:j,type:'反吟',desc:'柱位'+i+'与'+j+'反吟'});
     return r;}catch(e){return[]}};}
 
-var _calSelY=0,_calSelM=0,_calSelD=0;
-var _calY=0,_calM=0;
-function showLunar(){closeMk();renderCalendar(new Date().getFullYear(),new Date().getMonth()+1);}
-function renderCalendar(y,m){
-  _calY=y;_calM=m;
-  var oldEl=document.getElementById('mk_lunar');if(oldEl)oldEl.remove();
-  var td=new Date();if(!y||!m){y=td.getFullYear();m=td.getMonth()+1;}
-  var h='<div class=mk-s id=mk_lunar><div class=mk-c style=max-height:85vh>'
-    +'<div class=ft><span style=color:#c4a265;font-weight:600>☁历法</span><span style=float:right;cursor:pointer;font-size:16px onclick=closeMk()>✕</span></div>';
-  h+='<div style=text-align:center;margin:4px 0>';
-  h+='<span class=btn-s onclick=renderCalendar('+(y-1)+','+m+') style=cursor:pointer;font-size:14px>◀</span> ';
-  h+='<span class=btn-s onclick=renderCalendar('+y+','+(m-1)+') style=cursor:pointer>上月</span> ';
-  h+='<b style=margin:0 12px;font-size:14px;color:#c4a265>'+y+'年'+m+'月</b> ';
-  h+='<span class=btn-s onclick=renderCalendar('+y+','+(m+1)+') style=cursor:pointer>下月</span> ';
-  h+='<span class=btn-s onclick=renderCalendar('+(y+1)+','+m+') style=cursor:pointer;font-size:14px>▶</span></div>';
-  h+='<div style=display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:11px>日一二三四五六</div>';
-  var fd=new Date(y,m-1,1).getDay(),ld=new Date(y,m,0).getDate();
-  for(var i=0;i<fd;i++)h+='<div></div>';
-  for(var d=1;d<=ld;d++){
-    var it=(y===td.getFullYear()&&m===td.getMonth()+1&&d===td.getDate());
-    var ldi=null;try{ldi=BaZi.solarToLunar(y,m,d);}catch(ex){}
-    var gz=null;try{var gzp=BaZi.calcDayPillar(y,m,d);gz=gzp.ganName+gzp.zhiName;}catch(ex){}
-    var ti=null;try{var tii=BaZi.findSolarTermIndex(y,m,d);if(tii>=0)ti=BaZi.getSolarTermName(tii);}catch(ex){}
-    h+='<div onclick=showCalDay('+y+','+m+','+d+') style=cursor:pointer;text-align:center;padding:2px;border-radius:4px;background:'+(it?'rgba(196,162,101,0.3)':'rgba(255,255,255,0.03)')+';border:1px solid '+(it?'rgba(196,162,101,0.5)':'transparent')+'>';
-    h+='<div style=font-size:11px;color:#e0d8d0>'+(ti?ti.substring(0,2):d)+'</div>';
-    h+='<div style=font-size:8px;color:#5a4a3a>'+(ldi?ldi.dayName:'')+'</div>';
-    h+='<div style=font-size:7px;color:#6a5e50>'+(gz?gz.substring(0,1):'')+'</div></div>';
-  }
-  h+='</div>';
-  h+='<div class=fr style=margin:6px 0><div class=fg><label>年</label><input type=number id=cal_y value='+y+'></div><div class=fg><label>月</label><input type=number id=cal_m value='+m+'></div><div class=fg><label>日</label><input type=number id=cal_d value=1></div></div>';
-  h+='<div style=text-align:center;margin:4px 0><span class=btn-s onclick=goCal()>转换</span> <span class=btn-s onclick=renderCalendar(td.getFullYear(),td.getMonth()+1) style=color:#6abf6a>今天</span></div>';
-  h+='<div id=cal_det style=font-size:11px;color:#9a8a7a;padding:6px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;min-height:20px;margin-top:4px;white-space:pre-wrap>点击日期查看详情</div>';
-  h+='</div></div>';document.body.insertAdjacentHTML('beforeend',h);
-  var mkEl=document.getElementById('mk_lunar');if(mkEl)mkEl.onclick=function(ev){if(ev.target===this)closeMk();};
-}
-function goCal(){var y=+document.getElementById('cal_y').value,m=+document.getElementById('cal_m').value;if(y&&m)renderCalendar(y,m);}
-function showCalDay(y,m,d){try{var el=document.getElementById('cal_det');if(!el)return;var ld=BaZi.solarToLunar(y,m,d);var gzp=BaZi.calcDayPillar(y,m,d);if(!gzp)gzp={ganName:'?',zhiName:'?'};var ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:12,gender:'male'});var ti=BaZi.findSolarTermIndex(y,m,d);var tn=ti>=0?BaZi.getSolarTermName(ti):'';var txt=y+'/'+m+'/'+d+' '+(ld?ld.monthName+ld.dayName:'')+'\n\u5E72\u652F\uFF1A'+gzp.ganName+gzp.zhiName+'\n\u65E5\u4E3B\uFF1A'+ec.dayMaster.name;if(tn)txt+='\n\u8282\u6C14\uFF1A'+tn;if(ld)txt+='\n\u5C5E\u76F8\uFF1A'+ld.zodiac;el.textContent=txt;}catch(e){console.error(e);var el2=document.getElementById('cal_det');if(el2)el2.textContent='\u67E5\u8BE2\u51FA\u9519';}}
-
-var _calY=0,_calM=0;
+var _calSelY=0,_calSelM=0,_calSelD=0,_calTab=0,_calSelH=12;
 function showLunar(){closeMk();renderCalendar(new Date().getFullYear(),new Date().getMonth()+1);}
 function renderCalendar(y,m){
   _calY=y;_calM=m;var oe=document.getElementById('mk_lunar');if(oe)oe.remove();
   var td=new Date();if(!y||!m){y=td.getFullYear();m=td.getMonth()+1;}
-  var h='<div class=mk-s id=mk_lunar><div class=mk-c style=max-height:90vh;max-width:420px>'
-    +'<div class=ft><span style=color:#c4a265;font-weight:600>☁历法</span><span style=float:right;cursor:pointer;font-size:16px;color:#e0d8d0 onclick=closeMk()>✕</span></div>';
+  var h='<div class=mk-s id=mk_lunar><div class=mk-c style=max-height:90vh;max-width:420px>';
+  h+='<div class=ft><span style=color:#c4a265;font-weight:600>☁历法</span>';
+  h+='<span class=btn-s id=cal_tab0 onclick=_calTab=0;renderCalendar(_calY,_calM) style=cursor:pointer;font-size:11px;padding:1px 6px;margin-left:6px;color:#c4a265;border-radius:3px>月历</span>';
+  h+='<span class=btn-s id=cal_tab1 onclick=_calTab=1;renderAcupoint() style=cursor:pointer;font-size:11px;padding:1px 6px;color:#887a6e;border-radius:3px>择时开穴</span>';
+  h+='<span style=float:right;cursor:pointer;font-size:16px;color:#e0d8d0 onclick=closeMk()>✕</span></div>';
   h+='<div style=display:flex;align-items:center;justify-content:center;gap:6px;margin:6px 0;font-size:13px>';
   h+='<span class=btn-s onclick=renderCalendar('+(y-1)+','+m+') style=cursor:pointer;font-size:13px;padding:2px 6px>◀</span>';
   h+='<span class=btn-s onclick=renderCalendar('+y+','+(m-1)+') style=cursor:pointer;padding:2px 8px>上月</span>';
@@ -587,8 +552,8 @@ function renderCalendar(y,m){
   for(var d=1;d<=ld;d++){
     var it=(y===td.getFullYear()&&m===td.getMonth()+1&&d===td.getDate());
     var ldi=null;try{ldi=BaZi.solarToLunar(y,m,d);}catch(ex){}
-    var gz=null;try{var gzp=BaZi.calcDayPillar(y,m,d);gz=gzp.ganName+gzp.zhiName;}catch(ex){}
-    var ti=null;try{var tii=BaZi.findSolarTermIndex(y,m,d);if(tii>=0)ti=BaZi.getSolarTermName(tii);}catch(ex){}
+    var gz=null;try{var ecx=BaZi.calculateBaZi({year:y,month:m,day:d,hour:12,gender:'male'});gz=ecx.pillars.day.ganName+ecx.pillars.day.zhiName;}catch(ex){}
+    var ti=null;try{var tii=BaZi.getSolarTermIndex?BaZi.getSolarTermIndex(y,m,d):-1;if(tii>=0)ti=BaZi.getSolarTermName?BaZi.getSolarTermName(tii):'';}catch(ex){}
     var isTerm=!!ti;var termLabel=ti?ti.substring(0,2):'';
     h+='<div onclick=showCalDay('+y+','+m+','+d+') style=cursor:pointer;text-align:center;padding:3px 1px;border-radius:5px;background:'+(it?'rgba(196,162,101,0.25)':isTerm?'rgba(212,115,94,0.12)':'rgba(255,255,255,0.03)')+';border:1px solid '+(it?'rgba(196,162,101,0.5)':isTerm?'rgba(212,115,94,0.3)':'transparent')+'>';
     h+='<div style=font-size:13px;font-weight:600;color:'+(isTerm?'#d4735e':it?'#c4a265':'#e0d8d0')+'>'+(termLabel||d)+'</div>';
@@ -601,11 +566,56 @@ function renderCalendar(y,m){
   h+='<input type=number id=cal_y value='+y+' style=width:56px;padding:2px 4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#e0d8d0;font-size:12px;text-align:center>年';
   h+='<input type=number id=cal_m value='+m+' style=width:44px;padding:2px 4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#e0d8d0;font-size:12px;text-align:center>月';
   h+='<input type=number id=cal_d value=1 style=width:44px;padding:2px 4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#e0d8d0;font-size:12px;text-align:center>日';
-  h+='<select id=cal_hour style=width:100%;margin:4px 0;padding:2px 4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#e0d8d0;font-size:11px onchange=showCalDay(_calSelY||2026,_calSelM||6,_calSelD||1)>\u65F6\u8FB0\uFF1A<option value=0>\u5B50(23-01)</option><option value=2>\u4E11(01-03)</option><option value=4>\u5BC5(03-05)</option><option value=6>\u536F(05-07)</option><option value=8>\u8FB0(07-09)</option><option value=10>\u5DF3(09-11)</option><option value=12 selected>\u5348(11-13)</option><option value=14>\u672A(13-15)</option><option value=16>\u7533(15-17)</option><option value=18>\u9149(17-19)</option><option value=20>\u620C(19-21)</option><option value=22>\u4EA5(21-23)</option></select>';h+='<span class=btn-s onclick=goCal() style=cursor:pointer;padding:2px 8px;font-size:12px>转换</span></div>';
+  h+='<select id=cal_hour style=margin:4px 0;padding:2px 4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#e0d8d0;font-size:11px;width:100% onchange=showCalDay(_calSelY||2026,_calSelM||6,_calSelD||1)>';
+  h+='时辰：<option value=0>子(23-01)</option><option value=2>丑(01-03)</option><option value=4>寅(03-05)</option><option value=6>卯(05-07)</option><option value=8>辰(07-09)</option><option value=10>巳(09-11)</option><option value=12 selected>午(11-13)</option><option value=14>未(13-15)</option><option value=16>申(15-17)</option><option value=18>酉(17-19)</option><option value=20>戌(19-21)</option><option value=22>亥(21-23)</option></select>';
+  h+='<span class=btn-s onclick=goCal() style=cursor:pointer;padding:2px 8px;font-size:12px>转换</span></div>';
   h+='<div id=cal_det style=font-size:12px;color:#9a8a7a;padding:8px;background:rgba(255,255,255,0.03);border-radius:5px;line-height:1.8;min-height:28px;white-space:pre-wrap;font-family:inherit>点击日期查看详情</div>';
   h+='</div></div></div>';document.body.insertAdjacentHTML('beforeend',h);
   var mkEl=document.getElementById('mk_lunar');if(mkEl)mkEl.onclick=function(ev){if(ev.target===this)closeMk();};
 }
 function goCal(){var y=+document.getElementById('cal_y').value,m=+document.getElementById('cal_m').value;if(y&&m)renderCalendar(y,m);}
-function showCalDay(y,m,d){_calSelY=y;_calSelM=m;_calSelD=d;var el=document.getElementById('cal_det');if(!el)return;var hsel=document.getElementById('cal_hour');var h=hsel?+hsel.value:12;var ec=null;try{ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:h,minute:0,gender:'male'});}catch(ex){}var ld=null;try{ld=BaZi.solarToLunar(y,m,d);}catch(ex){}var ti=null;try{var tix=BaZi.getSolarTermIndex?BaZi.getSolarTermIndex(y,m,d):-1;ti=BaZi.getSolarTermName?BaZi.getSolarTermName(tix):'';}catch(ex){}var html='';if(ec&&ec.pillars){var p=ec.pillars;var pillars=[{n:'\u5E74\u67F1',c:p.year},{n:'\u6708\u67F1',c:p.month},{n:'\u65E5\u67F1',c:p.day},{n:'\u65F6\u67F1',c:p.hour}];html+='<div style=display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px>';for(var i=0;i<pillars.length;i++){var pi=pillars[i];html+='<div style=text-align:center;background:rgba(196,162,101,0.08);border-radius:5px;padding:4px 1px>';html+='<div style=font-size:10px;color:#887a6e;margin-bottom:2px>'+pi.n+'</div>';html+='<div style=font-size:16px;font-weight:600;color:#c4a265>'+(pi.c?pi.c.ganName+pi.c.zhiName:'')+'</div>';html+='<div style=font-size:10px;color:#6a5e50>'+(pi.c?pi.c.ganName+' '+pi.c.zhiName:'')+'</div></div>';}html+='</div>';html+='<div style=font-size:11px;color:#9a8a7a;line-height:1.8>';if(ec.dayMaster)html+='<b style=color:#c4a265>\u65E5\u4E3B\uFF1A</b>'+ec.dayMaster.name+(ec.dayMaster.wuxing?'['+ec.dayMaster.wuxing+']':'')+'<br>';if(ld)html+='<b style=color:#c4a265>\u519C\u5386\uFF1A</b>'+ld.monthName+'\u6708'+ld.dayName+'<br>';if(ld)html+='<b style=color:#c4a265>\u5C5E\u76F8\uFF1A</b>'+ld.zodiac+'<br>';if(ti)html+='<b style=color:#d4735e>\u8282\u6C14\uFF1A</b>'+ti+'<br>';html+='<b style=color:#c4a265>\u516C\u5386\uFF1A</b>'+y+'/'+m+'/'+d+'<br>';html+='</div>';}else{html='\u65E0\u6570\u636E';}el.innerHTML=html;}</script>
+function showCalDay(y,m,d){
+_calSelY=y;_calSelM=m;_calSelD=d;var el=document.getElementById('cal_det');if(!el)return;
+var hsel=document.getElementById('cal_hour');var h=_calSelH=hsel?+hsel.value:12;
+var ec=null;try{ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:h,minute:0,gender:'male'});}catch(ex){}
+var ld=null;try{ld=BaZi.solarToLunar(y,m,d);}catch(ex){}
+var ti=null;try{var tix=BaZi.getSolarTermIndex?BaZi.getSolarTermIndex(y,m,d):-1;ti=BaZi.getSolarTermName?BaZi.getSolarTermName(tix):'';}catch(ex){}
+var html='';
+if(ec&&ec.pillars){
+  var p=ec.pillars;var pi=[{n:'年柱',c:p.year},{n:'月柱',c:p.month},{n:'日柱',c:p.day},{n:'时柱',c:p.hour}];
+  html+='<div style=display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px>';
+  for(var i=0;i<4;i++){html+='<div style=text-align:center;background:rgba(196,162,101,0.08);border-radius:5px;padding:4px 1px><div style=font-size:10px;color:#887a6e;margin-bottom:2px>'+pi[i].n+'</div><div style=font-size:16px;font-weight:600;color:#c4a265>'+(pi[i].c?pi[i].c.ganName+pi[i].c.zhiName:'')+'</div><div style=font-size:10px;color:#6a5e50>'+(pi[i].c?pi[i].c.ganName+' '+pi[i].c.zhiName:'')+'</div></div>';}
+  html+='</div>';
+  html+='<div style=font-size:11px;color:#9a8a7a;line-height:1.8>';
+  if(ec.dayMaster)html+='<b style=color:#c4a265>日主：</b>'+ec.dayMaster.name+(ec.dayMaster.wuxing?'['+ec.dayMaster.wuxing+']':'')+'<br>';
+  if(ld)html+='<b style=color:#c4a265>农历：</b>'+ld.monthName+'月'+ld.dayName+'<br>';
+  if(ld)html+='<b style=color:#c4a265>属相：</b>'+ld.zodiac+'<br>';
+  if(ti)html+='<b style=color:#d4735e>节气：</b>'+ti+'<br>';
+  html+='<b style=color:#c4a265>公历：</b>'+y+'/'+m+'/'+d+'<br>';
+  html+='</div>';
+  html+='<div style=font-size:11px;margin-top:6px><span class=btn-s onclick=_calTab=1;renderAcupoint() style=cursor:pointer;padding:2px 8px;font-size:11px>💉 查看择时开穴</span></div>';
+}else{html='无数据';}
+el.innerHTML=html;
+}
+var _hr=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+function renderAcupoint(){
+var el=document.getElementById('cal_det');if(!el)return;
+var y=_calSelY||2026,m=_calSelM||6,d=_calSelD||21;
+var hsel=document.getElementById('cal_hour');var h=_calSelH=hsel?+hsel.value:12;
+var ec=null;try{ec=BaZi.calculateBaZi({year:y,month:m,day:d,hour:h,minute:0,gender:'male'});}catch(ex){}
+var html='<div style=font-size:10px;color:#887a6e;margin-bottom:6px>已选：'+y+'/'+m+'/'+d+' 时辰：'+_hr[h/2]+'</div>';
+html+='<div style=background:rgba(196,162,101,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#c4a265;margin-bottom:4px>① 子午流注</div>';
+try{if(BaZi.calcNaZiFa){var nz=BaZi.calcNaZiFa(h);if(nz){html+='<div style=font-size:11px;color:#9a8a7a><b>纳子法：</b>'+nz.dangLingMeridian+'当令→'+nz.wushuPoints[2].name+'('+nz.wushuPoints[2].type+')<br><span style=font-size:9px;color:#6a5e50>五输：'+nz.wushuPoints.map(function(p){return p.name+'('+p.type+')';}).join(' ')+'</span><br><b>原穴：</b>'+nz.yuanPoint.name+' - '+nz.yuanPoint.indications+'</div>';}}if(BaZi.calcNaJiaFa&&ec&&ec.pillars){var nj=BaZi.calcNaJiaFa(ec.pillars.day.gan,ec.pillars.hour.gan);if(nj){html+='<div style=font-size:11px;color:#9a8a7a;margin-top:4px><b>纳甲法：</b>'+(nj.openingAcupoint?nj.openingAcupoint:'-')+(nj.note?' ('+nj.note+')':'')+'</div>';}}}catch(ex){}
+html+='</div>';
+html+='<div style=background:rgba(212,115,94,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#d4735e;margin-bottom:4px>② 灵龟八法</div>';
+try{if(BaZi.calcLingGuiBaFa&&ec&&ec.pillars){var dg=ec.pillars.day,hg=ec.pillars.hour;var lg=BaZi.calcLingGuiBaFa(dg.gan,dg.zhi,hg.gan,hg.zhi);if(lg){html+='<div style=font-size:11px;color:#9a8a7a><b>主开穴：</b>'+lg.mainAcupoint+'('+lg.mainMeridian+')<br><b>配对合穴：</b>'+lg.pairedAcupoint+'('+lg.pairedMeridian+')<br><span style=font-size:9px;color:#6a5e50>'+lg.bagua+'卦('+lg.direction+') 主治：'+lg.indications+'</span></div>';}}}catch(ex){}
+html+='</div>';
+html+='<div style=background:rgba(106,191,106,0.06);border-radius:5px;padding:6px;margin-bottom:6px><div style=font-size:12px;font-weight:600;color:#6abf6a;margin-bottom:4px>③ 飞腾八法</div>';
+try{if(BaZi.calcFeiTengBaFa&&ec&&ec.pillars){var hg3=ec.pillars.hour.gan;var ft=BaZi.calcFeiTengBaFa(hg3);if(ft){html+='<div style=font-size:11px;color:#9a8a7a><b>主开穴：</b>'+ft.mainAcupoint+'('+ft.mainMeridian+')<br><b>配对合穴：</b>'+ft.pairedAcupoint+'('+ft.pairedMeridian+')<br><span style=font-size:9px;color:#6a5e50>'+ft.bagua+'卦 主治：'+ft.indications+'</span></div>';}}}catch(ex){}
+html+='</div>';
+html+='<div style=font-size:9px;color:#5a4a3a;text-align:center;padding:4px;line-height:1.4>本内容仅作传统文化娱乐参考，不构成医疗诊断、针灸施治依据。</div>';
+html+='<div style=text-align:center;margin-top:2px><span class=btn-s onclick=_calTab=0;showCalDay(y,m,d) style=cursor:pointer;padding:2px 8px;font-size:11px>← 返回日历</span></div>';
+el.innerHTML=html;
+}
+</script>
 </body></html>
