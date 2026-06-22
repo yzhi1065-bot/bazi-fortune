@@ -295,7 +295,7 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     var hg=$('gzg3')?$('gzg3').value:TG_ARR[3],hz=$('gzz3')?$('gzz3').value:DZ_ARR[0];
     // Find year with matching ganzhi
     var baseYear=1990;
-    var _yList=[];for(var yy=1900;yy<=2100;yy++){var _yg2=yy%10;var _yz2=yy%12;if(TG_ARR[_yg2]===yg&&DZ_ARR[_yz2]===yz)_yList.push(yy)};if(_yList.length===1){opts.year=_yList[0]}else if(_ganzhiYear&&_yList.includes(_ganzhiYear)){opts.year=_ganzhiYear}else if(_yList.length>1){showGanzhiYearPicker(_yList);_ganzhiYear=0;return}else{opts.year=_yList[0]};
+    var _yList=[];for(var yy=1900;yy<=2100;yy++){var _yg2=yy%10;var _yz2=yy%12;if(TG_ARR[_yg2]===yg&&DZ_ARR[_yz2]===yz)_yList.push(yy)};if(_yList.length===1){opts.year=_yList[0]}else if(_ganzhiYear&&_yList.includes(_ganzhiYear)){opts.year=_ganzhiYear}else if(_yList.length>1){var re=document.getElementById('results');if(re)re.innerHTML='<div class=fc style=text-align:center;padding:20px><div style=font-size:14px;color:#e0c878;font-weight:600>请在上方弹窗中选择年份</div><div style=font-size:11px;color:#b0a89c;margin-top:6px>该年柱有多个匹配年份</div></div>';showGanzhiYearPicker(_yList);_ganzhiYear=0;return}else{opts.year=_yList[0]};
     // Use fixed day/hour for rest - engine will compute from date
     opts.month=7;opts.day=1;opts.hour=12;opts.minute=0;
     localStorage.setItem('bazi_inp',JSON.stringify({fn:$('fn')?$('fn').value:'',g:gm,ts:ts,lon:lon,lat:lat,city:sv}));
