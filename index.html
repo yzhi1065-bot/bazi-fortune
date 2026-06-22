@@ -314,7 +314,7 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     if(typeof BaZi.calcGreatFortunes==='function')try{var _gfd=r.greatFortunes[0].direction;var _gfs=r.greatFortunes[0].startAge;var _gm={gan:mgIdx,zhi:mzIdx};r.greatFortunes=BaZi.calcGreatFortunes(_gfs,_gm,_gfd,dgIdx);for(var _fi=0;_fi<r.greatFortunes.length;_fi++){var _ff=r.greatFortunes[_fi];_ff.startAge=_gfs+_fi*10;_ff.endAge=_gfs+_fi*10+9;_ff.tenGod=BaZi.calcTenGod(dgIdx,_ff.gan)}}catch(_ge){}
     // Recalculate ten gods, na yin, shensha based on new pillars
     r.naYin=BaZi.getFourPillarNaYin(r.pillars);
-    r.hiddenStems=BaZi.getFourPillarHiddenStems([r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi]);
+    r.hiddenStems=BaZi.getFourPillarHiddenStems([r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi]);try{var _dg=r.pillars.day.gan;r.hiddenStems=r.hiddenStems.map(function(p){return p.map(function(h){h.tenGod=BaZi.calcTenGod(_dg,h.gan);return h})})}catch(_he){}
     try{r.tenGods=BaZi.calcGanTenGods(r.pillars.day.gan,r.pillars)}catch(e){}
     var yr=r.input.year%10;
     if(yr<0)yr+=10;
