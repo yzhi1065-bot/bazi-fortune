@@ -300,41 +300,7 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
 opts.month=7;opts.day=1;opts.hour=12;opts.minute=0;
     // Search exact date matching all 4 pillars
     try{for(var _sm=1;_sm<=12;_sm++){var _sdm=new Date(opts.year,_sm,0).getDate();for(var _sd=1;_sd<=_sdm;_sd++){for(var _sh=0;_sh<24;_sh+=2){try{var _sr=BaZi.calculateBaZi({year:opts.year,month:_sm,day:_sd,hour:_sh,minute:0,gender:'male'});if(_sr&&_sr.pillars&&_sr.pillars[0].ganName===yg&&_sr.pillars[0].zhiName===yz&&_sr.pillars[1].ganName===mg&&_sr.pillars[1].zhiName===mz&&_sr.pillars[2].ganName===dg&&_sr.pillars[2].zhiName===dz&&_sr.pillars[3].ganName===hg&&_sr.pillars[3].zhiName===hz){opts.month=_sm;opts.day=_sd;opts.hour=_sh;opts.minute=0;_sm=13;break}}catch(_se){}}if(_sm===13)break}}}catch(_se){}
-    // Smart date search: match month, then day, then hour
-    var _found=false;try{
-    for(var _sm=1;_sm<=12;_sm++){
-      var _sdm=new Date(opts.year,_sm,0).getDate();
-      // Quick check: does any day in this month have matching month pillar?
-      try{var _tc=BaZi.calculateBaZi({year:opts.year,month:_sm,day:1,hour:12,minute:0,gender:'male'});
-      if(_tc&&_tc.pillars&&_tc.pillars[1].ganName===mg&&_tc.pillars[1].zhiName===mz){
-        // Month matches! Now find exact day and hour
-        for(var _sd=1;_sd<=_sdm;_sd++){
-          try{var _dc=BaZi.calculateBaZi({year:opts.year,month:_sm,day:_sd,hour:12,minute:0,gender:'male'});
-          if(_dc&&_dc.pillars&&_dc.pillars[2].ganName===dg&&_dc.pillars[2].zhiName===dz){
-            // Day matches! Now find hour
-            for(var _sh=0;_sh<24;_sh+=2){
-              try{var _sr=BaZi.calculateBaZi({year:opts.year,month:_sm,day:_sd,hour:_sh,minute:0,gender:'male'});
-              if(_sr&&_sr.pillars&&_sr.pillars[3].ganName===hg&&_sr.pillars[3].zhiName===hz){
-                opts.month=_sm;opts.day=_sd;opts.hour=_sh;opts.minute=0;_found=true;_sm=13;_sd=999;break
-              }
-            }catch(_he){}
-            }
-            if(_found)break
-          }
-        }catch(_de){}
-        }
-      }
-    }catch(_me){}
-    }
-  }catch(_se){}
-  // Fallback: try finding month match even without day/hour (for fortune calc)
-  if(!_found){try{for(var _sm2=1;_sm2<=12;_sm2++){
-    try{var _tc2=BaZi.calculateBaZi({year:opts.year,month:_sm2,day:1,hour:12,minute:0,gender:'male'});
-    if(_tc2&&_tc2.pillars&&_tc2.pillars[1].ganName===mg&&_tc2.pillars[1].zhiName===mz){
-      opts.month=_sm2;opts.day=15;opts.hour=12;opts.minute=0;_found=true;break
-    }}catch(_me2){}
-  }}catch(_se2){}}
-  if(!_found){opts.month=7;opts.day=1;opts.hour=12;opts.minute=0;}
+
     localStorage.setItem('bazi_inp',JSON.stringify({fn:$('fn')?$('fn').value:'',g:gm,ts:ts,lon:lon,lat:lat,city:sv}));
   }else{
     var ym=+$('y').value,mm=+$('m').value,dm=+$('d').value,hm=+$('h').value,mim=+$('mi').value;
