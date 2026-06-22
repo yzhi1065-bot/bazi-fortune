@@ -298,6 +298,8 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     var _yList=[];for(var yy=1900;yy<=2100;yy++){var _yg2=(yy-4+10)%10;var _yz2=(yy-4+12)%12;if(TG_ARR[_yg2]===yg&&DZ_ARR[_yz2]===yz)_yList.push(yy)};
     if(_yList.length>0){var _best=_yList[0];for(var _bi=1;_bi<_yList.length;_bi++){if(Math.abs(_yList[_bi]-2026)<Math.abs(_best-2026))_best=_yList[_bi]};opts.year=_best}else{opts.year=1990};
 opts.month=7;opts.day=1;opts.hour=12;opts.minute=0;
+    // Search exact date matching all 4 pillars
+    try{for(var _sm=1;_sm<=12;_sm++){var _sdm=new Date(opts.year,_sm,0).getDate();for(var _sd=1;_sd<=_sdm;_sd++){for(var _sh=0;_sh<24;_sh+=2){try{var _sr=BaZi.calculateBaZi({year:opts.year,month:_sm,day:_sd,hour:_sh,minute:0,gender:'male'});if(_sr&&_sr.pillars&&_sr.pillars[0].ganName===yg&&_sr.pillars[0].zhiName===yz&&_sr.pillars[1].ganName===mg&&_sr.pillars[1].zhiName===mz&&_sr.pillars[2].ganName===dg&&_sr.pillars[2].zhiName===dz&&_sr.pillars[3].ganName===hg&&_sr.pillars[3].zhiName===hz){opts.month=_sm;opts.day=_sd;opts.hour=_sh;opts.minute=0;_sm=13;break}}catch(_se){}}if(_sm===13)break}}}catch(_se){}
     // Smart date search: match month, then day, then hour
     var _found=false;try{
     for(var _sm=1;_sm<=12;_sm++){
