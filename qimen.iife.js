@@ -430,7 +430,8 @@ var QiMen = (() => {
     10
     // 大雪→子, 冬至→子
   ];
-  function calcFourPillars(year, month, day, hour24) {
+  function getNextDayGan(y,m,d){var n=new Date(y,m-1,d+1);return calcDayGanZhi(n.getFullYear(),n.getMonth()+1,n.getDate()).gan}
+function calcFourPillars(year, month, day, hour24) {
     const sc = getHourShiChen(hour24);
     const shiChenIndex = sc.index;
     const solarTerm = getNearestSolarTerm(year, month, day);
@@ -442,7 +443,10 @@ var QiMen = (() => {
     const monthZhiOffset = SOLAR_TERM_OFFSET[solarTerm.index];
     const mGanZhi = calcMonthGanZhi(yGanZhi.ganIndex, monthZhiOffset);
     const dGanZhi = calcDayGanZhi(year, month, day);
-    const hGanZhi = calcHourGanZhi(dGanZhi.gan, shiChenIndex);
+    // 晚子时(23:00-00:00): 时干用明日日干
+    var _useNextDay = (shiChenIndex === 0 && hour24 >= 23);
+    var _dayGanForHour = _useNextDay ? getNextDayGan(year,month,day) : dGanZhi.gan;
+    const hGanZhi = calcHourGanZhi(_dayGanForHour, shiChenIndex);
     return {
       year: { ...yGanZhi },
       month: { ...mGanZhi },
