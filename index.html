@@ -324,7 +324,26 @@ function render(){if(_curTab==='qimen'){renderQimen();return}
     // Recalculate interactions
     r.shenShaDetail=[[],[],[],[]];
     r.interactions=BaZi.calcBranchInteractions([r.pillars.year.zhi,r.pillars.month.zhi,r.pillars.day.zhi,r.pillars.hour.zhi]);
-    try{r.fortuneInteraction=BaZi.calcFortuneWithAnnual&&BaZi.calcFortuneWithAnnual(r)||[]}catch(e){r.fortuneInteraction=[]};
+    try{
+if(BaZi.calcFortuneWithAnnual&&BaZi.calcYearPillar&&r.greatFortunes&&r.greatFortunes.length){
+var _ft=[];
+for(var _a=0;_a<r.greatFortunes.length;_a++){
+var _fa=r.greatFortunes[_a];
+var _al=[];
+for(var _yr=r.input.year+_fa.startAge;_yr<=r.input.year+_fa.endAge;_yr+=5){
+try{var _yp=BaZi.calcYearPillar(_yr);
+if(!_yp)continue;
+var _yi=BaZi.calcFortuneWithAnnual(_fa,_yp)||[];
+var _gg=TG_ARR[_yp.gan]+DZ_ARR[_yp.zhi];
+var _ds=_yi.filter(function(x){return x&&x.description}).map(function(x){return x.description}).join('; ');
+_al.push({year:String(_yr),ganZhi:_gg,zhiInteraction:_ds,ganHe:'',fortuneEffect:_gg,color:'#b0a89c'});
+}catch(_ye){}
+}
+_ft.push({annualInteractions:_al});
+}
+if(_ft.length)r.fortuneInteraction=_ft;
+}
+}catch(_fe){};
     try{var _wst=BaZi.calcFiveElementScore(r.pillars,r.hiddenStems);r.wuXingAnalysis={dayMaster:{element:['木','火','土','金','水'][Math.floor(r.pillars[2].gan/2)*2%5],isStrong:false},wangShuai:{木:'旺',火:'旺',土:'旺',金:'旺',水:'旺'},weights:{木:_wst.wood||0,火:_wst.fire||0,土:_wst.earth||0,金:_wst.metal||0,水:_wst.water||0}}}catch(e){}
     try{r.deityAnalysis=BaZi.calcNatalWithFortune&&BaZi.calcNatalWithFortune(r)||{}}catch(e){}
     try{r.shenSha=BaZi.calcShenSha(r.pillars.day.gan,r.pillars.year.gan,r.pillars.year.zhi,r.pillars.month.zhi,r.pillars,r.pillars.month.zhi)}catch(e){}
