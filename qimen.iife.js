@@ -467,13 +467,24 @@ var QiMen = (() => {
     return 2;
   }
   function calcYuanByFuTou(year, month, day) {
-    const jd = dateToJD(year, month, day);
-    let found = false;
-    let fuTouDayGan = "";
-    let fuTouDayZhi = "";
-    let diff = 0;
+    const terms = calcYearSolarTerms(year);
+    const inputJD = dateToJD2(year, month, day);
+    let nearestTerm = null;
+    for (let i = terms.length - 1; i >= 0; i--) {
+      if (terms[i].jd <= inputJD) {
+        nearestTerm = terms[i];
+        break;
+      }
+    }
+    if (!nearestTerm) {
+      const prevTerms = calcYearSolarTerms(year - 1);
+      nearestTerm = prevTerms[prevTerms.length - 1];
+    }
+    const termStartJD = nearestTerm.jd;
+    let fuTouJD = -1;
+    let diff = -1;
     for (let offset = 0; offset < 15; offset++) {
-      const checkJD = jd - offset;
+      const checkJD = termStartJD - offset;
       const Z = Math.floor(checkJD + 0.5);
       let A;
       if (Z < 2299161) A = Z;
@@ -490,17 +501,19 @@ var QiMen = (() => {
       const y = m > 2 ? C - 4716 : C - 4715;
       const dayGZ = calcDayGanZhi(y, m, d);
       if (dayGZ.gan === "\u7532" || dayGZ.gan === "\u5DF1") {
-        fuTouDayGan = dayGZ.gan;
-        fuTouDayZhi = dayGZ.zhi;
-        diff = offset;
-        found = true;
+        fuTouJD = checkJD;
+        diff = Math.floor(inputJD - checkJD + 0.5);
         break;
       }
     }
-    if (!found) return 0;
-    return getYuanLevel(fuTouDayGan, fuTouDayZhi);
+    if (fuTouJD < 0) return 0;
+    return getYuanLevel2(diff);
   }
-  function calcDunJu(year, month, day, hour24) {
+  function getYuanLevel2(diff) {
+    if (diff < 5) return 0;
+    if (diff < 10) return 1;
+    return 2;
+  }function calcDunJu(year, month, day, hour24) {
     const solarTerm = getNearestSolarTerm(year, month, day);
     const termName = solarTerm.name;
     const isYangDun = YANG_DUN_TERMS.includes(termName);
