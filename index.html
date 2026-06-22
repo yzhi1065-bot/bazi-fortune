@@ -269,7 +269,7 @@ function initForm(){
 
 function showGanzhiYearPicker(years){
   if(!years||!years.length)return 0;
-  var h='<div class=mk id=mk_year onclick="if(event.target===this)closeMk()"><div class=mk-c><div style=border-bottom:1px solid rgba(180,140,100,.1);padding-bottom:8px;margin-bottom:10px><div style=font-size:14px;font-weight:600;color:#e0c878>选择年份</div><div style=font-size:11px;color:#b0a89c;margin-top:4px>该年柱在1900-2100年范围内有'+years.length+'个匹配：</div></div><div style=display:grid;grid-template-columns:repeat(3,1fr);gap:6px>';
+  var h='<div class=mk mk-s id=mk_year onclick="if(event.target===this)closeMk()"><div class=mk-c><div style=border-bottom:1px solid rgba(180,140,100,.1);padding-bottom:8px;margin-bottom:10px><div style=font-size:14px;font-weight:600;color:#e0c878>选择年份</div><div style=font-size:11px;color:#b0a89c;margin-top:4px>该年柱在1900-2100年范围内有'+years.length+'个匹配：</div></div><div style=display:grid;grid-template-columns:repeat(3,1fr);gap:6px>';
   for(var i=0;i<years.length;i++){
     var y=years[i];
     h+='<div onclick=_ganzhiYear='+y+';closeMk();render() style=text-align:center;padding:10px 6px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;font-size:14px;font-weight:600;color:#e0c878>'+y+'</div>';
