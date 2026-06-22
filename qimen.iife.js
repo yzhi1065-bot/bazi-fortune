@@ -650,7 +650,7 @@ var QiMen = (() => {
     const zhiShiHome = DOOR_HOME[zhiShiDoor] || xunShouPalace;
     const hourZhi1 = hourGanZhi && hourGanZhi.zhiIndex !== void 0 ? hourGanZhi.zhiIndex + 1 : 1;
     const xunStartZhi = XUN_START_ZHI[xunShou.name] || 1;
-    const steps = (hourZhi1 - xunStartZhi + 12) % 12;
+    const steps = (xunStartZhi - hourZhi1 + 12) % 12;  // shijia zhuanpan: reverse count
     const homeIdx = WALK_PATH.indexOf(zhiShiHome);
     let resultIdx = (homeIdx + steps) % 9;  // shijia zhuanpan: always clockwise
     let zhiShiResultPalace = WALK_PATH[resultIdx];
