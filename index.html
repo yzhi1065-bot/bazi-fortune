@@ -463,7 +463,8 @@ try{var _cy=now,_dg2=BaZi.calcYearPillar?BaZi.calcYearPillar(_cy).gan:r.pillars.
 }
 function tf(i){var e=$('fi_'+i);if(!e)return;var w=e.style.display!=='none';for(var j=0;j<8;j++){var el=$('fi_'+j);if(el)el.style.display='none'}if(!w)e.style.display='table-row'}
 function saveHist(r,fn){
-  var e=r.eightChars+' '+(fn||'')+' '+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+r.input.minute;
+  var ec=r.eightChars||(r.fourPillars?r.fourPillars.year+' '+r.fourPillars.month+' '+r.fourPillars.day+' '+r.fourPillars.hour:'');
+  var e=ec+' '+(fn||'')+' '+r.input.year+'/'+r.input.month+'/'+r.input.day+' '+r.input.hour+':'+(r.input.minute||0);
   var x=JSON.parse(localStorage.getItem(_curTab==='qimen'?'qimen_h':'bazi_h')||'[]');var nx=JSON.parse(localStorage.getItem('bazi_notes')||'[]');
   if(x.find(function(v){return v.s===e}))return;
   x.unshift({s:e,d:new Date().toISOString()});if(x.length>50)x.length=50;
