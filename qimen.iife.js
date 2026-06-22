@@ -652,12 +652,7 @@ var QiMen = (() => {
     const xunStartZhi = XUN_START_ZHI[xunShou.name] || 1;
     const steps = (hourZhi1 - xunStartZhi + 12) % 12;
     const homeIdx = WALK_PATH.indexOf(zhiShiHome);
-    let resultIdx;
-    if (isYangDun) {
-      resultIdx = (homeIdx + steps) % 9;
-    } else {
-      resultIdx = (homeIdx - steps + 9 * 99) % 9;
-    }
+    let resultIdx = (homeIdx + steps) % 9;  // shijia zhuanpan: always clockwise
     let zhiShiResultPalace = WALK_PATH[resultIdx];
     if (zhiShiResultPalace === 5) zhiShiResultPalace = 2;
     const zhiShiDoorIdx = DOOR_CYCLE.indexOf(zhiShiDoor);
