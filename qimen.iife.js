@@ -654,7 +654,12 @@ function calcFourPillars(year, month, day, hour24) {
     const zhiShiHome = DOOR_HOME[zhiShiDoor] || xunShouPalace;
     const hourZhi1 = hourGanZhi && hourGanZhi.zhiIndex !== void 0 ? hourGanZhi.zhiIndex + 1 : 1;
     const xunStartZhi = XUN_START_ZHI[xunShou.name] || 1;
-    const steps = (xunStartZhi - hourZhi1 + 12) % 12;  // shijia zhuanpan: reverse count
+    var steps;
+    if (isYangDun) {
+      steps = (hourZhi1 - xunStartZhi + 12) % 12;  // yang: shichen - xunshou
+    } else {
+      steps = (xunStartZhi - hourZhi1 + 12) % 12;  // yin: xunshou - shichen
+    }
     const homeIdx = WALK_PATH.indexOf(zhiShiHome);
     let resultIdx = (homeIdx + steps) % 9;  // shijia zhuanpan: always clockwise
     let zhiShiResultPalace = WALK_PATH[resultIdx];
