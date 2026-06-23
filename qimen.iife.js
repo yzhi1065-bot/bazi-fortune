@@ -634,10 +634,13 @@ var QiMen = (() => {
     const zhiShiDoor = DOORS_MAP[xunShouPalace] || "";
     const zhiShiOriginalPalace = DOOR_PALACE[zhiShiDoor] || xunShouPalace;
     var hourZi=hourGanZhi&&hourGanZhi.zhiIndex!==void 0?hourGanZhi.zhiIndex+1:1;var xunSt=({甲子:1,甲戌:11,甲申:9,甲午:7,甲辰:5,甲寅:3}[xunShou.name]||1);const steps=(hourZi-xunSt+12)%12;
+    var wlk=[1,2,3,4,5,6,7,8,9];
+    var si=wlk.indexOf(zhiShiOriginalPalace);
+    var ti;
+    ti=(si+steps)%9;
+    var zhiShiResultPalace=wlk[ti];
+    if(zhiShiResultPalace===5)zhiShiResultPalace=2;
     const order = isYangDun ? LS_ORDER : LS_REV;
-    const startIdx = order.indexOf(zhiShiOriginalPalace);
-    const targetIdx = (startIdx + steps + 8) % 8;
-    const zhiShiResultPalace = order[targetIdx];
     const zhiShiInDoorOrder = DOOR_ORDER.indexOf(zhiShiDoor);
     const zhiShiInOrder = order.indexOf(zhiShiResultPalace);
     const doorPan = /* @__PURE__ */ new Map();
