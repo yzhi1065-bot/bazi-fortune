@@ -633,7 +633,7 @@ var QiMen = (() => {
     if (xunShouPalace === 5) xunShouPalace = 2;
     const zhiShiDoor = DOORS_MAP[xunShouPalace] || "";
     const zhiShiOriginalPalace = DOOR_PALACE[zhiShiDoor] || xunShouPalace;
-    const steps = heavenResult && heavenResult.rotationSteps !== void 0 ? heavenResult.rotationSteps : 0;
+    var hourZi=hourGanZhi&&hourGanZhi.zhiIndex!==void 0?hourGanZhi.zhiIndex+1:1;var xunSt=({甲子:1,甲戌:11,甲申:9,甲午:7,甲辰:5,甲寅:3}[xunShou.name]||1);const steps=(hourZi-xunSt+12)%12;
     const order = isYangDun ? LS_ORDER : LS_REV;
     const startIdx = order.indexOf(zhiShiOriginalPalace);
     const targetIdx = (startIdx + steps + 8) % 8;
