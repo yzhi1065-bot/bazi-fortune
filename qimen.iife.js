@@ -99,7 +99,6 @@ var QiMen = (() => {
     "\u666F": "\u706B"
   };
   var DOOR_PALACE = { "\u4F11": 1, "\u6B7B": 2, "\u4F24": 3, "\u675C": 4, "\u5F00": 6, "\u60CA": 7, "\u751F": 8, "\u666F": 9 };
-  var DOOR_ORDER = ["\u4F11", "\u751F", "\u4F24", "\u675C", "\u666F", "\u6B7B", "\u60CA", "\u5F00"];
   var YI_ORDER = ["\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678", "\u4E01", "\u4E19", "\u4E59"];
   var XUN_KONG_WANG = {
     "\u7532\u5B50": ["\u620C", "\u4EA5"],
@@ -443,7 +442,9 @@ var QiMen = (() => {
     const monthZhiOffset = SOLAR_TERM_OFFSET[solarTerm.index];
     const mGanZhi = calcMonthGanZhi(yGanZhi.ganIndex, monthZhiOffset);
     const dGanZhi = calcDayGanZhi(year, month, day);
-    const hGanZhi = calcHourGanZhi(dGanZhi.gan, shiChenIndex);
+    var _useNextDay = shiChenIndex === 0 && hour24 >= 23;
+    var _dayGanForHour = _useNextDay ? calcDayGanZhiByAdd(year, month, day, 1).gan : dGanZhi.gan;
+    const hGanZhi = calcHourGanZhi(_dayGanForHour, shiChenIndex);
     return {
       year: { ...yGanZhi },
       month: { ...mGanZhi },
@@ -454,8 +455,11 @@ var QiMen = (() => {
       solarTermName: solarTerm.name,
       isBeforeSpring,
       springJD
-      // 调试用
     };
+  }
+  function calcDayGanZhiByAdd(year, month, day, addDays) {
+    var d = new Date(year, month - 1, day + addDays);
+    return calcDayGanZhi(d.getFullYear(), d.getMonth() + 1, d.getDate());
   }
 
   // src/qimen/dunJu.js
@@ -618,10 +622,13 @@ var QiMen = (() => {
   }
 
   // src/qimen/eightDoors.js
-  var LS_ORDER = [1, 8, 3, 4, 9, 2, 7, 6];
-  var LS_REV = [1, 6, 7, 2, 9, 4, 3, 8];
   var XUN_TO_YI = { "\u7532\u5B50": "\u620A", "\u7532\u620C": "\u5DF1", "\u7532\u7533": "\u5E9A", "\u7532\u5348": "\u8F9B", "\u7532\u8FB0": "\u58EC", "\u7532\u5BC5": "\u7678" };
-  function calcEightDoors(isYangDun, earthPan, hourGanZhi, xunShou, heavenResult) {
+  var XUN_START_ZHI = { "\u7532\u5B50": 1, "\u7532\u620C": 11, "\u7532\u7533": 9, "\u7532\u5348": 7, "\u7532\u8FB0": 5, "\u7532\u5BC5": 3 };
+  var DOOR_CYCLE = ["\u4F11", "\u751F", "\u4F24", "\u675C", "\u666F", "\u6B7B", "\u60CA", "\u5F00"];
+  var DOOR_HOME = { "\u4F11": 1, "\u6B7B": 2, "\u4F24": 3, "\u675C": 4, "\u5F00": 6, "\u60CA": 7, "\u751F": 8, "\u666F": 9 };
+  var WALK_PATH = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  var SPREAD_PATH = [1, 8, 3, 4, 9, 2, 7, 6];
+  function calcEightDoors(isYangDun, earthPan, hourGanZhi, xunShou) {
     const xunYi = XUN_TO_YI[xunShou.name] || xunShou.gan;
     let xunShouPalace = 0;
     for (const [palace, val] of earthPan) {
@@ -632,28 +639,24 @@ var QiMen = (() => {
     }
     if (xunShouPalace === 5) xunShouPalace = 2;
     const zhiShiDoor = DOORS_MAP[xunShouPalace] || "";
-    const zhiShiOriginalPalace = DOOR_PALACE[zhiShiDoor] || xunShouPalace;
-    var hourZi=hourGanZhi&&hourGanZhi.zhiIndex!==void 0?hourGanZhi.zhiIndex+1:1;var xunSt=({甲子:1,甲戌:11,甲申:9,甲午:7,甲辰:5,甲寅:3}[xunShou.name]||1);const steps=(hourZi-xunSt+12)%12;
-    var wlk=[1,2,3,4,5,6,7,8,9];
-    var si=wlk.indexOf(zhiShiOriginalPalace);
-    var ti;
-    ti=(si-steps+81)%9;
-    var zhiShiResultPalace=wlk[ti];
-    if(zhiShiResultPalace===5)zhiShiResultPalace=2;
-    const order = isYangDun ? LS_ORDER : LS_REV;
-    const zhiShiInDoorOrder = DOOR_ORDER.indexOf(zhiShiDoor);
-    const zhiShiInOrder = order.indexOf(zhiShiResultPalace);
+    const zhiShiHome = DOOR_HOME[zhiShiDoor] || xunShouPalace;
+    const hourZhi1 = hourGanZhi && hourGanZhi.zhiIndex !== void 0 ? hourGanZhi.zhiIndex + 1 : 1;
+    const xunStartZhi = XUN_START_ZHI[xunShou.name] || 1;
+    var steps = (hourZhi1 - xunStartZhi + 12) % 12;
+    const homeIdx = WALK_PATH.indexOf(zhiShiHome);
+    let resultIdx = (homeIdx + steps) % 9;
+    let zhiShiResultPalace = WALK_PATH[resultIdx];
+    if (zhiShiResultPalace === 5) zhiShiResultPalace = 2;
+    const zhiShiDoorIdx = DOOR_CYCLE.indexOf(zhiShiDoor);
+    const spreadStartIdx = SPREAD_PATH.indexOf(zhiShiResultPalace);
     const doorPan = /* @__PURE__ */ new Map();
     for (let i = 0; i < 8; i++) {
-      const palaceNum = order[(zhiShiInOrder + i) % 8];
-      const doorIdx = (zhiShiInDoorOrder + i) % 8;
-      doorPan.set(palaceNum, {
-        door: DOOR_ORDER[doorIdx],
-        isZhiShi: doorIdx === zhiShiInDoorOrder
-      });
+      const palaceNum = SPREAD_PATH[(spreadStartIdx + i) % 8];
+      const doorIdx = (zhiShiDoorIdx + i) % 8;
+      doorPan.set(palaceNum, { door: DOOR_CYCLE[doorIdx], isZhiShi: doorIdx === zhiShiDoorIdx });
     }
     doorPan.set(5, { door: "", isZhiShi: false });
-    return { doorPan, zhiShiDoor, zhiShiPalace: zhiShiResultPalace, zhiShiOriginalPalace };
+    return { doorPan, zhiShiDoor, zhiShiPalace: zhiShiResultPalace, zhiShiOriginalPalace: zhiShiHome };
   }
 
   // src/qimen/eightSpirits.js
