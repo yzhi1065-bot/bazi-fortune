@@ -99,6 +99,7 @@ var QiMen = (() => {
     "\u666F": "\u706B"
   };
   var DOOR_PALACE = { "\u4F11": 1, "\u6B7B": 2, "\u4F24": 3, "\u675C": 4, "\u5F00": 6, "\u60CA": 7, "\u751F": 8, "\u666F": 9 };
+  var DOOR_ORDER = ["\u4F11", "\u751F", "\u4F24", "\u675C", "\u666F", "\u6B7B", "\u60CA", "\u5F00"];
   var YI_ORDER = ["\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678", "\u4E01", "\u4E19", "\u4E59"];
   var XUN_KONG_WANG = {
     "\u7532\u5B50": ["\u620C", "\u4EA5"],
@@ -144,7 +145,7 @@ var QiMen = (() => {
     "\u5927\u6691": [7, 1, 4],
     "\u7ACB\u79CB": [2, 5, 8],
     "\u5904\u6691": [1, 4, 7],
-    "\u767D\u9732": [9, 3, 6],
+    "\u767D\u9732": [9, 3, 9],
     "\u79CB\u5206": [7, 1, 4],
     "\u5BD2\u9732": [6, 9, 3],
     "\u971C\u964D": [5, 8, 2],
@@ -430,8 +431,7 @@ var QiMen = (() => {
     10
     // 大雪→子, 冬至→子
   ];
-  function getNextDayGan(y,m,d){var n=new Date(y,m-1,d+1);return calcDayGanZhi(n.getFullYear(),n.getMonth()+1,n.getDate()).gan}
-function calcFourPillars(year, month, day, hour24) {
+  function calcFourPillars(year, month, day, hour24) {
     const sc = getHourShiChen(hour24);
     const shiChenIndex = sc.index;
     const solarTerm = getNearestSolarTerm(year, month, day);
@@ -443,10 +443,7 @@ function calcFourPillars(year, month, day, hour24) {
     const monthZhiOffset = SOLAR_TERM_OFFSET[solarTerm.index];
     const mGanZhi = calcMonthGanZhi(yGanZhi.ganIndex, monthZhiOffset);
     const dGanZhi = calcDayGanZhi(year, month, day);
-    // 晚子时(23:00-00:00): 时干用明日日干
-    var _useNextDay = (shiChenIndex === 0 && hour24 >= 23);
-    var _dayGanForHour = _useNextDay ? getNextDayGan(year,month,day) : dGanZhi.gan;
-    const hGanZhi = calcHourGanZhi(_dayGanForHour, shiChenIndex);
+    const hGanZhi = calcHourGanZhi(dGanZhi.gan, shiChenIndex);
     return {
       year: { ...yGanZhi },
       month: { ...mGanZhi },
@@ -471,70 +468,40 @@ function calcFourPillars(year, month, day, hour24) {
     return 2;
   }
   function calcYuanByFuTou(year, month, day) {
-    const terms = calcYearSolarTerms(year);
-    const inputJD = dateToJD2(year, month, day);
-    let nearestTerm = null;
-    for (let i = terms.length - 1; i >= 0; i--) {
-      if (terms[i].jd <= inputJD) {
-        nearestTerm = terms[i];
-        break;
-      }
-    }
-    if (!nearestTerm) {
-      const prevTerms = calcYearSolarTerms(year - 1);
-      nearestTerm = prevTerms[prevTerms.length - 1];
-    }
-    const termStartJD = nearestTerm.jd;
-    // Find NEXT fuTou (Jia/Ji day) AFTER solar term start
-    var nextFuTouJD = -1;
-    var nextFuTouGan = "";
-    var nextFuTouZhi = "";
-    for (var offset = 0; offset < 30; offset++) {
-      var checkJD = termStartJD + offset;
-      var Z = Math.floor(checkJD + 0.5);
-      var A;
+    const jd = dateToJD(year, month, day);
+    let found = false;
+    let fuTouDayGan = "";
+    let fuTouDayZhi = "";
+    let diff = 0;
+    for (let offset = 0; offset < 15; offset++) {
+      const checkJD = jd - offset;
+      const Z = Math.floor(checkJD + 0.5);
+      let A;
       if (Z < 2299161) A = Z;
       else {
-        var alpha = Math.floor((Z - 186721625e-2) / 36524.25);
+        const alpha = Math.floor((Z - 186721625e-2) / 36524.25);
         A = Z + 1 + alpha - Math.floor(alpha / 4);
       }
-      var B = A + 1524;
-      var C = Math.floor((B - 122.1) / 365.25);
-      var D = Math.floor(365.25 * C);
-      var E = Math.floor((B - D) / 30.6001);
-      var d = B - D - Math.floor(30.6001 * E);
-      var m = E < 14 ? E - 1 : E - 13;
-      var y = m > 2 ? C - 4716 : C - 4715;
-      var dayGZ = calcDayGanZhi(y, m, d);
+      const B = A + 1524;
+      const C = Math.floor((B - 122.1) / 365.25);
+      const D = Math.floor(365.25 * C);
+      const E = Math.floor((B - D) / 30.6001);
+      const d = B - D - Math.floor(30.6001 * E);
+      const m = E < 14 ? E - 1 : E - 13;
+      const y = m > 2 ? C - 4716 : C - 4715;
+      const dayGZ = calcDayGanZhi(y, m, d);
       if (dayGZ.gan === "\u7532" || dayGZ.gan === "\u5DF1") {
-        nextFuTouJD = checkJD;
-        nextFuTouGan = dayGZ.gan;
-        nextFuTouZhi = dayGZ.zhi;
+        fuTouDayGan = dayGZ.gan;
+        fuTouDayZhi = dayGZ.zhi;
+        diff = offset;
+        found = true;
         break;
       }
     }
-    if (nextFuTouJD < 0) return 0;
-    var diff = Math.floor(inputJD - nextFuTouJD + 0.5);
-    var fuTouZhiIdx = DI_ZHI.indexOf(nextFuTouZhi);
-    // fuTou di zhi determines base yuan: 子午卯酉=上, 寅申巳亥=中, 辰戌丑未=下
-    var baseYuan = 0;
-    if ([0, 6, 3, 9].indexOf(fuTouZhiIdx) >= 0) baseYuan = 0;      // 子午卯酉
-    else if ([2, 8, 5, 11].indexOf(fuTouZhiIdx) >= 0) baseYuan = 1;  // 寅申巳亥
-    else baseYuan = 2;                                                 // 辰戌丑未
-    if (diff >= 0) {
-      if (diff < 5) return 0;       // 上元
-      if (diff < 10) return 1;      // 中元
-      return 2;                      // 下元
-    } else {
-      // 残元: days BEFORE first fuTou -> previous yuan
-      return (baseYuan - 1 + 3) % 3;
-    }
+    if (!found) return 0;
+    return getYuanLevel(fuTouDayGan, fuTouDayZhi);
   }
-  function getYuanLevel2(diff) {
-    if (diff < 5) return 0;
-    if (diff < 10) return 1;
-    return 2;
-  }function calcDunJu(year, month, day, hour24) {
+  function calcDunJu(year, month, day, hour24) {
     const solarTerm = getNearestSolarTerm(year, month, day);
     const termName = solarTerm.name;
     const isYangDun = YANG_DUN_TERMS.includes(termName);
@@ -651,13 +618,10 @@ function calcFourPillars(year, month, day, hour24) {
   }
 
   // src/qimen/eightDoors.js
+  var LS_ORDER = [1, 8, 3, 4, 9, 2, 7, 6];
+  var LS_REV = [1, 6, 7, 2, 9, 4, 3, 8];
   var XUN_TO_YI = { "\u7532\u5B50": "\u620A", "\u7532\u620C": "\u5DF1", "\u7532\u7533": "\u5E9A", "\u7532\u5348": "\u8F9B", "\u7532\u8FB0": "\u58EC", "\u7532\u5BC5": "\u7678" };
-  var XUN_START_ZHI = { "\u7532\u5B50": 1, "\u7532\u620C": 11, "\u7532\u7533": 9, "\u7532\u5348": 7, "\u7532\u8FB0": 5, "\u7532\u5BC5": 3 };
-  var DOOR_CYCLE = ["\u4F11", "\u751F", "\u4F24", "\u675C", "\u666F", "\u6B7B", "\u60CA", "\u5F00"];
-  var DOOR_HOME = { "\u4F11": 1, "\u6B7B": 2, "\u4F24": 3, "\u675C": 4, "\u5F00": 6, "\u60CA": 7, "\u751F": 8, "\u666F": 9 };
-  var WALK_PATH = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var SPREAD_PATH = [2, 7, 6, 1, 8, 3, 4, 9];
-  function calcEightDoors(isYangDun, earthPan, hourGanZhi, xunShou) {
+  function calcEightDoors(isYangDun, earthPan, hourGanZhi, xunShou, heavenResult) {
     const xunYi = XUN_TO_YI[xunShou.name] || xunShou.gan;
     let xunShouPalace = 0;
     for (const [palace, val] of earthPan) {
@@ -668,29 +632,25 @@ function calcFourPillars(year, month, day, hour24) {
     }
     if (xunShouPalace === 5) xunShouPalace = 2;
     const zhiShiDoor = DOORS_MAP[xunShouPalace] || "";
-    const zhiShiHome = DOOR_HOME[zhiShiDoor] || xunShouPalace;
-    const hourZhi1 = hourGanZhi && hourGanZhi.zhiIndex !== void 0 ? hourGanZhi.zhiIndex + 1 : 1;
-    const xunStartZhi = XUN_START_ZHI[xunShou.name] || 1;
-    var steps;
-    if (isYangDun) {
-      steps = (hourZhi1 - xunStartZhi + 12) % 12;  // yang: shichen - xunshou
-    } else {
-      steps = (xunStartZhi - hourZhi1 + 12) % 12;  // yin: xunshou - shichen
-    }
-    const homeIdx = WALK_PATH.indexOf(zhiShiHome);
-    let resultIdx = (homeIdx + steps) % 9;  // shijia zhuanpan: always clockwise
-    let zhiShiResultPalace = WALK_PATH[resultIdx];
-    if (zhiShiResultPalace === 5) zhiShiResultPalace = 2;
-    const zhiShiDoorIdx = DOOR_CYCLE.indexOf(zhiShiDoor);
-    const spreadStartIdx = SPREAD_PATH.indexOf(zhiShiResultPalace);
+    const zhiShiOriginalPalace = DOOR_PALACE[zhiShiDoor] || xunShouPalace;
+    const steps = heavenResult && heavenResult.rotationSteps !== void 0 ? heavenResult.rotationSteps : 0;
+    const order = isYangDun ? LS_ORDER : LS_REV;
+    const startIdx = order.indexOf(zhiShiOriginalPalace);
+    const targetIdx = (startIdx + steps + 8) % 8;
+    const zhiShiResultPalace = order[targetIdx];
+    const zhiShiInDoorOrder = DOOR_ORDER.indexOf(zhiShiDoor);
+    const zhiShiInOrder = order.indexOf(zhiShiResultPalace);
     const doorPan = /* @__PURE__ */ new Map();
     for (let i = 0; i < 8; i++) {
-      const palaceNum = SPREAD_PATH[(spreadStartIdx + i) % 8];
-      const doorIdx = (zhiShiDoorIdx + i) % 8;
-      doorPan.set(palaceNum, { door: DOOR_CYCLE[doorIdx], isZhiShi: doorIdx === zhiShiDoorIdx });
+      const palaceNum = order[(zhiShiInOrder + i) % 8];
+      const doorIdx = (zhiShiInDoorOrder + i) % 8;
+      doorPan.set(palaceNum, {
+        door: DOOR_ORDER[doorIdx],
+        isZhiShi: doorIdx === zhiShiInDoorOrder
+      });
     }
     doorPan.set(5, { door: "", isZhiShi: false });
-    return { doorPan, zhiShiDoor, zhiShiPalace: zhiShiResultPalace, zhiShiOriginalPalace: zhiShiHome };
+    return { doorPan, zhiShiDoor, zhiShiPalace: zhiShiResultPalace, zhiShiOriginalPalace };
   }
 
   // src/qimen/eightSpirits.js
