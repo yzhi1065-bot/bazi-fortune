@@ -637,7 +637,7 @@ var QiMen = (() => {
     var wlk=[1,2,3,4,5,6,7,8,9];
     var si=wlk.indexOf(zhiShiOriginalPalace);
     var ti;
-    ti=(si+steps)%9;
+    ti=(si-steps+81)%9;
     var zhiShiResultPalace=wlk[ti];
     if(zhiShiResultPalace===5)zhiShiResultPalace=2;
     const order = isYangDun ? LS_ORDER : LS_REV;
