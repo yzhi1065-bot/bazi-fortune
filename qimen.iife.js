@@ -640,13 +640,18 @@ var QiMen = (() => {
     if (xunShouPalace === 5) xunShouPalace = 2;
     const zhiShiDoor = DOORS_MAP[xunShouPalace] || "";
     const zhiShiHome = DOOR_HOME[zhiShiDoor] || xunShouPalace;
-    const hourZhi1 = hourGanZhi && hourGanZhi.zhiIndex !== void 0 ? hourGanZhi.zhiIndex + 1 : 1;
-    const xunStartZhi = XUN_START_ZHI[xunShou.name] || 1;
-    var steps = (hourZhi1 - xunStartZhi + 12) % 12;
-    const homeIdx = WALK_PATH.indexOf(zhiShiHome);
-    let resultIdx = (homeIdx + steps) % 9;
-    let zhiShiResultPalace = WALK_PATH[resultIdx];
-    if (zhiShiResultPalace === 5) zhiShiResultPalace = 2;
+    var XUN_T2={甲子:'子丑寅卯辰巳午未申酉戌亥',甲戌:'戌亥子丑寅卯辰巳午未申酉',甲申:'申酉戌亥子丑寅卯辰巳午未',甲午:'午未申酉戌亥子丑寅卯辰巳',甲辰:'辰巳午未申酉戌亥子丑寅卯',甲寅:'寅卯辰巳午未申酉戌亥子丑'};
+    var XUN_Y2={甲子:'戊',甲戌:'己',甲申:'庚',甲午:'辛',甲辰:'壬',甲寅:'癸'};
+    var _xg=XUN_Y2[xunShou.name];
+    var _xgp=0;
+    for(var[_p,_v]of earthPan){if(_v.yi===_xg){_xgp=_p;break}}
+    var _si=WALK_PATH.indexOf(_xgp);
+    var _hz=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][hourGanZhi.zhiIndex];
+    var _sc=(XUN_T2[xunShou.name]||'').indexOf(_hz);
+    if(_sc<0)_sc=0;
+    var _ri=(_si-_sc+81)%9;
+    var zhiShiResultPalace=WALK_PATH[_ri];
+    if(zhiShiResultPalace===5)zhiShiResultPalace=2;
     const zhiShiDoorIdx = DOOR_CYCLE.indexOf(zhiShiDoor);
     const spreadStartIdx = SPREAD_PATH.indexOf(zhiShiResultPalace);
     const doorPan = /* @__PURE__ */ new Map();
