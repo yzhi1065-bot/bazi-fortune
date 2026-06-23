@@ -485,33 +485,50 @@ function calcFourPillars(year, month, day, hour24) {
       nearestTerm = prevTerms[prevTerms.length - 1];
     }
     const termStartJD = nearestTerm.jd;
-    let fuTouJD = -1;
-    let diff = -1;
-    for (let offset = 0; offset < 15; offset++) {
-      const checkJD = termStartJD - offset;
-      const Z = Math.floor(checkJD + 0.5);
-      let A;
+    // Find NEXT fuTou (Jia/Ji day) AFTER solar term start
+    var nextFuTouJD = -1;
+    var nextFuTouGan = "";
+    var nextFuTouZhi = "";
+    for (var offset = 0; offset < 30; offset++) {
+      var checkJD = termStartJD + offset;
+      var Z = Math.floor(checkJD + 0.5);
+      var A;
       if (Z < 2299161) A = Z;
       else {
-        const alpha = Math.floor((Z - 186721625e-2) / 36524.25);
+        var alpha = Math.floor((Z - 186721625e-2) / 36524.25);
         A = Z + 1 + alpha - Math.floor(alpha / 4);
       }
-      const B = A + 1524;
-      const C = Math.floor((B - 122.1) / 365.25);
-      const D = Math.floor(365.25 * C);
-      const E = Math.floor((B - D) / 30.6001);
-      const d = B - D - Math.floor(30.6001 * E);
-      const m = E < 14 ? E - 1 : E - 13;
-      const y = m > 2 ? C - 4716 : C - 4715;
-      const dayGZ = calcDayGanZhi(y, m, d);
+      var B = A + 1524;
+      var C = Math.floor((B - 122.1) / 365.25);
+      var D = Math.floor(365.25 * C);
+      var E = Math.floor((B - D) / 30.6001);
+      var d = B - D - Math.floor(30.6001 * E);
+      var m = E < 14 ? E - 1 : E - 13;
+      var y = m > 2 ? C - 4716 : C - 4715;
+      var dayGZ = calcDayGanZhi(y, m, d);
       if (dayGZ.gan === "\u7532" || dayGZ.gan === "\u5DF1") {
-        fuTouJD = checkJD;
-        diff = Math.floor(inputJD - checkJD + 0.5);
+        nextFuTouJD = checkJD;
+        nextFuTouGan = dayGZ.gan;
+        nextFuTouZhi = dayGZ.zhi;
         break;
       }
     }
-    if (fuTouJD < 0) return 0;
-    return getYuanLevel2(diff);
+    if (nextFuTouJD < 0) return 0;
+    var diff = Math.floor(inputJD - nextFuTouJD + 0.5);
+    var fuTouZhiIdx = DI_ZHI.indexOf(nextFuTouZhi);
+    // fuTou di zhi determines base yuan: 子午卯酉=上, 寅申巳亥=中, 辰戌丑未=下
+    var baseYuan = 0;
+    if ([0, 6, 3, 9].indexOf(fuTouZhiIdx) >= 0) baseYuan = 0;      // 子午卯酉
+    else if ([2, 8, 5, 11].indexOf(fuTouZhiIdx) >= 0) baseYuan = 1;  // 寅申巳亥
+    else baseYuan = 2;                                                 // 辰戌丑未
+    if (diff >= 0) {
+      if (diff < 5) return 0;       // 上元
+      if (diff < 10) return 1;      // 中元
+      return 2;                      // 下元
+    } else {
+      // 残元: days BEFORE first fuTou -> previous yuan
+      return (baseYuan - 1 + 3) % 3;
+    }
   }
   function getYuanLevel2(diff) {
     if (diff < 5) return 0;
