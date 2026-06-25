@@ -25,6 +25,7 @@ var BaZi = (() => {
     DI_ZHI: () => DI_ZHI,
     FIVE_ELEMENT_MED: () => FIVE_ELEMENT_MED,
     GAN_WU_XING: () => GAN_WU_XING,
+    MERIDIAN_ACUPOINTS: () => MERIDIAN_ACUPOINTS,
     MONTH_ZHI_FROM_TERM: () => MONTH_ZHI_FROM_TERM,
     SHENG_XIAO: () => SHENG_XIAO,
     TIAN_GAN: () => TIAN_GAN,
@@ -3051,6 +3052,23 @@ var BaZi = (() => {
     { name: "\u516C\u5B59", meridian: "\u813E\u7ECF", type: "\u516B\u8109\u4EA4\u4F1A", indications: "\u80C3\u75DB\u5455\u5410\u3001\u8179\u75DB\u6CC4\u6CFB\u3001\u5FC3\u80F8\u70E6\u95F7", location: "\u8DB3\u8DD6\u533A\u7B2C1\u8DD6\u9AA8\u5E95\u524D\u4E0B\u7F18\u8D64\u767D\u8089\u9645\u5904", pairings: ["\u914D\u5185\u5173\u5FC3\u80F8\u80C3\u75BE\u75C5", "\u914D\u4E2D\u8118\u6CBB\u80C3\u75DB\u8179\u80C0", "\u914D\u8DB3\u4E09\u91CC\u8C03\u7406\u813E\u80C3"] },
     { name: "\u5217\u7F3A", meridian: "\u80BA\u7ECF", type: "\u516B\u8109\u4EA4\u4F1A", indications: "\u54B3\u55FD\u6C14\u5598\u3001\u54BD\u5589\u80BF\u75DB\u3001\u504F\u5934\u75DB\u3001\u624B\u8155\u75DB", location: "\u8155\u638C\u4FA7\u6A2A\u7EB9\u4E0A1.5\u5BF8\u4E24\u624B\u864E\u53E3\u4EA4\u53C9\u98DF\u6307\u5C16\u4E0B\u51F9\u9677", pairings: ["\u914D\u7167\u6D77\u6CBB\u54BD\u5589\u80BF\u75DB", "\u914D\u98CE\u6C60\u6CBB\u504F\u5934\u75DB", "\u914D\u592A\u6E0A\u6CBB\u54B3\u55FD"] }
   ];
+  var MERIDIAN_ACUPOINTS = {};
+  var _merMap = {};
+  var _all = ACUPOINT_DATABASE;
+  for (_mi = 0; _mi < _all.length; _mi++) {
+    _a = _all[_mi];
+    if (!_merMap[_a.meridian]) _merMap[_a.meridian] = { wushu: [] };
+    if (_a.type === "\u539F" || _a.type === "\u8F93/\u539F") _merMap[_a.meridian].yuan = _a;
+    else _merMap[_a.meridian].wushu.push(_a);
+  }
+  var _a;
+  var _mi;
+  for (_mk in _merMap) _merMap[_mk].wushu.sort(function(x, y) {
+    var order = { \u4E95: 0, \u8365: 1, \u8F93: 2, \u7ECF: 3, \u5408: 4 };
+    return (order[x.type] || 0) - (order[y.type] || 0);
+  });
+  var _mk;
+  MERIDIAN_ACUPOINTS = _merMap;
   var NA_ZI_MAP = {
     "\u5BC5": ["\u5C11\u5546", "\u9C7C\u9645", "\u592A\u6E0A", "\u7ECF\u6E20", "\u5C3A\u6CFD"],
     "\u536F": ["\u5546\u9633", "\u4E8C\u95F4", "\u4E09\u95F4", "\u9633\u6EAA", "\u66F2\u6C60"],
