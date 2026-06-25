@@ -3130,10 +3130,8 @@ var BaZi = (() => {
       });
     }
     var lgSum = ((LG_GAN[dayGan] || 0) + (LG_ZHI[dayZhi] || 0) + (LG_GAN[GAN[hg]] || 0) + (LG_ZHI[hourZhi] || 0)) % 9;
-    if (lgSum === 0) lgSum = 9;
-    var lgIdx = 9 - lgSum;
-    if (lgIdx < 0) lgIdx += 9;
-    if (lgIdx < 8) result.lingGui = ACUPOINT_DATABASE.find(function(a) {
+    var lgIdx = (lgSum - 1 + 8) % 8;
+    if (lgIdx >= 0 && lgIdx < 8) result.lingGui = ACUPOINT_DATABASE.find(function(a) {
       return a.name === LG_ACU[lgIdx];
     }) || { name: LG_ACU[lgIdx] };
     var ftName = FT_MAP[GAN[hg]];
